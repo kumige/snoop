@@ -35,7 +35,7 @@ const userType = new GraphQLObjectType({
       type: profileInfoType,
       resolve(parent, args) {
         //console.log(profileInfo.find({_id: {$in: parent.ProfileInfo}}));
-        console.log(parent.ProfileInfo);
+        //console.log(parent.ProfileInfo);
         return profileInfo.findById(parent.ProfileInfo);
       },
     },
@@ -131,7 +131,6 @@ const Mutation = new GraphQLObjectType({
           const hashedPass = await bcrypt.hash(args.Password, saltRound);
 
           let newProfile = new profileInfo(args.ProfileInfo);
-          await newProfile.save();
 
           const userWithHashAndProfile = {
             ...args,
@@ -141,9 +140,13 @@ const Mutation = new GraphQLObjectType({
 
           //console.log(userWithHashAndProfile.ProfileInfo);
           const newUser = new user(userWithHashAndProfile);
+
+          // Adding UserID for the profile info
+          newProfile.UserID = newUser.id;
+          await newProfile.save();
           return newUser.save();
         } catch (e) {
-          throw new Error(e);
+          throw new Error(e.message);
         }
       },
     },
@@ -159,17 +162,38 @@ const Mutation = new GraphQLObjectType({
         Followers: { type: new GraphQLList(GraphQLID) },
         AnsweredQuestionCount: { type: GraphQLInt },
       },
-      resolve(parent, args) {
-        const profile = new profileInfo({
-          UserID: args.UserID,
-          Bio: args.Bio,
-          ProfilePicture: args.ProfilePicture,
-          Following: args.Following,
-          Followers: args.Followers,
-          AnsweredQuestionCount: args.AnsweredQuestionCount,
-        });
-        console.log(profile);
-        return profile.save();
+      resolve: async (parent, args) => {
+        try {
+          const profile = new profileInfo({
+            UserID: args.UserID,
+            Bio: args.Bio,
+            ProfilePicture: args.ProfilePicture,
+            Following: args.Following,
+            Followers: args.Followers,
+            AnsweredQuestionCount: args.AnsweredQuestionCount,
+          });
+          console.log(profile);
+          return profile.save();
+        } catch (e) {
+          throw new Error(e.message);
+        }
+      },
+    },
+
+    deleteUser: {
+      type: userType,
+      description: "delete user",
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+      },
+      resolve: async (parent, args) => {
+        try {
+          const result = await user.findById(args.id);
+          console.log("user deleted: " + result);
+          return user.findByIdAndDelete(args.id);
+        } catch (e) {
+          throw new Error(e.message);
+        }
       },
     },
   }),
