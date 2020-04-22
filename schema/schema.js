@@ -57,6 +57,19 @@ const profileInfoType = new GraphQLObjectType({
   }),
 });
 
+const profileInfoInput = new GraphQLInputObjectType({
+  name: "profileInputInfo",
+  fields: () => ({
+    id: { type: GraphQLID },
+    UserID: { type: GraphQLID },
+    Bio: { type: GraphQLString },
+    ProfilePicture: { type: GraphQLString },
+    Following: { type: new GraphQLList(GraphQLID) },
+    Followers: { type: new GraphQLList(GraphQLID) },
+    AnsweredQuestionCount: { type: GraphQLInt },
+  }),
+});
+
 const RootQuery = new GraphQLObjectType({
   name: "RootQuery",
   fields: {
@@ -100,6 +113,41 @@ const Mutation = new GraphQLObjectType({
         return true;
       },
     },
+
+    registerUser: {
+      type: userType,
+      description: "register user",
+      args: {
+        Username: { type: new GraphQLNonNull(GraphQLString) },
+        Displayname: { type: new GraphQLNonNull(GraphQLString) },
+        Email: { type: new GraphQLNonNull(GraphQLString) },
+        Password: { type: new GraphQLNonNull(GraphQLString) },
+        ProfileInfo: {
+          type: new GraphQLNonNull(profileInfoInput),
+        },
+      },
+      resolve: async (parent, args) => {
+        try {
+          const hashedPass = await bcrypt.hash(args.Password, saltRound);
+
+          let newProfile = new profileInfo(args.ProfileInfo);
+          await newProfile.save();
+
+          const userWithHashAndProfile = {
+            ...args,
+            Passowrd: hashedPass,
+            ProfileInfo: newProfile,
+          };
+
+          //console.log(userWithHashAndProfile.ProfileInfo);
+          const newUser = new user(userWithHashAndProfile);
+          return newUser.save();
+        } catch (e) {
+          throw new Error(e);
+        }
+      },
+    },
+
     addProfileInfo: {
       type: profileInfoType,
       description: "add profile info",
@@ -118,11 +166,11 @@ const Mutation = new GraphQLObjectType({
           ProfilePicture: args.ProfilePicture,
           Following: args.Following,
           Followers: args.Followers,
-          AnsweredQuestionCount: args.AnsweredQuestionCount
-        })
-        console.log(profile)
-        return profile.save()
-      }
+          AnsweredQuestionCount: args.AnsweredQuestionCount,
+        });
+        console.log(profile);
+        return profile.save();
+      },
     },
   }),
 });
