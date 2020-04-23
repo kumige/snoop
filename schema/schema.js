@@ -80,6 +80,18 @@ const questionType = new GraphQLObjectType({
   }),
 });
 
+const answerType = new GraphQLObjectType({
+  name: "answer",
+  fields: () => ({
+    id: { type: GraphQLID },
+    QuestionID: { type: GraphQLID },
+    Text: { type: GraphQLString },
+    Image: { type: GraphQLString },
+    Giphy: { type: GraphQLString },
+    DateTime: { type: dateTimeType },
+  }),
+});
+
 const dateTimeType = new GraphQLObjectType({
   name: "datetime",
   fields: () => ({
@@ -99,6 +111,7 @@ const RootQuery = new GraphQLObjectType({
         return user.find();
       },
     },
+
     user: {
       type: userType,
       description: "get user by id",
@@ -107,6 +120,7 @@ const RootQuery = new GraphQLObjectType({
         return user.findById(args.id);
       },
     },
+
     profileinfo: {
       type: profileInfoType,
       description: "Get profile info.",
@@ -116,22 +130,36 @@ const RootQuery = new GraphQLObjectType({
         return profileInfo.findById(args.id);
       },
     },
+
+    questions: {
+      type: new GraphQLList(questionType),
+      description: "Get all questions.",
+      args: { 
+        limit: { type: GraphQLInt, defaultValue: 10 },
+        start: { type: GraphQLInt, defaultValue: 0 }
+      },
+      resolve: (parent, args) => {
+        return question.find();
+      },
+    },
+
+    question: {
+      type: questionType,
+      description: "Get question by id.",
+      args: { 
+        id: { type: GraphQLID }
+      },
+      resolve: (parent, args) => {
+        return question.findById(args.id);
+      },
+    },
+
   },
 });
 
 const Mutation = new GraphQLObjectType({
   name: "MutationType",
   fields: () => ({
-    //addUser, addQuestion etc...
-    addStation: {
-      type: userType,
-      description: "dummy mutation",
-
-      resolve: async (parent, args, { req, res }) => {
-        return true;
-      },
-    },
-
     addQuestion: {
       type: questionType,
       description: "add a question",
@@ -142,18 +170,77 @@ const Mutation = new GraphQLObjectType({
       },
       resolve: async (parent, args) => {
         try {
-          const dateTime = date.now();
-          console.log('datetime: ' + dateTime);
-
-          let newQuestion = new question({
+          const newQuestion = new question({
             Sender: args.Sender,
             Receiver: args.Receiver,
             Text: args.Text,
-            DateTime: dateTime,
+            DateTime: date.now(),
           });
           return newQuestion.save();
         } catch (error) {
           console.log(error.message);
+        }
+      },
+    },
+
+    deleteQuestion: {
+      type: questionType,
+      description: "delete question",
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+      },
+      resolve: async (parent, args) => {
+        try {
+          return question.findByIdAndDelete(args.id);
+        } catch (e) {
+          throw new Error(e.message);
+        }
+      },
+    },
+
+    addAnswer: {
+      type: answerType,
+      description: "add an answer",
+      args: {
+        QuestionID: { type: new GraphQLNonNull(GraphQLID) },
+        Text: { type: new GraphQLNonNull(GraphQLString) },
+        Image: { type: GraphQLString },
+        Giphy: { type: GraphQLString },
+      },
+      resolve: async (parent, args) => {
+        try {
+          const newAnswer = new answer({
+            QuestionID: args.QuestionID,
+            Sender: args.Sender,
+            Receiver: args.Receiver,
+            Text: args.Text,
+            DateTime: date.now(),
+          });
+
+          const relatedQuestion = await question.findById(newAnswer.QuestionID)
+          relatedQuestion.Answer = newAnswer._id
+
+          relatedQuestion.save()
+          return newAnswer.save();
+        } catch (error) {
+          console.log(error.message);
+        }
+      },
+    },
+
+    deleteAnswer: {
+      type: answerType,
+      description: "delete answer",
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+      },
+      resolve: async (parent, args) => {
+        try {
+          const answerToDelete = await answer.findById(args.id)
+          await question.findByIdAndDelete(answerToDelete.QuestionID)
+          return answer.findByIdAndDelete(args.id);
+        } catch (e) {
+          throw new Error(e.message);
         }
       },
     },
