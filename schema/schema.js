@@ -134,9 +134,9 @@ const RootQuery = new GraphQLObjectType({
     questions: {
       type: new GraphQLList(questionType),
       description: "Get all questions.",
-      args: { 
+      args: {
         limit: { type: GraphQLInt, defaultValue: 10 },
-        start: { type: GraphQLInt, defaultValue: 0 }
+        start: { type: GraphQLInt, defaultValue: 0 },
       },
       resolve: (parent, args) => {
         return question.find();
@@ -146,14 +146,13 @@ const RootQuery = new GraphQLObjectType({
     question: {
       type: questionType,
       description: "Get question by id.",
-      args: { 
-        id: { type: GraphQLID }
+      args: {
+        id: { type: GraphQLID },
       },
       resolve: (parent, args) => {
         return question.findById(args.id);
       },
     },
-
   },
 });
 
@@ -176,7 +175,7 @@ const Mutation = new GraphQLObjectType({
             Text: args.Text,
             DateTime: date.now(),
           });
-          return newQuestion.save();
+          return await newQuestion.save();
         } catch (error) {
           console.log(error.message);
         }
@@ -191,7 +190,7 @@ const Mutation = new GraphQLObjectType({
       },
       resolve: async (parent, args) => {
         try {
-          return question.findByIdAndDelete(args.id);
+          return await question.findByIdAndDelete(args.id);
         } catch (e) {
           throw new Error(e.message);
         }
@@ -217,11 +216,11 @@ const Mutation = new GraphQLObjectType({
             DateTime: date.now(),
           });
 
-          const relatedQuestion = await question.findById(newAnswer.QuestionID)
-          relatedQuestion.Answer = newAnswer._id
+          const relatedQuestion = await question.findById(newAnswer.QuestionID);
+          relatedQuestion.Answer = newAnswer._id;
 
-          relatedQuestion.save()
-          return newAnswer.save();
+          relatedQuestion.save();
+          return await newAnswer.save();
         } catch (error) {
           console.log(error.message);
         }
@@ -236,9 +235,9 @@ const Mutation = new GraphQLObjectType({
       },
       resolve: async (parent, args) => {
         try {
-          const answerToDelete = await answer.findById(args.id)
-          await question.findByIdAndDelete(answerToDelete.QuestionID)
-          return answer.findByIdAndDelete(args.id);
+          const answerToDelete = await answer.findById(args.id);
+          await question.findByIdAndDelete(answerToDelete.QuestionID);
+          return await answer.findByIdAndDelete(args.id);
         } catch (e) {
           throw new Error(e.message);
         }
@@ -269,7 +268,7 @@ const Mutation = new GraphQLObjectType({
             ProfileInfo: newProfile,
           };
 
-          //console.log(userWithHashAndProfile.ProfileInfo);
+          //console.log(userWithHashAndProfile.Password);
           const newUser = new user(userWithHashAndProfile);
 
           // Filling the profile info
@@ -278,7 +277,42 @@ const Mutation = new GraphQLObjectType({
           newProfile.AnsweredQuestionCount = 0;
 
           await newProfile.save();
-          return newUser.save();
+          return await newUser.save();
+        } catch (e) {
+          throw new Error(e.message);
+        }
+      },
+    },
+
+    modifyUser: {
+      type: userType,
+      description: "modify user",
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        //token: { type: new GraphQLNonNull(GraphQLString) },
+        Password: { type: GraphQLString },
+        Displayname: { type: GraphQLString },
+      },
+      resolve: async (parent, args) => {
+        try {
+          // Variable to store modified data
+          let updatedUserInfo = {};
+
+          // Updates password if not null
+          if (args.Password != null) {
+            const hashedPass = await bcrypt.hash(args.Password, saltRound);
+            updatedUserInfo.Password = hashedPass;
+          }
+
+          // Updates displayname if not null
+          if (args.Displayname != null) {
+            updatedUserInfo.Displayname = args.Displayname;
+          }
+
+          console.log(updatedUserInfo);
+          return await user.findByIdAndUpdate(args.id, updatedUserInfo, {
+            new: true,
+          });
         } catch (e) {
           throw new Error(e.message);
         }
@@ -307,7 +341,7 @@ const Mutation = new GraphQLObjectType({
             AnsweredQuestionCount: args.AnsweredQuestionCount,
           });
           console.log(profile);
-          return profile.save();
+          return await profile.save();
         } catch (e) {
           throw new Error(e.message);
         }
@@ -324,7 +358,7 @@ const Mutation = new GraphQLObjectType({
         try {
           const result = await user.findById(args.id);
           console.log("user deleted: " + result);
-          return user.findByIdAndDelete(args.id);
+          return await user.findByIdAndDelete(args.id);
         } catch (e) {
           throw new Error(e.message);
         }
