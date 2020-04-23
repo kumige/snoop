@@ -17,7 +17,7 @@ const bcrypt = require("bcrypt");
 const saltRound = 12;
 
 //const authController = require('../controllers/authController');
-
+const date = require("../utils/date");
 const answer = require("../models/answer");
 const profileInfo = require("../models/profileinfo");
 const question = require("../models/question");
@@ -34,8 +34,6 @@ const userType = new GraphQLObjectType({
     ProfileInfo: {
       type: profileInfoType,
       resolve(parent, args) {
-        //console.log(profileInfo.find({_id: {$in: parent.ProfileInfo}}));
-        //console.log(parent.ProfileInfo);
         return profileInfo.findById(parent.ProfileInfo);
       },
     },
@@ -67,6 +65,26 @@ const profileInfoInput = new GraphQLInputObjectType({
     Following: { type: new GraphQLList(GraphQLID) },
     Followers: { type: new GraphQLList(GraphQLID) },
     AnsweredQuestionCount: { type: GraphQLInt },
+  }),
+});
+
+const questionType = new GraphQLObjectType({
+  name: "question",
+  fields: () => ({
+    id: { type: GraphQLID },
+    Sender: { type: GraphQLID },
+    Receiver: { type: GraphQLID },
+    Text: { type: GraphQLString },
+    DateTime: { type: dateTimeType },
+    Answer: { type: GraphQLID },
+  }),
+});
+
+const dateTimeType = new GraphQLObjectType({
+  name: "datetime",
+  fields: () => ({
+    date: { type: GraphQLString },
+    time: { type: GraphQLString },
   }),
 });
 
@@ -114,6 +132,32 @@ const Mutation = new GraphQLObjectType({
       },
     },
 
+    addQuestion: {
+      type: questionType,
+      description: "add a question",
+      args: {
+        Sender: { type: new GraphQLNonNull(GraphQLString) },
+        Receiver: { type: new GraphQLNonNull(GraphQLString) },
+        Text: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve: async (parent, args) => {
+        try {
+          const dateTime = date.now();
+          console.log('datetime: ' + dateTime);
+
+          let newQuestion = new question({
+            Sender: args.Sender,
+            Receiver: args.Receiver,
+            Text: args.Text,
+            DateTime: dateTime,
+          });
+          return newQuestion.save();
+        } catch (error) {
+          console.log(error.message);
+        }
+      },
+    },
+
     registerUser: {
       type: userType,
       description: "register user",
@@ -134,15 +178,18 @@ const Mutation = new GraphQLObjectType({
 
           const userWithHashAndProfile = {
             ...args,
-            Passowrd: hashedPass,
+            Password: hashedPass,
             ProfileInfo: newProfile,
           };
 
           //console.log(userWithHashAndProfile.ProfileInfo);
           const newUser = new user(userWithHashAndProfile);
 
-          // Adding UserID for the profile info
+          // Filling the profile info
           newProfile.UserID = newUser.id;
+          newProfile.Bio = "";
+          newProfile.AnsweredQuestionCount = 0;
+
           await newProfile.save();
           return newUser.save();
         } catch (e) {
