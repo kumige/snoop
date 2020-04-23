@@ -348,6 +348,45 @@ const Mutation = new GraphQLObjectType({
       },
     },
 
+    modifyProfile: {
+      type: profileInfoType,
+      description: "modify profile info",
+      args: {
+        UserID: { type: new GraphQLNonNull(GraphQLID) },
+        //token: { type: new GraphQLNonNull(GraphQLString) },
+        Bio: { type: GraphQLString },
+        ProfilePicture: { type: GraphQLString },
+      },
+      resolve: async (parent, args) => {
+        try {
+          // Variable to store modified data
+          let updatedProfileInfo = {};
+
+          // Updates bio if not null
+          if (args.Bio != null) {
+            console.log("Bio changed");
+            updatedProfileInfo.Bio = args.Bio;
+          }
+
+          // Updates profile picture if not null
+          if (args.ProfilePicture != null) {
+            console.log("PFP changed");
+            updatedProfileInfo.ProfilePicture = args.ProfilePicture;
+          }
+
+          return await profileInfo.findOneAndUpdate(
+            { UserID: args.UserID },
+            updatedProfileInfo,
+            {
+              new: true,
+            }
+          );
+        } catch (e) {
+          throw new Error(e.message);
+        }
+      },
+    },
+
     deleteUser: {
       type: userType,
       description: "delete user",
@@ -356,8 +395,15 @@ const Mutation = new GraphQLObjectType({
       },
       resolve: async (parent, args) => {
         try {
-          const result = await user.findById(args.id);
-          console.log("user deleted: " + result);
+          /*const result = await user.findById(args.id);
+          const result2 = await profileInfo.findOne({
+            UserID: args.id,
+          });*/
+          //console.log("user profile deleted: " + result2);
+          //console.log("user deleted: " + result);
+
+          // Deletes user and it's profile
+          await profileInfo.findOneAndDelete({ UserID: args.id });
           return await user.findByIdAndDelete(args.id);
         } catch (e) {
           throw new Error(e.message);
