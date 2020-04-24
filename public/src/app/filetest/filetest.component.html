@@ -16,4 +16,4 @@
             Upload  
         </button>  
     </mat-card-actions>  
-</mat-card><input type="file" #fileUpload id="fileUpload" name="fileUpload" accept="image/*" style="display:none;" /></div>
+</mat-card><input type="file" #fileUpload id="fileUpload" name="fileUpload" accept="image/*" style="display:none;" (change)="upload($event)" /></div>

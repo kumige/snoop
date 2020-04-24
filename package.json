@@ -12,7 +12,8 @@
     "graphql": "^15.0.0",
     "graphql-upload": "^10.0.0",
     "mongoose": "^5.9.10",
-    "passport": "^0.4.1"
+    "passport": "^0.4.1",
+    "unique-slug": "^2.0.2"
   },
   "devDependencies": {},
   "scripts": {

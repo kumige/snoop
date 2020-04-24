@@ -1,8 +1,13 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { HttpEventType, HttpErrorResponse } from '@angular/common/http';
+import {
+  HttpEventType,
+  HttpErrorResponse,
+  HttpClient,
+} from '@angular/common/http';
 import { of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { UploadService } from '../services/upload.service';
+import { FetchGqlService } from '../services/fetch-gql.service';
 
 @Component({
   selector: 'app-filetest',
@@ -11,63 +16,60 @@ import { UploadService } from '../services/upload.service';
 })
 export class FiletestComponent implements OnInit {
   @ViewChild('fileUpload', { static: false }) fileUpload: ElementRef;
+
   files = [];
-  constructor(private uploadService: UploadService) {}
+  gqlUrl = 'http://localhost:3000/graphql';
+  constructor(
+    private uploadService: UploadService,
+    private api: FetchGqlService,
+    private http: HttpClient
+  ) {}
 
   ngOnInit(): void {}
 
-  uploadFile(file) {
-    const formData = new FormData();
-    formData.append('file', file.data);
-    file.inProgress = true;
-    this.uploadService
-      .upload(formData)
-      .pipe(
-        map((event) => {
-          switch (event.type) {
-            case HttpEventType.UploadProgress:
-              file.progress = Math.round((event.loaded * 100) / event.total);
-              break;
-            case HttpEventType.Response:
-              return event;
-          }
-        }),
-        catchError((error: HttpErrorResponse) => {
-          file.inProgress = false;
-          return of(`${file.data.name} upload failed.`);
-        })
-      )
-      .subscribe((event: any) => {
-        if (typeof event === 'object') {
-          console.log(event.body);
-        }
-      });
-  }
+  async upload($event) {
 
-  private uploadFiles() {
-    this.fileUpload.nativeElement.value = '';
-    this.files.forEach((file) => {
-      this.uploadFile(file);
-    });
+    // Adds an answer with image
+    const operations = {
+      query: `mutation($file: upload) {
+        addAnswer(
+          QuestionID: "5ea1506e78f10542809f20e1"
+          Text: "img test"
+          Image: $file
+        ) {
+          id
+          QuestionID
+          Text
+          Image
+          Giphy
+          DateTime {
+            date
+            time
+          }
+        }
+      }
+     `,
+      variables: {
+        file: null,
+      },
+    };
+
+    const _map = {
+      file: ['variables.file'],
+    };
+
+    const file = $event.target.files[0];
+
+    const fd = new FormData();
+    fd.append('operations', JSON.stringify(operations));
+    fd.append('map', JSON.stringify(_map));
+    fd.append('file', file, file.name);
+
+    this.http.post(this.gqlUrl, fd).subscribe();
   }
 
   onClick() {
     const fileUpload = this.fileUpload.nativeElement;
-    console.log(fileUpload.files)
-    fileUpload.onchange = () => {
-      /*
-      fileUpload.files.forEach(file => {
-        this.files.push({ data: file, inProgress: false, progress: 0 });
-      });
-      */
-      
-      for (let index = 0; index < fileUpload.files.length; index++) {
-        const file = fileUpload.files[index];
-        this.files.push({ data: file, name: file.name, inProgress: false, progress: 0 });
-      }
-      
-      this.uploadFiles();
-    };
     fileUpload.click();
   }
 }

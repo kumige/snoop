@@ -11,7 +11,12 @@ const {
   GraphQLSchema,
   GraphQLBoolean,
   GraphQLNonNull,
+  GraphQLScalarType,
 } = require("graphql");
+const GraphQLUpload = require("graphql-upload");
+const uniqueSlug = require('unique-slug')
+const fs = require("fs");
+const uploadURI = "C:/Users/Mikko/Desktop/snoop/uploads/"
 
 const bcrypt = require("bcrypt");
 const saltRound = 12;
@@ -100,6 +105,11 @@ const dateTimeType = new GraphQLObjectType({
   }),
 });
 
+const uploadScalar = new GraphQLScalarType({
+  name: "upload",
+  Upload: { type: GraphQLUpload },
+});
+
 const RootQuery = new GraphQLObjectType({
   name: "RootQuery",
   fields: {
@@ -134,9 +144,9 @@ const RootQuery = new GraphQLObjectType({
     questions: {
       type: new GraphQLList(questionType),
       description: "Get all questions.",
-      args: { 
+      args: {
         limit: { type: GraphQLInt, defaultValue: 10 },
-        start: { type: GraphQLInt, defaultValue: 0 }
+        start: { type: GraphQLInt, defaultValue: 0 },
       },
       resolve: (parent, args) => {
         return question.find();
@@ -146,20 +156,30 @@ const RootQuery = new GraphQLObjectType({
     question: {
       type: questionType,
       description: "Get question by id.",
-      args: { 
-        id: { type: GraphQLID }
+      args: {
+        id: { type: GraphQLID },
       },
       resolve: (parent, args) => {
         return question.findById(args.id);
       },
     },
-
   },
 });
+
+// Saves the image and returns the filename that will be saved to db
+const saveImage = async (image) => {
+  const fname = image.file.filename
+  const path = `${ uploadURI }${ uniqueSlug() + '.jpg' }`;
+  const stream = image.file.createReadStream();
+  stream.pipe(fs.createWriteStream(path));
+
+  return fname
+}
 
 const Mutation = new GraphQLObjectType({
   name: "MutationType",
   fields: () => ({
+
     addQuestion: {
       type: questionType,
       description: "add a question",
@@ -204,7 +224,10 @@ const Mutation = new GraphQLObjectType({
       args: {
         QuestionID: { type: new GraphQLNonNull(GraphQLID) },
         Text: { type: new GraphQLNonNull(GraphQLString) },
-        Image: { type: GraphQLString },
+        Image: {
+          description: "Image file.",
+          type: uploadScalar,
+        },
         Giphy: { type: GraphQLString },
       },
       resolve: async (parent, args) => {
@@ -217,10 +240,15 @@ const Mutation = new GraphQLObjectType({
             DateTime: date.now(),
           });
 
-          const relatedQuestion = await question.findById(newAnswer.QuestionID)
-          relatedQuestion.Answer = newAnswer._id
+          if (args.Image != undefined) {
+            const image = args.Image
+            newAnswer.Image = await saveImage(image)
+          }
 
-          relatedQuestion.save()
+          const relatedQuestion = await question.findById(newAnswer.QuestionID);
+          relatedQuestion.Answer = newAnswer._id;
+
+          relatedQuestion.save();
           return newAnswer.save();
         } catch (error) {
           console.log(error.message);
@@ -236,8 +264,8 @@ const Mutation = new GraphQLObjectType({
       },
       resolve: async (parent, args) => {
         try {
-          const answerToDelete = await answer.findById(args.id)
-          await question.findByIdAndDelete(answerToDelete.QuestionID)
+          const answerToDelete = await answer.findById(args.id);
+          await question.findByIdAndDelete(answerToDelete.QuestionID);
           return answer.findByIdAndDelete(args.id);
         } catch (e) {
           throw new Error(e.message);
@@ -337,3 +365,23 @@ module.exports = new GraphQLSchema({
   query: RootQuery,
   mutation: Mutation,
 });
+
+/* Add answer with file upload mutation
+mutation($file: upload) {
+  addAnswer(
+    QuestionID: "5ea1506e78f10542809f20e1"
+    Text: "img test"
+    Image: $file
+  ) {
+    id
+    QuestionID
+    Text
+    Image
+    Giphy
+    DateTime {
+      date
+      time
+    }
+  }
+}
+*/
