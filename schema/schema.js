@@ -14,9 +14,9 @@ const {
   GraphQLScalarType,
 } = require("graphql");
 const GraphQLUpload = require("graphql-upload");
-const uniqueSlug = require('unique-slug')
+const uniqueSlug = require("unique-slug");
 const fs = require("fs");
-const uploadURI = "C:/Users/Mikko/Desktop/snoop/uploads/"
+const uploadURI = "C:/Users/Mikko/Desktop/snoop/uploads/";
 
 const bcrypt = require("bcrypt");
 const saltRound = 12;
@@ -168,18 +168,17 @@ const RootQuery = new GraphQLObjectType({
 
 // Saves the image and returns the filename that will be saved to db
 const saveImage = async (image) => {
-  const fname = image.file.filename
-  const path = `${ uploadURI }${ uniqueSlug() + '.jpg' }`;
+  const fname = image.file.filename;
+  const path = `${uploadURI}${uniqueSlug() + ".jpg"}`;
   const stream = image.file.createReadStream();
   stream.pipe(fs.createWriteStream(path));
 
-  return fname
-}
+  return fname;
+};
 
 const Mutation = new GraphQLObjectType({
   name: "MutationType",
   fields: () => ({
-
     addQuestion: {
       type: questionType,
       description: "add a question",
@@ -241,8 +240,8 @@ const Mutation = new GraphQLObjectType({
           });
 
           if (args.Image != undefined) {
-            const image = args.Image
-            newAnswer.Image = await saveImage(image)
+            const image = args.Image;
+            newAnswer.Image = await saveImage(image);
           }
 
           const relatedQuestion = await question.findById(newAnswer.QuestionID);
@@ -353,6 +352,61 @@ const Mutation = new GraphQLObjectType({
           const result = await user.findById(args.id);
           console.log("user deleted: " + result);
           return user.findByIdAndDelete(args.id);
+        } catch (e) {
+          throw new Error(e.message);
+        }
+      },
+    },
+
+    followUser: {
+      type: profileInfoType,
+      description: "follow a user",
+      args: {
+        UserID: { type: new GraphQLNonNull(GraphQLID) },
+        UserToFollow: { type: new GraphQLNonNull(GraphQLID) },
+      },
+      //TODO: add user check, maybe with token?
+      resolve: async (parent, args) => {
+        try {
+
+          let modifiedProfile = await profileInfo.findOne(
+            { UserID: args.UserID },
+            async (error, profile) => {
+              // Check if UserToFollow is already in Following list
+              const isInArray = profile.Following.some((userId) => {
+                return userId.equals(args.UserToFollow);
+              });
+
+              // If not in Following, push new ID to Following
+              if (!isInArray) {
+                profileInfo.findOneAndUpdate(
+                  { UserID: args.UserID },
+                  { $push: { Following: args.UserToFollow } }
+                );
+              }
+            }
+          );
+          return await modifiedProfile;
+        } catch (e) {
+          throw new Error(e.message);
+        }
+      },
+    },
+
+    unfollowUser: {
+      type: profileInfoType,
+      description: "unfollow a user",
+      args: {
+        UserID: { type: new GraphQLNonNull(GraphQLID) },
+        UserToUnfollow: { type: new GraphQLNonNull(GraphQLID) },
+      },
+      //TODO: add user check, maybe with token?
+      resolve: async (parent, args) => {
+        try {
+          return await profileInfo.findOneAndUpdate(
+            { UserID: args.UserID },
+            { $pull: { Following: args.UserToFollow } }
+          );
         } catch (e) {
           throw new Error(e.message);
         }
