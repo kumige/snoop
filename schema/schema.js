@@ -11,7 +11,12 @@ const {
   GraphQLSchema,
   GraphQLBoolean,
   GraphQLNonNull,
+  GraphQLScalarType,
 } = require("graphql");
+const GraphQLUpload = require("graphql-upload");
+const uniqueSlug = require("unique-slug");
+const fs = require("fs");
+const uploadURI = "C:/Users/Mikko/Desktop/snoop/uploads/";
 
 const bcrypt = require("bcrypt");
 const saltRound = 12;
@@ -100,6 +105,11 @@ const dateTimeType = new GraphQLObjectType({
   }),
 });
 
+const uploadScalar = new GraphQLScalarType({
+  name: "upload",
+  Upload: { type: GraphQLUpload },
+});
+
 const RootQuery = new GraphQLObjectType({
   name: "RootQuery",
   fields: {
@@ -156,6 +166,16 @@ const RootQuery = new GraphQLObjectType({
   },
 });
 
+// Saves the image and returns the filename that will be saved to db
+const saveImage = async (image) => {
+  const fname = image.file.filename;
+  const path = `${uploadURI}${uniqueSlug() + ".jpg"}`;
+  const stream = image.file.createReadStream();
+  stream.pipe(fs.createWriteStream(path));
+
+  return fname;
+};
+
 const Mutation = new GraphQLObjectType({
   name: "MutationType",
   fields: () => ({
@@ -203,7 +223,10 @@ const Mutation = new GraphQLObjectType({
       args: {
         QuestionID: { type: new GraphQLNonNull(GraphQLID) },
         Text: { type: new GraphQLNonNull(GraphQLString) },
-        Image: { type: GraphQLString },
+        Image: {
+          description: "Image file.",
+          type: uploadScalar,
+        },
         Giphy: { type: GraphQLString },
       },
       resolve: async (parent, args) => {
@@ -215,6 +238,11 @@ const Mutation = new GraphQLObjectType({
             Text: args.Text,
             DateTime: date.now(),
           });
+
+          if (args.Image != undefined) {
+            const image = args.Image;
+            newAnswer.Image = await saveImage(image);
+          }
 
           const relatedQuestion = await question.findById(newAnswer.QuestionID);
           relatedQuestion.Answer = newAnswer._id;
@@ -410,6 +438,61 @@ const Mutation = new GraphQLObjectType({
         }
       },
     },
+
+    followUser: {
+      type: profileInfoType,
+      description: "follow a user",
+      args: {
+        UserID: { type: new GraphQLNonNull(GraphQLID) },
+        UserToFollow: { type: new GraphQLNonNull(GraphQLID) },
+      },
+      //TODO: add user check, maybe with token?
+      resolve: async (parent, args) => {
+        try {
+
+          let modifiedProfile = await profileInfo.findOne(
+            { UserID: args.UserID },
+            async (error, profile) => {
+              // Check if UserToFollow is already in Following list
+              const isInArray = profile.Following.some((userId) => {
+                return userId.equals(args.UserToFollow);
+              });
+
+              // If not in Following, push new ID to Following
+              if (!isInArray) {
+                profileInfo.findOneAndUpdate(
+                  { UserID: args.UserID },
+                  { $push: { Following: args.UserToFollow } }
+                );
+              }
+            }
+          );
+          return await modifiedProfile;
+        } catch (e) {
+          throw new Error(e.message);
+        }
+      },
+    },
+
+    unfollowUser: {
+      type: profileInfoType,
+      description: "unfollow a user",
+      args: {
+        UserID: { type: new GraphQLNonNull(GraphQLID) },
+        UserToUnfollow: { type: new GraphQLNonNull(GraphQLID) },
+      },
+      //TODO: add user check, maybe with token?
+      resolve: async (parent, args) => {
+        try {
+          return await profileInfo.findOneAndUpdate(
+            { UserID: args.UserID },
+            { $pull: { Following: args.UserToFollow } }
+          );
+        } catch (e) {
+          throw new Error(e.message);
+        }
+      },
+    },
   }),
 });
 
@@ -417,3 +500,23 @@ module.exports = new GraphQLSchema({
   query: RootQuery,
   mutation: Mutation,
 });
+
+/* Add answer with file upload mutation
+mutation($file: upload) {
+  addAnswer(
+    QuestionID: "5ea1506e78f10542809f20e1"
+    Text: "img test"
+    Image: $file
+  ) {
+    id
+    QuestionID
+    Text
+    Image
+    Giphy
+    DateTime {
+      date
+      time
+    }
+  }
+}
+*/
