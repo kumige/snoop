@@ -18,6 +18,8 @@ const uniqueSlug = require("unique-slug");
 const fs = require("fs");
 const uploadURI = "C:/Users/Mikko/Desktop/snoop/uploads/";
 
+const authController = require("../controllers/authController");
+
 const bcrypt = require("bcrypt");
 const saltRound = 12;
 
@@ -161,6 +163,30 @@ const RootQuery = new GraphQLObjectType({
       },
       resolve: (parent, args) => {
         return question.findById(args.id);
+      },
+    },
+
+    login: {
+      type: userType,
+      description: "Login with username and password to receive token.",
+      args: {
+        username: { type: new GraphQLNonNull(GraphQLString) },
+        password: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve: async (parent, args, { req, res }) => {
+        console.log("arks", args);
+        req.body = args; // inject args to reqest body for passport
+        try {
+          const authResponse = await authController.login(req, res);
+          console.log("ar", authResponse);
+          return {
+            id: authResponse.user._id,
+            ...authResponse.user,
+            token: authResponse.token,
+          };
+        } catch (err) {
+          throw new Error(err);
+        }
       },
     },
   },
@@ -421,8 +447,9 @@ const Mutation = new GraphQLObjectType({
       args: {
         id: { type: new GraphQLNonNull(GraphQLID) },
       },
-      resolve: async (parent, args) => {
+      resolve: async (parent, args, { req, res }) => {
         try {
+          await authController.checkAuth(req, res);
           /*const result = await user.findById(args.id);
           const result2 = await profileInfo.findOne({
             UserID: args.id,
@@ -449,7 +476,6 @@ const Mutation = new GraphQLObjectType({
       //TODO: add user check, maybe with token?
       resolve: async (parent, args) => {
         try {
-
           let modifiedProfile = await profileInfo.findOne(
             { UserID: args.UserID },
             async (error, profile) => {
