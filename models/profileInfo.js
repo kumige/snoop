@@ -6,6 +6,7 @@ const profileInfoSchema = new Schema({
     UserID: {type: mongoose.Types.ObjectId, ref: 'User'},
     Bio: String,
     ProfilePicture: String,
+    Favourites: [{type: mongoose.Types.ObjectId, ref: 'Question'}],
     Following: [{type: mongoose.Types.ObjectId, ref: 'User'}],
     Followers: [{type: mongoose.Types.ObjectId, ref: 'User'}],
     AnsweredQuestionCount: Number

@@ -42,7 +42,6 @@ const userType = new GraphQLObjectType({
         return profileInfo.findById(parent.ProfileInfo);
       },
     },
-    UserType: { type: GraphQLInt },
     LastLogin: { type: GraphQLString },
   }),
 });
@@ -56,6 +55,7 @@ const profileInfoType = new GraphQLObjectType({
     ProfilePicture: { type: GraphQLString },
     Following: { type: new GraphQLList(GraphQLID) },
     Followers: { type: new GraphQLList(GraphQLID) },
+    Favourites: { type: new GraphQLList(GraphQLID) },
     AnsweredQuestionCount: { type: GraphQLInt },
   }),
 });
@@ -67,6 +67,7 @@ const profileInfoInput = new GraphQLInputObjectType({
     UserID: { type: GraphQLID },
     Bio: { type: GraphQLString },
     ProfilePicture: { type: GraphQLString },
+    Favourites: { type: new GraphQLList(GraphQLID) },
     Following: { type: new GraphQLList(GraphQLID) },
     Followers: { type: new GraphQLList(GraphQLID) },
     AnsweredQuestionCount: { type: GraphQLInt },
@@ -80,6 +81,7 @@ const questionType = new GraphQLObjectType({
     Sender: { type: GraphQLID },
     Receiver: { type: GraphQLID },
     Text: { type: GraphQLString },
+    Favourites: { type: new GraphQLList(GraphQLID) },
     DateTime: { type: dateTimeType },
     Answer: { type: GraphQLID },
   }),
@@ -172,16 +174,18 @@ const RootQuery = new GraphQLObjectType({
       },
       resolve: async (parent, args) => {
         // Get profile info where the following data is located
-        const userProfile = await profileInfo.findOne({ UserID: args.id })
+        const userProfile = await profileInfo.findOne({ UserID: args.id });
 
         // Create a list of users from the user IDs
-        const followingList = Promise.all(userProfile.Following.map(async userID => {
-          return await user.findById(userID)
-        }))
+        const followingList = Promise.all(
+          userProfile.Following.map(async (userID) => {
+            return await user.findById(userID);
+          })
+        );
 
-        return followingList.then(data => {
-          return data
-        })
+        return followingList.then((data) => {
+          return data;
+        });
       },
     },
 
@@ -193,19 +197,66 @@ const RootQuery = new GraphQLObjectType({
       },
       resolve: async (parent, args) => {
         // Get profile info where the following data is located
-        const userProfile = await profileInfo.findOne({ UserID: args.id })
-        console.log(userProfile.Followers)
+        const userProfile = await profileInfo.findOne({ UserID: args.id });
 
         // Create a list of users from the user IDs
-        const followerList = Promise.all(userProfile.Followers.map(async userID => {
-          return await user.findById(userID)
-        }))
+        const followerList = Promise.all(
+          userProfile.Followers.map(async (userID) => {
+            return await user.findById(userID);
+          })
+        );
 
-        return followerList.then(data => {
-          return data
-        })
+        return followerList.then((data) => {
+          return data;
+        });
       },
     },
+
+    favouriteAnswers: {
+      type: new GraphQLList(questionType),
+      description: "Get a list of a users favourited answers",
+      args: {
+        id: { type: GraphQLID },
+      },
+      resolve: async (parent, args) => {
+        // Get profile info where the favourites is located
+        const userProfile = await profileInfo.findOne({ UserID: args.id });
+
+        // Create a list of questions from the question IDs
+        const favouriteArray = Promise.all(
+          userProfile.Favourites.map(async (qID) => {
+            return await question.findById(qID);
+          })
+        );
+
+        return favouriteArray.then((data) => {
+          return data;
+        });
+      },
+    },
+
+    usersWhoFavourited: {
+      type: new GraphQLList(userType),
+      description: "Get a list of users who favourited an answer",
+      args: {
+        QuestionID: { type: GraphQLID },
+      },
+      resolve: async (parent, args) => {
+        // Get question where the users are located
+        const _question = await question.findOne({ _id: args.QuestionID });
+
+        // Create a list of users from the user IDs
+        const userArray = Promise.all(
+          _question.Favourites.map(async (userID) => {
+            return await user.findById(userID);
+          })
+        );
+
+        return userArray.then((data) => {
+          return data;
+        });
+      },
+    }
   },
 });
 
@@ -236,6 +287,7 @@ const Mutation = new GraphQLObjectType({
             Sender: args.Sender,
             Receiver: args.Receiver,
             Text: args.Text,
+            Favourites: [],
             DateTime: date.now(),
           });
           return await newQuestion.save();
@@ -337,6 +389,7 @@ const Mutation = new GraphQLObjectType({
             ...args,
             Password: hashedPass,
             ProfileInfo: newProfile,
+            UserType: 0,
           };
 
           //console.log(userWithHashAndProfile.Password);
@@ -397,8 +450,8 @@ const Mutation = new GraphQLObjectType({
         UserID: { type: GraphQLID },
         Bio: { type: GraphQLString },
         ProfilePicture: { type: GraphQLString },
-        Following: { type: new GraphQLList(GraphQLID) },
-        Followers: { type: new GraphQLList(GraphQLID) },
+        //Following: { type: new GraphQLList(GraphQLID) },
+        //Followers: { type: new GraphQLList(GraphQLID) },
         AnsweredQuestionCount: { type: GraphQLInt },
       },
       resolve: async (parent, args) => {
@@ -407,8 +460,11 @@ const Mutation = new GraphQLObjectType({
             UserID: args.UserID,
             Bio: args.Bio,
             ProfilePicture: args.ProfilePicture,
-            Following: args.Following,
-            Followers: args.Followers,
+            //Following: args.Following,
+            //Followers: args.Followers,
+            Following: [],
+            Followers: [],
+            Favourites: [],
             AnsweredQuestionCount: args.AnsweredQuestionCount,
           });
           console.log(profile);
@@ -495,7 +551,6 @@ const Mutation = new GraphQLObjectType({
           let modifiedProfile = await profileInfo.findOne(
             { UserID: args.UserID },
             async (error, profile) => {
-
               // Check if UserToFollow is already in Following list
               const isInArray = profile.Following.some((userId) => {
                 return userId.equals(args.UserToFollow);
@@ -554,6 +609,78 @@ const Mutation = new GraphQLObjectType({
         }
       },
     },
+
+    addFavourite: {
+      type: questionType,
+      description: "Favourite an answer",
+      args: {
+        UserID: { type: new GraphQLNonNull(GraphQLID) }, // TODO: CHANGE THIS TO GET USERID FROM TOKEN?
+        QuestionID: { type: new GraphQLNonNull(GraphQLID) },
+      },
+      resolve: async (parent, args) => {
+        try {
+          let _question = await question.findOne(
+            { _id: args.QuestionID },
+            async (error, q) => {
+              console.log(q)
+              // Check if user has already favourited the answer
+              const isInFavourites = q.Favourites.some((userID) => {
+                return userID.equals(args.UserID);
+              });
+
+              if (!isInFavourites) {
+                // Save question id to the users favourites list
+                await profileInfo.findOneAndUpdate(
+                  { UserID: args.UserID },
+                  { $push: { Favourites: args.QuestionID } },
+                  { new: true }
+                );
+
+                // Save user id to favourites list of the respective question
+                await question.findOneAndUpdate(
+                  { _id: args.QuestionID },
+                  { $push: { Favourites: args.UserID } },
+                  { new: true }
+                );
+              }
+            }
+          );
+
+          return _question;
+        } catch (e) {
+          throw new Error(e.message);
+        }
+      },
+    },
+
+    removeFavourite: {
+      type: questionType,
+      description: "Remove favourite from an answer",
+      args: {
+        UserID: { type: new GraphQLNonNull(GraphQLID) }, // TODO: CHANGE THIS TO GET USERID FROM PASSPORT-LOCAL
+        QuestionID: { type: new GraphQLNonNull(GraphQLID) },
+      },
+      resolve: async (parent, args) => {
+        try {
+          // Remove question from the favourites of the user
+          await profileInfo.findOneAndUpdate(
+            { UserID: args.UserID },
+            { $pull: { Favourites: args.QuestionID } },
+            { new: true }
+          );
+
+          // Remove user from question favourites
+          return await question.findOneAndUpdate(
+            { _id: args.QuestionID },
+            { $pull: { Favourites: args.UserID } },
+            { new: true }
+          );
+
+        } catch (e) {
+          throw new Error(e.message);
+        }
+      }
+    }
   }),
 });
 

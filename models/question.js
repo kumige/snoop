@@ -6,6 +6,7 @@ const questionSchema = new Schema({
   Sender: { type: mongoose.Types.ObjectId, ref: "User" },
   Receiver: { type: mongoose.Types.ObjectId, ref: "User" },
   Text: String,
+  Favourites: [{type: mongoose.Types.ObjectId, ref: 'User'}],
   DateTime: {
     type: {
       date: String,
