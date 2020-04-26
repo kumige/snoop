@@ -163,6 +163,49 @@ const RootQuery = new GraphQLObjectType({
         return question.findById(args.id);
       },
     },
+
+    following: {
+      type: new GraphQLList(userType),
+      description: "Get list of users someone is following.",
+      args: {
+        id: { type: GraphQLID },
+      },
+      resolve: async (parent, args) => {
+        // Get profile info where the following data is located
+        const userProfile = await profileInfo.findOne({ UserID: args.id })
+
+        // Create a list of users from the user IDs
+        const followingList = Promise.all(userProfile.Following.map(async userID => {
+          return await user.findById(userID)
+        }))
+
+        return followingList.then(data => {
+          return data
+        })
+      },
+    },
+
+    followers: {
+      type: new GraphQLList(userType),
+      description: "Get list of users who follow someone.",
+      args: {
+        id: { type: GraphQLID },
+      },
+      resolve: async (parent, args) => {
+        // Get profile info where the following data is located
+        const userProfile = await profileInfo.findOne({ UserID: args.id })
+        console.log(userProfile.Followers)
+
+        // Create a list of users from the user IDs
+        const followerList = Promise.all(userProfile.Followers.map(async userID => {
+          return await user.findById(userID)
+        }))
+
+        return followerList.then(data => {
+          return data
+        })
+      },
+    },
   },
 });
 
@@ -449,10 +492,10 @@ const Mutation = new GraphQLObjectType({
       //TODO: add user check, maybe with token?
       resolve: async (parent, args) => {
         try {
-
           let modifiedProfile = await profileInfo.findOne(
             { UserID: args.UserID },
             async (error, profile) => {
+
               // Check if UserToFollow is already in Following list
               const isInArray = profile.Following.some((userId) => {
                 return userId.equals(args.UserToFollow);
@@ -460,9 +503,18 @@ const Mutation = new GraphQLObjectType({
 
               // If not in Following, push new ID to Following
               if (!isInArray) {
-                profileInfo.findOneAndUpdate(
+                // Save user id to following list
+                await profileInfo.findOneAndUpdate(
                   { UserID: args.UserID },
-                  { $push: { Following: args.UserToFollow } }
+                  { $push: { Following: args.UserToFollow } },
+                  { new: true }
+                );
+
+                // Save user id to followers list of the respective user
+                await profileInfo.findOneAndUpdate(
+                  { UserID: args.UserToFollow },
+                  { $push: { Followers: args.UserID } },
+                  { new: true }
                 );
               }
             }
@@ -484,9 +536,18 @@ const Mutation = new GraphQLObjectType({
       //TODO: add user check, maybe with token?
       resolve: async (parent, args) => {
         try {
+          // Remove user id from followers list of the respective user
+          await profileInfo.findOneAndUpdate(
+            { UserID: args.UserToUnfollow },
+            { $pull: { Followers: args.UserID } },
+            { new: true }
+          );
+
+          // Remove user id from following list
           return await profileInfo.findOneAndUpdate(
             { UserID: args.UserID },
-            { $pull: { Following: args.UserToFollow } }
+            { $pull: { Following: args.UserToUnfollow } },
+            { new: true }
           );
         } catch (e) {
           throw new Error(e.message);
