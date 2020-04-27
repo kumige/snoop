@@ -1,20 +1,47 @@
-<div class="feed">
-    <mat-card-content id="card">  
+<div class="page">
+    <mat-card>
+        <mat-card-content id="feed">  
 
-        <ul>  
-            <li *ngFor="let q of questions" class="qWithA">
-                <div class="question">
-                    <img matListAvatar src="assets/{{q.Image}}" alt="...">
-                    <span>{{ q.Question.Text }}</span>  
-                    <span>{{ q.Question.Sender.Username }}</span>  
-                    <span>{{ q.Question.Sender.Displayname }}</span>  
-                </div>
-                <mat-list></mat-list>
-                <div class="answer">
-                    <span>{{ q.Text }}</span>  
-                </div>
+            <ul>  
+                <li *ngFor="let q of questions" class="qWithA">
+                    <div class="question">
+                        <div class="horizontal">
+                            <img class="profilePicture" src="{{ uploadsUrl }}PagChomp.png" alt="Profile image">
+                            <div class="vertical">
+                                <span class="qDisplayname">{{ q.Question.Sender.Displayname }} asked:</span> 
+                                <span>{{ q.Question.DateTime.date }}</span> 
+                            </div>
+                        </div>
+                        <div class="textCenter">
+                            <span class="qText">{{ q.Question.Text }}</span> 
+                        </div>
+                         
+                    </div>
+                    <mat-divider></mat-divider>
+                    <div class="answer">
+                        <div class="horizontal">
+                            <img class="profilePicture" src="{{ uploadsUrl }}PagChomp.png" alt="Profile image">
+                            <div class="vertical">
+                                <span class="qDisplayname">{{ q.Question.Receiver.Displayname }}'s answer: </span> 
+                                <span>{{ q.Question.DateTime.date }}</span> 
+                            </div>
+                        </div>
+                        <div class="textCenter">
+                            <span class="aText">{{ q.Text }}</span>  
+                        </div>
 
-            </li>  
-        </ul>  
-    </mat-card-content> 
+                        <div class="imgContainer">
+                            <img class="answerImage" src="{{ uploadsUrl }}{{  q.Image  }}" alt="Answer image">
+                        </div>
+                    </div>
+                    <mat-divider></mat-divider>
+
+                </li>  
+
+            </ul>  
+
+    
+        </mat-card-content> 
+    </mat-card>
+    
 </div>

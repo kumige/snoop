@@ -9,6 +9,10 @@ import { FetchGqlService } from '../services/fetch-gql.service';
 export class HomeComponent implements OnInit {
   questions;
 
+  get uploadsUrl() {
+    return "http://localhost:3000/uploads/"
+  }
+
   private query = {
     query: `
     query {

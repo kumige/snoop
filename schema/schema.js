@@ -16,7 +16,7 @@ const {
 const GraphQLUpload = require("graphql-upload");
 const uniqueSlug = require("unique-slug");
 const fs = require("fs");
-const uploadURI = "C:/Users/Mikko/Desktop/snoop/public/src/assets/";
+const uploadURI = "C:/Users/Mikko/Desktop/snoop/uploads/";
 
 const bcrypt = require("bcrypt");
 const saltRound = 12;

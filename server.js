@@ -15,6 +15,7 @@ server.use(express.json()); // for parsing application/json
 server.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
 server.use(express.static("public"));
+server.use('/uploads', express.static('uploads'))
 server.use("/modules", express.static("node_modules"));
 
 server.use(
