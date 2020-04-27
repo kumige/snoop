@@ -11,16 +11,24 @@ li, ul
     border: 1px #b0b0b0
     
 .answerImage
-    max-width: 100%
+    object-fit: contain
     margin: 0.5em
+    display: block
+    margin-left: auto
+    margin-right: auto
+    max-width: 100%
+    max-height: 100%
 
 .profilePicture
-            width: 36px
-            height: 36px
-            margin-right: 0.5em
-
+    width: 36px
+    height: 36px
+    margin-right: 0.5em
 
 .qWithA
+    margin-bottom: 16px
+
+    .answer
+        margin-top: 16px
 
     .question, .answer
         max-width: 30rem
@@ -28,7 +36,6 @@ li, ul
         align-items: flex-start 
         justify-content: center
         flex-flow: column
-        
 
         .qText, .aText
             font-size: 18px
@@ -39,15 +46,19 @@ li, ul
             
         .imgContainer
             width: 100%
-            display: flex
+            display: flex                                                                                                                            
             align-items: center
             justify-content: center
+            max-width: 480px
+            max-height: 480px
+            overflow: hidden
 
         .textCenter
             width: 100%
             display: flex
             align-items: center
             justify-content: center
+            overflow-wrap: anywhere
         
         .horizontal
             display: flex
