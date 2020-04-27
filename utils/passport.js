@@ -15,7 +15,7 @@ passport.use(
       const user = await userModel.findOne({ Username });
       console.log("Local strategy", user);
       if (user === null) {
-        return done(null, false, { message: "Incorrect email." });
+        return done(null, false, { message: "Incorrect username." });
       }
       console.log("pw", Password, user.Password);
       const validate = await bcrypt.compare(Password, user.Password);

@@ -33,7 +33,7 @@ const checkAuth = (req, res) => {
   return new Promise((resolve, reject) => {
     passport.authenticate("jwt", (err, user) => {
       if (err || !user) {
-        console.log("Not logged in");
+        console.log("Not authenticated or user expired");
         reject("Not authenticated or user expired");
       }
       resolve(user);
