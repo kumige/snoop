@@ -4,37 +4,83 @@ import { FetchGqlService } from '../services/fetch-gql.service';
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.sass']
+  styleUrls: ['./home.component.sass'],
 })
 export class HomeComponent implements OnInit {
-
-  questions
+  questions;
 
   private query = {
-    query: `{
-      questions {
-        Sender
-        Receiver
+    query: `
+    query {
+      qWithA(limit: 10, start: 0) {
+        id
+        Question {
+          id
+          Sender {
+            id
+            token
+            Email
+            Username
+            Displayname
+            ProfileInfo {
+              id
+              UserID
+              Bio
+              ProfilePicture
+              Following
+              Followers
+              Favourites
+              AnsweredQuestionCount
+            }
+            LastLogin
+          }
+          Receiver {
+            id
+            token
+            Email
+            Username
+            Displayname
+            ProfileInfo {
+              id
+              UserID
+              Bio
+              ProfilePicture
+              Following
+              Followers
+              Favourites
+              AnsweredQuestionCount
+            }
+            LastLogin
+          }
+          Text
+          Favourites
+          DateTime {
+            date
+            time
+          }
+        }
         Text
+        Image
+        Giphy
         DateTime {
           date
           time
         }
-        Answer
       }
-    }`
-  }
+    }
+    `,
+  };
 
-  constructor(private api: FetchGqlService) { }
+  constructor(private api: FetchGqlService) {}
 
   ngOnInit(): void {
-    this.getQs()
+    this.getQs();
   }
 
-  private async getQs(){
-    this.questions = await this.api.fetchGraphql(this.query)
-    this.questions = this.questions.questions
-    console.log(this.questions)
-  }
+  private async getQs() {
+    this.questions = await this.api.fetchGraphql(this.query);
+    this.questions = this.questions.qWithA;
+    console.log(this.questions);
 
+  }
 }

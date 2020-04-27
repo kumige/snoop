@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const answerSchema = new Schema({
-    QuestionID: { type: mongoose.Types.ObjectId, ref: "Question" },
+    Question: { type: mongoose.Types.ObjectId, ref: "Question" },
     Text: String,
     Image: String,
     Giphy: String,

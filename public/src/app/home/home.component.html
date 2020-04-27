@@ -1,8 +1,19 @@
 <div class="feed">
-    <mat-card-content>  
+    <mat-card-content id="card">  
+
         <ul>  
-            <li *ngFor="let q of questions">  
-                <span>{{ q.Text }}</span>  
+            <li *ngFor="let q of questions" class="qWithA">
+                <div class="question">
+                    <img matListAvatar src="assets/{{q.Image}}" alt="...">
+                    <span>{{ q.Question.Text }}</span>  
+                    <span>{{ q.Question.Sender.Username }}</span>  
+                    <span>{{ q.Question.Sender.Displayname }}</span>  
+                </div>
+                <mat-list></mat-list>
+                <div class="answer">
+                    <span>{{ q.Text }}</span>  
+                </div>
+
             </li>  
         </ul>  
     </mat-card-content> 

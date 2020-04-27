@@ -16,7 +16,7 @@ const {
 const GraphQLUpload = require("graphql-upload");
 const uniqueSlug = require("unique-slug");
 const fs = require("fs");
-const uploadURI = "C:/Users/Mikko/Desktop/snoop/uploads/";
+const uploadURI = "C:/Users/Mikko/Desktop/snoop/public/src/assets/";
 
 const bcrypt = require("bcrypt");
 const saltRound = 12;
@@ -78,12 +78,22 @@ const questionType = new GraphQLObjectType({
   name: "question",
   fields: () => ({
     id: { type: GraphQLID },
-    Sender: { type: GraphQLID },
-    Receiver: { type: GraphQLID },
+    Sender: {
+      type: userType,
+      resolve(parent, args) {
+        return user.findById(parent.Sender);
+      },
+    },
+    Receiver: {
+      type: userType,
+      resolve(parent, args) {
+        return user.findById(parent.Receiver);
+      },
+    },
     Text: { type: GraphQLString },
     Favourites: { type: new GraphQLList(GraphQLID) },
     DateTime: { type: dateTimeType },
-    Answer: { type: GraphQLID },
+    Answer: { type: answerType },
   }),
 });
 
@@ -91,7 +101,12 @@ const answerType = new GraphQLObjectType({
   name: "answer",
   fields: () => ({
     id: { type: GraphQLID },
-    QuestionID: { type: GraphQLID },
+    Question: {
+      type: questionType,
+      resolve(parent, args) {
+        return question.findById(parent.Question);
+      },
+    },
     Text: { type: GraphQLString },
     Image: { type: GraphQLString },
     Giphy: { type: GraphQLString },
@@ -150,8 +165,17 @@ const RootQuery = new GraphQLObjectType({
         limit: { type: GraphQLInt, defaultValue: 10 },
         start: { type: GraphQLInt, defaultValue: 0 },
       },
-      resolve: (parent, args) => {
-        return question.find();
+      resolve: async (parent, args) => {
+        const questions = await question
+          .find()
+          .skip(args.start)
+          .limit(args.limit)
+          .populate('Sender')
+          .populate('Receiver')
+          .populate('Answer')
+          .exec();
+
+        return questions
       },
     },
 
@@ -163,6 +187,23 @@ const RootQuery = new GraphQLObjectType({
       },
       resolve: (parent, args) => {
         return question.findById(args.id);
+      },
+    },
+
+    qWithA: {
+      type: new GraphQLList(answerType), 
+      description: "Get question with an answer by id.",
+      args: {
+        limit: { type: GraphQLInt, defaultValue: 10 },
+        start: { type: GraphQLInt, defaultValue: 0 },
+      },
+      resolve: async (parent, args) => {
+        const questions = await answer
+          .find()
+          .skip(args.start)
+          .limit(args.limit)
+
+        return questions
       },
     },
 
@@ -256,14 +297,14 @@ const RootQuery = new GraphQLObjectType({
           return data;
         });
       },
-    }
+    },
   },
 });
 
 // Saves the image and returns the filename that will be saved to db
 const saveImage = async (image) => {
-  const fname = image.file.filename;
-  const path = `${uploadURI}${uniqueSlug() + ".jpg"}`;
+  const fname = uniqueSlug() + ".jpg"
+  const path = `${uploadURI}${fname}`;
   const stream = image.file.createReadStream();
   stream.pipe(fs.createWriteStream(path));
 
@@ -327,7 +368,7 @@ const Mutation = new GraphQLObjectType({
       resolve: async (parent, args) => {
         try {
           const newAnswer = new answer({
-            QuestionID: args.QuestionID,
+            Question: args.QuestionID,
             Sender: args.Sender,
             Receiver: args.Receiver,
             Text: args.Text,
@@ -339,7 +380,7 @@ const Mutation = new GraphQLObjectType({
             newAnswer.Image = await saveImage(image);
           }
 
-          const relatedQuestion = await question.findById(newAnswer.QuestionID);
+          const relatedQuestion = await question.findById(newAnswer.Question);
           relatedQuestion.Answer = newAnswer._id;
 
           relatedQuestion.save();
@@ -359,7 +400,7 @@ const Mutation = new GraphQLObjectType({
       resolve: async (parent, args) => {
         try {
           const answerToDelete = await answer.findById(args.id);
-          await question.findByIdAndDelete(answerToDelete.QuestionID);
+          await question.findByIdAndDelete(answerToDelete.Question);
           return await answer.findByIdAndDelete(args.id);
         } catch (e) {
           throw new Error(e.message);
@@ -622,7 +663,7 @@ const Mutation = new GraphQLObjectType({
           let _question = await question.findOne(
             { _id: args.QuestionID },
             async (error, q) => {
-              console.log(q)
+              console.log(q);
               // Check if user has already favourited the answer
               const isInFavourites = q.Favourites.some((userID) => {
                 return userID.equals(args.UserID);
@@ -675,12 +716,11 @@ const Mutation = new GraphQLObjectType({
             { $pull: { Favourites: args.UserID } },
             { new: true }
           );
-
         } catch (e) {
           throw new Error(e.message);
         }
-      }
-    }
+      },
+    },
   }),
 });
 
