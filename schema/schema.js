@@ -18,6 +18,8 @@ const uniqueSlug = require("unique-slug");
 const fs = require("fs");
 const uploadURI = "C:/Users/Mikko/Desktop/snoop/uploads/";
 
+const authController = require("../controllers/authController");
+
 const bcrypt = require("bcrypt");
 const saltRound = 12;
 
@@ -170,12 +172,12 @@ const RootQuery = new GraphQLObjectType({
           .find()
           .skip(args.start)
           .limit(args.limit)
-          .populate('Sender')
-          .populate('Receiver')
-          .populate('Answer')
+          .populate("Sender")
+          .populate("Receiver")
+          .populate("Answer")
           .exec();
 
-        return questions
+        return questions;
       },
     },
 
@@ -191,7 +193,7 @@ const RootQuery = new GraphQLObjectType({
     },
 
     qWithA: {
-      type: new GraphQLList(answerType), 
+      type: new GraphQLList(answerType),
       description: "Get question with an answer by id.",
       args: {
         limit: { type: GraphQLInt, defaultValue: 10 },
@@ -201,9 +203,9 @@ const RootQuery = new GraphQLObjectType({
         const questions = await answer
           .find()
           .skip(args.start)
-          .limit(args.limit)
+          .limit(args.limit);
 
-        return questions
+        return questions;
       },
     },
 
@@ -298,12 +300,36 @@ const RootQuery = new GraphQLObjectType({
         });
       },
     },
+
+    login: {
+      type: userType,
+      description: "Login with username and password to receive token.",
+      args: {
+        username: { type: new GraphQLNonNull(GraphQLString) },
+        password: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve: async (parent, args, { req, res }) => {
+        console.log("arks", args);
+        req.body = args; // inject args to reqest body for passport
+        try {
+          const authResponse = await authController.login(req, res);
+          console.log("ar", authResponse);
+          return {
+            id: authResponse.user._id,
+            ...authResponse.user,
+            token: authResponse.token,
+          };
+        } catch (err) {
+          throw new Error(err);
+        }
+      },
+    },
   },
 });
 
 // Saves the image and returns the filename that will be saved to db
 const saveImage = async (image) => {
-  const fname = uniqueSlug() + ".jpg"
+  const fname = uniqueSlug() + ".jpg";
   const path = `${uploadURI}${fname}`;
   const stream = image.file.createReadStream();
   stream.pipe(fs.createWriteStream(path));
@@ -561,8 +587,9 @@ const Mutation = new GraphQLObjectType({
       args: {
         id: { type: new GraphQLNonNull(GraphQLID) },
       },
-      resolve: async (parent, args) => {
+      resolve: async (parent, args, { req, res }) => {
         try {
+          await authController.checkAuth(req, res);
           /*const result = await user.findById(args.id);
           const result2 = await profileInfo.findOne({
             UserID: args.id,
