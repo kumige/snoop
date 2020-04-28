@@ -1,0 +1,103 @@
+.page
+    display: flex
+    justify-content: center
+    align-items: center 
+    flex-flow: column
+
+li, ul
+    padding: 0
+    list-style: none
+
+.profilePicture
+    width: 36px
+    height: 36px
+    margin-right: 0.5em
+
+#profile
+    width: 30rem
+    display: flex
+    justify-content: space-between
+    flex-flow: column
+
+    #profileVerticalContainer
+        display: flex
+        flex-flow: row
+        justify-content: space-between
+
+    #profPicAndName
+        display: flex
+        flex-flow: row
+
+        #namesContainer
+            display: flex
+            flex-flow: column
+
+    #countsContainer
+        display: flex
+        flex-flow: column
+
+    #bioContainer
+        text-align: center
+
+#askBox
+    width: 30rem
+    display: flex
+    flex-flow: row
+
+    #textInput
+        flex-grow: 2
+        margin-right: 16px
+
+    #sendButton
+        height: 52px
+        margin-top: 3.5px
+
+#feed
+    width: 30rem
+    display: flex
+    justify-content: space-between
+    flex-flow: column
+
+.qWithA
+    margin-bottom: 16px
+
+    .answer
+        margin-top: 16px
+
+    .question, .answer
+        max-width: 30rem
+        display: flex
+        align-items: flex-start 
+        justify-content: center
+        flex-flow: column
+
+        .qText, .aText
+            font-size: 18px
+            margin: 0.5em
+
+        .qUsername
+            color: #B0B0B0
+            
+        .imgContainer
+            width: 100%
+            display: flex                                                                                                                            
+            align-items: center
+            justify-content: center
+            max-width: 480px
+            max-height: 480px
+            overflow: hidden
+
+        .textCenter
+            width: 100%
+            display: flex
+            align-items: center
+            justify-content: center
+            overflow-wrap: anywhere
+        
+        .horizontal
+            display: flex
+            flex-flow: row
+
+        .vertical
+            display: flex
+            flex-flow: column

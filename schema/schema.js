@@ -95,7 +95,13 @@ const questionType = new GraphQLObjectType({
     Text: { type: GraphQLString },
     Favourites: { type: new GraphQLList(GraphQLID) },
     DateTime: { type: dateTimeType },
-    Answer: { type: answerType },
+    //Answer: { type: answerType },
+    Answer: {
+      type: answerType,
+      resolve(parent, args) {
+        return answer.findById(parent.Answer);
+      },
+    },
   }),
 });
 
@@ -141,12 +147,21 @@ const RootQuery = new GraphQLObjectType({
       },
     },
 
-    user: {
+    userById: {
       type: userType,
       description: "get user by id",
       args: { id: { type: GraphQLID } },
       resolve(parent, args) {
         return user.findById(args.id);
+      },
+    },
+
+    userByUsername: {
+      type: userType,
+      description: "get user by username",
+      args: { username: { type: GraphQLString } },
+      resolve(parent, args) {
+        return user.findOne({ Username: args.username });
       },
     },
 
@@ -194,7 +209,7 @@ const RootQuery = new GraphQLObjectType({
 
     qWithA: {
       type: new GraphQLList(answerType),
-      description: "Get question with an answer by id.",
+      description: "Get questions with an answer.",
       args: {
         limit: { type: GraphQLInt, defaultValue: 10 },
         start: { type: GraphQLInt, defaultValue: 0 },
@@ -206,6 +221,36 @@ const RootQuery = new GraphQLObjectType({
           .limit(args.limit);
 
         return questions;
+      },
+    },
+
+    qWithAOfUser: {
+      type: new GraphQLList(questionType),
+      description: "Get questions with an answer.",
+      args: {
+        limit: { type: GraphQLInt, defaultValue: 10 },
+        start: { type: GraphQLInt, defaultValue: 0 },
+        UserID: { type: GraphQLID },
+      },
+      resolve: async (parent, args) => {
+        
+        const questions = await question
+          .find({ Receiver: args.UserID })
+          .skip(args.start)
+          .limit(args.limit);
+
+          console.log(questions)
+
+        let qList = []
+
+        questions.forEach(singleQ => {
+          if(singleQ.Answer != undefined){
+            qList.push(singleQ)
+          }
+        })
+
+        console.log(qList)
+        return qList;
       },
     },
 
