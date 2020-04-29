@@ -20,10 +20,12 @@ export class LoginComponent implements OnInit {
 
   ngOnInit() {}
 
+  // Gets login form's controls
   get f_login() {
     return this.loginForm.controls;
   }
 
+  // Checks if the login input fields are valid and if they are, tries to login
   onSubmit() {
     this.loginError = false;
     this.submitted = true;
@@ -38,6 +40,9 @@ export class LoginComponent implements OnInit {
     }
   }
 
+  // function to handle logging in
+  // If successfull, stores token into localstorage and redirects to main page
+  // If not successful, gives an error
   private async login() {
     const query = {
       query: `query {login(username:"${this.loginForm.controls.username.value}", password:"${this.loginForm.controls.password.value}"){

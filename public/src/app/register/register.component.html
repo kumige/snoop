@@ -1,0 +1,52 @@
+<h2>Register</h2>
+<form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+  <div class="register_form">
+    <label for="username">Username</label>
+    <input type="text" formControlName="username" class="form-control" />
+    <!-- prettier-ignore -->
+    <div *ngIf="(f_register.username.touched && f_register.username.invalid) || (submitted == true && f_register.username.invalid)">
+      <div *ngIf="f_register.username.errors.required">Username is required.
+      </div>
+    </div>
+
+    <label for="displayName">Display name</label>
+    <input type="text" formControlName="displayName" class="form-control" />
+    <!-- prettier-ignore -->
+    <div *ngIf="(f_register.displayName.touched && f_register.displayName.invalid) || (submitted == true && f_register.displayName.invalid)">
+      <div *ngIf="f_register.displayName.errors.required">
+        Display name is required.
+      </div>
+    </div>
+
+    <label for="email">Email</label>
+    <input type="text" formControlName="email" class="form-control" />
+    <!-- prettier-ignore -->
+    <div *ngIf="(f_register.email.touched && f_register.email.invalid) || (submitted == true && f_register.email.invalid)">
+      <div *ngIf="f_register.email.errors.required">
+        Email is required.
+      </div>
+    </div>
+
+    <label for="password">Password</label>
+    <input type="text" formControlName="password" class="form-control" />
+    <!-- prettier-ignore -->
+    <div *ngIf="(f_register.password.touched && f_register.password.invalid) || (submitted == true && f_register.password.invalid)">
+      <div *ngIf="f_register.password.errors.required">
+        Password is required.
+      </div>
+    </div>
+
+    <label for="rePassword">Retype your password</label>
+    <input type="text" formControlName="rePassword" class="form-control" />
+    <!-- prettier-ignore -->
+    <div *ngIf="(f_register.rePassword.touched && f_register.rePassword.invalid) || (submitted == true && f_register.rePassword.invalid)">
+      <div *ngIf="f_register.rePassword.errors.required">
+        Retyping your password is required.
+      </div>
+    </div>
+  </div>
+
+  <button class="btn_register" type="submit">
+    Register
+  </button>
+</form>
