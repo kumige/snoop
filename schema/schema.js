@@ -24,6 +24,7 @@ const bcrypt = require("bcrypt");
 const saltRound = 12;
 
 //const authController = require('../controllers/authController');
+const registerValidation = require("../utils/registerValidation");
 const date = require("../utils/date");
 const answer = require("../models/answer");
 const profileInfo = require("../models/profileinfo");
@@ -442,33 +443,41 @@ const Mutation = new GraphQLObjectType({
         Displayname: { type: new GraphQLNonNull(GraphQLString) },
         Email: { type: new GraphQLNonNull(GraphQLString) },
         Password: { type: new GraphQLNonNull(GraphQLString) },
-        ProfileInfo: {
-          type: new GraphQLNonNull(profileInfoInput),
-        },
       },
       resolve: async (parent, args) => {
         try {
-          const hashedPass = await bcrypt.hash(args.Password, saltRound);
+          const valid = registerValidation.validation(
+            args.Username,
+            args.Displayname,
+            args.Email,
+            args.Password
+          );
 
-          let newProfile = new profileInfo(args.ProfileInfo);
+          if (valid.valid == true) {
+            const hashedPass = await bcrypt.hash(args.Password, saltRound);
 
-          const userWithHashAndProfile = {
-            ...args,
-            Password: hashedPass,
-            ProfileInfo: newProfile,
-            UserType: 0,
-          };
+            let newProfile = new profileInfo();
 
-          //console.log(userWithHashAndProfile.Password);
-          const newUser = new user(userWithHashAndProfile);
+            const userWithHashAndProfile = {
+              ...args,
+              Password: hashedPass,
+              ProfileInfo: newProfile,
+              UserType: 0,
+            };
 
-          // Filling the profile info
-          newProfile.UserID = newUser.id;
-          newProfile.Bio = "";
-          newProfile.AnsweredQuestionCount = 0;
+            //console.log(userWithHashAndProfile.Password);
+            const newUser = new user(userWithHashAndProfile);
 
-          await newProfile.save();
-          return await newUser.save();
+            // Filling the profile info
+            newProfile.UserID = newUser.id;
+            newProfile.Bio = "";
+            newProfile.AnsweredQuestionCount = 0;
+
+            await newProfile.save();
+            return await newUser.save();
+          } else {
+            throw new Error(valid.message);
+          }
         } catch (e) {
           throw new Error(e.message);
         }

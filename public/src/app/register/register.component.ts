@@ -35,7 +35,7 @@ export class RegisterComponent implements OnInit {
   private async register() {
     const query = {
       query: `mutation {
-        registerUser(Username: "${this.registerForm.controls.username.value}", Displayname: "${this.registerForm.controls.displayName.value}", Email: "${this.registerForm.controls.email.value}", Password: "${this.registerForm.controls.password.value}", ProfileInfo: {}) {
+        registerUser(Username: "${this.registerForm.controls.username.value}", Displayname: "${this.registerForm.controls.displayName.value}", Email: "${this.registerForm.controls.email.value}", Password: "${this.registerForm.controls.password.value}") {
           id
         }
       }
