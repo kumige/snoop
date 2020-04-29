@@ -2,15 +2,35 @@
 <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
   <div class="login_form">
     <label for="username">Username</label>
-    <input type="text" formControlName="username" />
+    <input type="text" formControlName="username" class="form-control" />
+
+    <div
+      *ngIf="
+        (f_login.username.touched && f_login.username.invalid) ||
+        (submitted == true && f_login.username.invalid)
+      "
+    >
+      <div *ngIf="f_login.username.errors.required">Username is required.</div>
+    </div>
 
     <label for="password">password</label>
-    <input type="text" formControlName="password" />
+    <input type="text" formControlName="password" class="form-control" />
+
+    <div
+      *ngIf="
+        (f_login.password.touched && f_login.password.invalid) ||
+        (submitted == true && f_login.password.invalid)
+      "
+    >
+      <div *ngIf="f_login.password.errors.required">Password is required.</div>
+    </div>
   </div>
+
   <button class="btn_login" type="submit">
     Login
   </button>
-  <div>
-    <label class="login_errorMsg"></label>
+
+  <div *ngIf="loginError == true">
+    <label class="login_errorMsg">Incorrect username or password</label>
   </div>
 </form>

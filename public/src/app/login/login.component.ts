@@ -9,18 +9,33 @@ import { FetchGqlService } from '../services/fetch-gql.service';
 })
 export class LoginComponent implements OnInit {
   loginForm = new FormGroup({
-    username: new FormControl(''),
-    password: new FormControl(''),
+    username: new FormControl('', [Validators.required]),
+    password: new FormControl('', [Validators.required]),
   });
   loginResult;
+  submitted = false;
+  loginError = false;
 
   constructor(private api: FetchGqlService) {}
 
   ngOnInit() {}
 
+  get f_login() {
+    return this.loginForm.controls;
+  }
+
   onSubmit() {
-    this.login();
-    console.log(this.loginForm.controls.password.value);
+    this.loginError = false;
+    this.submitted = true;
+    if (
+      this.loginForm.controls.username.status == 'INVALID' ||
+      this.loginForm.controls.password.status == 'INVALID'
+    ) {
+      console.log('INVALID');
+    } else {
+      this.submitted = false;
+      this.login();
+    }
   }
 
   private async login() {
@@ -35,7 +50,13 @@ export class LoginComponent implements OnInit {
     try {
       this.loginResult = await this.api.fetchGraphql(query);
       console.log(this.loginResult);
-      localStorage.setItem('token', this.loginResult.login.token);
+      if (this.loginResult.login == null) {
+        console.log('wrong username / password');
+        this.loginError = true;
+      } else {
+        localStorage.setItem('token', this.loginResult.login.token);
+        // TODO: REDIRECT
+      }
     } catch (e) {
       console.log('error', e.message);
     }
