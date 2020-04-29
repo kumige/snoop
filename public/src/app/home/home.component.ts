@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FetchGqlService } from '../services/fetch-gql.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -75,10 +76,14 @@ export class HomeComponent implements OnInit {
     `,
   };
 
-  constructor(private api: FetchGqlService) {}
+  constructor(private api: FetchGqlService, private router: Router) {}
 
   ngOnInit(): void {
     this.getQs();
+  }
+
+  redirectToUser(event) {
+    this.router.navigate([`./user/${event.target.id}`])
   }
 
   private async getQs() {

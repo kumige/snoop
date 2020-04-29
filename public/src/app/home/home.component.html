@@ -8,7 +8,10 @@
                         <div class="horizontal">
                             <img class="profilePicture" src="{{ uploadsUrl }}PagChomp.png" alt="Profile image">
                             <div class="vertical">
-                                <span class="qDisplayname">{{ q.Question.Sender.Displayname }} asked:</span> 
+                                <div>
+                                    <span id="{{ q.Question.Sender.Username }}" class="qDisplayname" (click)="redirectToUser($event)">{{ q.Question.Sender.Displayname }}</span> 
+                                    <span> asked:</span> 
+                                </div>
                                 <span>{{ q.Question.DateTime.date }}</span> 
                             </div>
                         </div>
@@ -22,7 +25,10 @@
                         <div class="horizontal">
                             <img class="profilePicture" src="{{ uploadsUrl }}PagChomp.png" alt="Profile image">
                             <div class="vertical">
-                                <span class="qDisplayname">{{ q.Question.Receiver.Displayname }}'s answer: </span> 
+                                <div>
+                                    <span id="{{ q.Question.Receiver.Username }}" class="qDisplayname" (click)="redirectToUser($event)">{{ q.Question.Receiver.Displayname }}'s</span> 
+                                    <span> answer:</span> 
+                                </div>
                                 <span>{{ q.Question.DateTime.date }}</span> 
                             </div>
                         </div>
@@ -31,7 +37,7 @@
                         </div>
 
                         <div class="imgContainer">
-                            <img class="answerImage" src="{{ uploadsUrl }}{{  q.Image  }}" alt="Answer image">
+                            <img *ngIf="q.Image != null" class="answerImage" src="{{ uploadsUrl }}{{  q.Image  }}" alt="Answer image">
                         </div>
                     </div>
                     <mat-divider></mat-divider>

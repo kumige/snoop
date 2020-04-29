@@ -1,0 +1,57 @@
+<div class="page" *ngIf="questions.length != 0 else notfound">
+    <mat-card>
+        <mat-card-content id="feed">  
+
+            <ul>  
+                <li *ngFor="let q of questions; let i = index" [attr.data-index]="i" class="qWithA" id="i" (click)="openBox(i)">
+                    <div class="question">
+                        <div class="horizontal">
+                            <img class="profilePicture" src="{{ uploadsUrl }}PagChomp.png" alt="Profile image">
+                            <div class="vertical">
+                                <div>
+                                    <span id="{{ q.Sender.Username }}" class="qDisplayname" (click)="redirectToUser($event)">{{ q.Sender.Displayname }}</span> 
+                                    <span> asked:</span> 
+                                </div>
+                                <span>{{ q.DateTime.date }}</span> 
+                            </div>
+                        </div>
+                        <div class="textCenter">
+                            <span class="qText">{{ q.Text }}</span> 
+                        </div>
+                        <!---<button mat-raised-button type="button" color="primary" id="openBox" (click)="openBox($event)">Answer</button>--->
+
+                    </div>
+                    <form (ngSubmit)="sendAnswer($event)" id="askBox" >
+                        <mat-form-field appearance="outline" id="textInput">
+                            <mat-label>Answer</mat-label>
+                            <input matInput name="question" [formControl]="formControl" [errorStateMatcher]="matcher">
+                            <mat-error *ngIf="formControl.hasError('required')">
+                                Field is required
+                            </mat-error>
+                        </mat-form-field>
+                        <div id="buttonContainer">
+                            <button mat-button color="primary" type="button" id="sendButton" (click)="chooseFile()">
+                                <mat-icon>file_upload</mat-icon> 
+                            </button>
+                            <button mat-raised-button type="submit" color="primary" id="sendButton">Answer</button>
+                        </div>
+                        <span *ngIf="this.currentFile">{{ currentFile.name }}</span>
+                      </form> 
+                    <mat-divider></mat-divider>
+                </li>  
+                
+            </ul>  
+        </mat-card-content> 
+    </mat-card>
+    <input type="file" #fileUpload id="fileUpload" name="fileUpload" accept="image/*" style="display:none;" (change)="addFile($event)" />
+</div>
+
+<ng-template #notfound>
+    <mat-card>
+        <mat-card-content>
+            <div style="text-align: center;">
+                You have no unanswered questions.
+            </div>
+        </mat-card-content>
+    </mat-card>
+</ng-template>

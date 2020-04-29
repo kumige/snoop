@@ -45,13 +45,20 @@
     <mat-card>
         <mat-card-content id="feed">  
 
+            <h2 id="answerTitle">
+                {{ user.Displayname }}'s Answers
+            </h2>
+
             <ul>  
                 <li *ngFor="let q of answers" class="qWithA">
                     <div class="question">
                         <div class="horizontal">
                             <img class="profilePicture" src="{{ uploadsUrl }}PagChomp.png" alt="Profile image">
                             <div class="vertical">
-                                <span class="qDisplayname">{{ q.Sender.Displayname }} asked:</span> 
+                                <div>
+                                    <span id="{{ q.Sender.Username }}" class="qDisplayname" (click)="redirectToUser($event)">{{ q.Sender.Displayname }}</span> 
+                                    <span> asked:</span> 
+                                </div>
                                 <span>{{ q.DateTime.date }}</span> 
                             </div>
                         </div>
@@ -65,7 +72,10 @@
                         <div class="horizontal">
                             <img class="profilePicture" src="{{ uploadsUrl }}PagChomp.png" alt="Profile image">
                             <div class="vertical">
-                                <span class="qDisplayname">{{ q.Receiver.Displayname }}'s answer: </span> 
+                                <div>
+                                    <span id="{{ q.Sender.Username }}" class="qDisplayname" (click)="redirectToUser($event)">{{ q.Receiver.Displayname }}'s</span> 
+                                    <span> answer:</span> 
+                                </div>
                                 <span>{{ q.DateTime.date }}</span> 
                             </div>
                         </div>

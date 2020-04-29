@@ -22,7 +22,7 @@ import { FiletestComponent } from './filetest/filetest.component';
 import { LoginComponent } from './login/login.component';
 import { HomeComponent } from './home/home.component';
 import { UserComponent } from './user/user.component';
-
+import { ReceivedQuestionsComponent } from './received-questions/received-questions.component';
 
 
 @NgModule({
@@ -31,7 +31,8 @@ import { UserComponent } from './user/user.component';
     FiletestComponent,
     LoginComponent,
     HomeComponent,
-    UserComponent
+    UserComponent,
+    ReceivedQuestionsComponent,
   ],
   imports: [
     BrowserModule,
@@ -52,6 +53,6 @@ import { UserComponent } from './user/user.component';
     MatSnackBarModule
   ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
 export class AppModule { }

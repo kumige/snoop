@@ -207,6 +207,27 @@ const RootQuery = new GraphQLObjectType({
       },
     },
 
+    questionsForUser: {
+      type: new GraphQLList(questionType),
+      description: "Get unanswered questions of a user",
+      args: {
+        id: { type: GraphQLID },
+      },
+      resolve: async (parent, args) => {
+        const allQs = await question.find({ Receiver: args.id });
+        console.log(allQs)
+        const qsNoAnswers = [];
+
+        allQs.forEach((q) => {
+          if (q.Answer == undefined) {
+            qsNoAnswers.push(q);
+          }
+        });
+
+        return qsNoAnswers;
+      },
+    },
+
     qWithA: {
       type: new GraphQLList(answerType),
       description: "Get questions with an answer.",
@@ -233,23 +254,19 @@ const RootQuery = new GraphQLObjectType({
         UserID: { type: GraphQLID },
       },
       resolve: async (parent, args) => {
-        
         const questions = await question
           .find({ Receiver: args.UserID })
           .skip(args.start)
           .limit(args.limit);
 
-          console.log(questions)
+        let qList = [];
 
-        let qList = []
-
-        questions.forEach(singleQ => {
-          if(singleQ.Answer != undefined){
-            qList.push(singleQ)
+        questions.forEach((singleQ) => {
+          if (singleQ.Answer != undefined) {
+            qList.push(singleQ);
           }
-        })
+        });
 
-        console.log(qList)
         return qList;
       },
     },
@@ -445,6 +462,8 @@ const Mutation = new GraphQLObjectType({
             Text: args.Text,
             DateTime: date.now(),
           });
+
+          console.log(args)
 
           if (args.Image != undefined) {
             const image = args.Image;

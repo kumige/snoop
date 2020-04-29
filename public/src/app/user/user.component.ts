@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FetchGqlService } from '../services/fetch-gql.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   FormControl,
   FormGroupDirective,
@@ -54,7 +54,8 @@ export class UserComponent implements OnInit {
   constructor(
     private api: FetchGqlService,
     private route: ActivatedRoute,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -62,6 +63,10 @@ export class UserComponent implements OnInit {
       this.username = params.username;
       this.getUserData();
     });
+  }
+
+  redirectToUser(event) {
+    this.router.navigate([`./user/${event.target.id}`])
   }
 
   async getUserData() {
@@ -157,7 +162,7 @@ export class UserComponent implements OnInit {
 
   async sendQuestion(event) {
     const question = event.target.question.value;
-    console.log(question);
+    console.log(event.target);
     this.formControl.reset();
     this.formControl.markAsPristine();
     this.formControl.markAsUntouched();
