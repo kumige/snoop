@@ -34,6 +34,7 @@ export class RegisterComponent implements OnInit {
   });
   submitted = false;
   registerResult;
+  unexpectedError = false;
 
   constructor(private api: FetchGqlService) {}
 
@@ -43,12 +44,17 @@ export class RegisterComponent implements OnInit {
     return this.registerForm.controls;
   }
 
+  // prettier-ignore
   onSubmit() {
+    this.submitted = true;
     console.log('Submitting registering ' + this.registerForm.valid);
     console.log(this.registerForm.controls);
-
-    if (this.registerForm.valid) {
-      this.register();
+    if (this.registerForm.controls.password.value === this.registerForm.controls.rePassword.value) {
+      if (this.registerForm.valid) {
+        this.register();
+      }
+    } else {
+      console.log('Different passwords');
     }
   }
 
@@ -65,6 +71,10 @@ export class RegisterComponent implements OnInit {
     try {
       this.registerResult = await this.api.fetchGraphql(query);
       console.log(this.registerResult);
+      if (this.registerResult.registerUser == null) {
+        this.unexpectedError = true;
+        console.log('Unexpected error');
+      }
     } catch (e) {
       console.log('Error', e.message);
     }
