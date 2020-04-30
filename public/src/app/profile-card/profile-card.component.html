@@ -1,0 +1,13 @@
+<mat-card id="profileCard">
+    <mat-card-content id="profileInfo">
+        <img class="profilePicture" src="{{ uploadsUrl }}{{ userData.ProfileInfo.ProfilePicture }}" alt="Profile image">
+        <span id="{{ userData.Username }}" (click)="redirectToUser($event)" class="displayName">{{ userData.Displayname }}</span>
+        <div>
+            <span class="follow">Followers: {{ userData.ProfileInfo.Followers.length }}</span>
+            <span class="follow">Following: {{ userData.ProfileInfo.Following.length }}</span>
+        </div>
+        
+        <span>Answers: {{ userData.ProfileInfo.AnsweredQuestionCount }}</span>
+        <span class="bio">{{ userData.ProfileInfo.Bio }}</span>
+    </mat-card-content>
+</mat-card>

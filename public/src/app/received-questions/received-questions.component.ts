@@ -233,7 +233,6 @@ export class ReceivedQuestionsComponent implements OnInit {
       const form = li.querySelector('form');
       form.style.display = 'none';
       this.chevronToggle(li);
-
     }
 
     // Box toggle

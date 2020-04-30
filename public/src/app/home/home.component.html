@@ -1,6 +1,9 @@
-<div class="page">
+<div class="page mat-app-background">
+    <div class="placeholder"></div>
     <mat-card>
         <mat-card-content id="feed">  
+            <h2 style="margin-bottom: 8px;">Feed</h2>
+            <mat-divider></mat-divider>
 
             <ul>  
                 <li *ngFor="let q of questions" class="qWithA">
@@ -48,6 +51,8 @@
 
     
         </mat-card-content> 
+
     </mat-card>
-    
+    <ng-template #dynamic id="sideProfile"></ng-template>
+
 </div>

@@ -23,6 +23,8 @@ import { LoginComponent } from './login/login.component';
 import { HomeComponent } from './home/home.component';
 import { UserComponent } from './user/user.component';
 import { ReceivedQuestionsComponent } from './received-questions/received-questions.component';
+import { ProfileCardComponent } from './profile-card/profile-card.component';
+import { DynamicLoaderService } from './services/dynamic-loader.service';
 
 
 @NgModule({
@@ -33,6 +35,7 @@ import { ReceivedQuestionsComponent } from './received-questions/received-questi
     HomeComponent,
     UserComponent,
     ReceivedQuestionsComponent,
+    ProfileCardComponent,
   ],
   imports: [
     BrowserModule,
@@ -52,7 +55,8 @@ import { ReceivedQuestionsComponent } from './received-questions/received-questi
     ReactiveFormsModule,
     MatSnackBarModule
   ],
-  providers: [],
+  providers: [DynamicLoaderService],
   bootstrap: [AppComponent],
+  entryComponents: [ProfileCardComponent]
 })
 export class AppModule { }

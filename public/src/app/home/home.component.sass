@@ -5,10 +5,12 @@ li, ul
 .page
     display: flex
     justify-content: center
-    align-items: center 
 
 .feed
     border: 1px #b0b0b0
+
+.placeholder
+    width: 252px
     
 .answerImage
     object-fit: contain
@@ -46,6 +48,8 @@ li, ul
 
         .qDisplayname
             cursor: pointer
+            &:hover
+                text-decoration: underline
             
         .imgContainer
             width: 100%
@@ -69,5 +73,10 @@ li, ul
 
         .vertical
             display: flex
-            flex-flow: column
-            
+            flex-flow: column          
+
+#sideProfile
+    display: flex
+    justify-content: center
+    align-items: center 
+    margin: 32px
