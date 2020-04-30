@@ -17,8 +17,9 @@ import { MatListModule } from '@angular/material/list';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatMenuModule } from '@angular/material/menu';
 
-import { FiletestComponent } from './filetest/filetest.component';
 import { LoginComponent } from './login/login.component';
 import { HomeComponent } from './home/home.component';
 import { UserComponent } from './user/user.component';
@@ -27,10 +28,10 @@ import { ProfileCardComponent } from './profile-card/profile-card.component';
 import { DynamicLoaderService } from './services/dynamic-loader.service';
 
 
+
 @NgModule({
   declarations: [
     AppComponent,
-    FiletestComponent,
     LoginComponent,
     HomeComponent,
     UserComponent,
@@ -53,7 +54,9 @@ import { DynamicLoaderService } from './services/dynamic-loader.service';
     MatFormFieldModule,
     MatInputModule,
     ReactiveFormsModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatAutocompleteModule,
+    MatMenuModule,
   ],
   providers: [DynamicLoaderService],
   bootstrap: [AppComponent],
