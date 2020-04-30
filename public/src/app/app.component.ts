@@ -52,7 +52,7 @@ export class AppComponent implements OnInit {
       };
       const results = await this.api.fetchGraphql(query);
       this.options = results.searchUser;
-    }
+    } 
   }
 
   redirectToUser(user) {

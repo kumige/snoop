@@ -1,4 +1,4 @@
-<div class="page mat-app-background layoutFill" layout *ngIf="user != null else notfound">
+<div class="page mat-app-background" *ngIf="user != null else notfound">
     <mat-card>
         <mat-card-content id="profile">  
             <div id="profileVerticalContainer">
@@ -93,7 +93,7 @@
 
         </mat-card-content> 
     </mat-card>
-    
+    <div></div>
 </div>
 
 <ng-template #notfound>
