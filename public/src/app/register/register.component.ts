@@ -6,6 +6,7 @@ import {
   ValidatorFn,
 } from '@angular/forms';
 import { FetchGqlService } from '../services/fetch-gql.service';
+import { checkCharacters } from './customValidators';
 
 @Component({
   selector: 'app-register',
@@ -17,10 +18,12 @@ export class RegisterComponent implements OnInit {
     username: new FormControl('', [
       Validators.required,
       Validators.minLength(5),
+      checkCharacters.illegalCharacters,
     ]),
     displayName: new FormControl('', [
       Validators.required,
       Validators.minLength(3),
+      checkCharacters.illegalCharacters,
     ]),
     email: new FormControl('', [Validators.required, Validators.email]),
     password: new FormControl('', [
@@ -74,6 +77,9 @@ export class RegisterComponent implements OnInit {
       if (this.registerResult.registerUser == null) {
         this.unexpectedError = true;
         console.log('Unexpected error');
+      } else {
+        this.unexpectedError = false;
+        //TODO redirect
       }
     } catch (e) {
       console.log('Error', e.message);
