@@ -3,7 +3,7 @@
         <mat-card-content id="feed">  
 
             <ul>  
-                <li *ngFor="let q of questions; let i = index" [attr.data-index]="i" class="qWithA" id="i" (click)="openBox(i)">
+                <li *ngFor="let q of questions; let i = index" [attr.data-index]="i" class="qWithA" id="i" >
                     <div class="question">
                         <div class="horizontal">
                             <img class="profilePicture" src="{{ uploadsUrl }}PagChomp.png" alt="Profile image">
@@ -36,7 +36,16 @@
                             <button mat-raised-button type="submit" color="primary" id="sendButton">Answer</button>
                         </div>
                         <span *ngIf="this.currentFile">{{ currentFile.name }}</span>
-                      </form> 
+                      </form>
+                      <div class="centerButton">
+                        <button id="expandMore" mat-button color="accent" type="button" (click)="openBox(i)" style="display: flex;">
+                            <mat-icon>expand_more</mat-icon>
+                        </button>
+                        <button id="expandLess" mat-button color="accent" type="button" (click)="openBox(i)">
+                            <mat-icon>expand_less</mat-icon>
+                        </button>
+                      </div>
+                      
                     <mat-divider></mat-divider>
                 </li>  
                 

@@ -200,7 +200,7 @@ export class ReceivedQuestionsComponent implements OnInit {
     fd.append('file', this.file, this.file.name);
 
     const res = this.http.post(this.gqlUrl, fd).subscribe();
-    
+
     if (res != undefined) {
       let snackBarRef = this.snackBar.open('Answer Sent!', 'Close', {
         duration: 3000,
@@ -221,24 +221,44 @@ export class ReceivedQuestionsComponent implements OnInit {
   openBox(id) {
     const li = document.querySelector(`li[data-index="${id}"]`);
     const form = li.querySelector('form');
+    const butt = li.querySelector(`.centerButton`);
+    //console.log(butt.querySelector(`button`))
+    console.log(li.querySelector('#expandMore'));
 
+    // Check if another box is open and close it
     if (this.boxIsOpen == true && this.currentBox != id) {
-      this.file = undefined
+      this.file = undefined;
       this.boxIsOpen = true;
       const li = document.querySelector(`li[data-index="${this.currentBox}"]`);
       const form = li.querySelector('form');
       form.style.display = 'none';
+      this.chevronToggle(li);
+
     }
 
+    // Box toggle
     if (form.style.display == 'flex') {
-      if (!this.boxIsOpen){
-        form.style.display = 'none';
-        this.boxIsOpen = false;
-      }
+      form.style.display = 'none';
+      this.boxIsOpen = false;
+      this.chevronToggle(li);
     } else {
       form.style.display = 'flex';
       this.boxIsOpen = true;
       this.currentBox = id;
+      this.chevronToggle(li);
+    }
+  }
+
+  chevronToggle(li) {
+    const expandMore = li.querySelector('#expandMore');
+    const expandLess = li.querySelector('#expandLess');
+
+    if (expandMore.style.display == 'flex') {
+      expandMore.style.display = 'none';
+      expandLess.style.display = 'flex';
+    } else {
+      expandMore.style.display = 'flex';
+      expandLess.style.display = 'none';
     }
   }
 }
