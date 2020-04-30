@@ -1,5 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import {
+  FormGroup,
+  FormControl,
+  Validators,
+  ValidatorFn,
+} from '@angular/forms';
 import { FetchGqlService } from '../services/fetch-gql.service';
 
 @Component({
@@ -9,11 +14,23 @@ import { FetchGqlService } from '../services/fetch-gql.service';
 })
 export class RegisterComponent implements OnInit {
   registerForm = new FormGroup({
-    username: new FormControl('', [Validators.required]),
-    displayName: new FormControl('', [Validators.required]),
-    email: new FormControl('', [Validators.required]),
-    password: new FormControl('', [Validators.required]),
-    rePassword: new FormControl('', [Validators.required]),
+    username: new FormControl('', [
+      Validators.required,
+      Validators.minLength(5),
+    ]),
+    displayName: new FormControl('', [
+      Validators.required,
+      Validators.minLength(3),
+    ]),
+    email: new FormControl('', [Validators.required, Validators.email]),
+    password: new FormControl('', [
+      Validators.required,
+      Validators.minLength(6),
+    ]),
+    rePassword: new FormControl('', [
+      Validators.required,
+      Validators.minLength(6),
+    ]),
   });
   submitted = false;
   registerResult;
@@ -27,16 +44,19 @@ export class RegisterComponent implements OnInit {
   }
 
   onSubmit() {
-    console.log('Submitting registering');
+    console.log('Submitting registering ' + this.registerForm.valid);
     console.log(this.registerForm.controls);
-    this.register();
+
+    if (this.registerForm.valid) {
+      this.register();
+    }
   }
 
   private async register() {
     const query = {
       query: `mutation {
         registerUser(Username: "${this.registerForm.controls.username.value}", Displayname: "${this.registerForm.controls.displayName.value}", Email: "${this.registerForm.controls.email.value}", Password: "${this.registerForm.controls.password.value}") {
-          id
+          Username
         }
       }
     `,

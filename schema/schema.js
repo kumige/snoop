@@ -446,6 +446,7 @@ const Mutation = new GraphQLObjectType({
       },
       resolve: async (parent, args) => {
         try {
+          // Gives all the register inputs for a function to check if they are valid
           const valid = registerValidation.validation(
             args.Username,
             args.Displayname,
@@ -453,6 +454,8 @@ const Mutation = new GraphQLObjectType({
             args.Password
           );
 
+          // If all the user inputs are valid, registers new user
+          // If all of the user inputs are not valid, throws an error saying what is wrong
           if (valid.valid == true) {
             const hashedPass = await bcrypt.hash(args.Password, saltRound);
 
@@ -476,6 +479,7 @@ const Mutation = new GraphQLObjectType({
             await newProfile.save();
             return await newUser.save();
           } else {
+            console.log("Unsuccessfull register: " + valid.message);
             throw new Error(valid.message);
           }
         } catch (e) {

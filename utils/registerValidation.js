@@ -41,8 +41,9 @@ const specialVariableCheck = (text) => {
   }
 };
 
+// Change this
 const validEmail = (email) => {
-  if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+  if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w)+$/.test(email)) {
     return true;
   }
 };
