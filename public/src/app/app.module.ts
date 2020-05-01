@@ -19,6 +19,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatDialogModule } from '@angular/material/dialog';
 
 import { LoginComponent } from './login/login.component';
 import { HomeComponent } from './home/home.component';
@@ -26,6 +27,7 @@ import { UserComponent } from './user/user.component';
 import { ReceivedQuestionsComponent } from './received-questions/received-questions.component';
 import { ProfileCardComponent } from './profile-card/profile-card.component';
 import { DynamicLoaderService } from './services/dynamic-loader.service';
+import { ImageDialogComponent } from './image-dialog/image-dialog.component';
 
 
 
@@ -37,6 +39,7 @@ import { DynamicLoaderService } from './services/dynamic-loader.service';
     UserComponent,
     ReceivedQuestionsComponent,
     ProfileCardComponent,
+    ImageDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -57,6 +60,7 @@ import { DynamicLoaderService } from './services/dynamic-loader.service';
     MatSnackBarModule,
     MatAutocompleteModule,
     MatMenuModule,
+    MatDialogModule
   ],
   providers: [DynamicLoaderService],
   bootstrap: [AppComponent],

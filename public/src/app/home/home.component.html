@@ -40,7 +40,7 @@
                         </div>
 
                         <div class="imgContainer">
-                            <img *ngIf="q.Image != null" class="answerImage" src="{{ uploadsUrl }}{{  q.Image  }}" alt="Answer image">
+                            <img *ngIf="q.Image != null" class="answerImage" src="{{ uploadsUrl }}tn{{  q.Image  }}" alt="Answer image" (click)="openDialog(q.Image)">
                         </div>
                     </div>
                     <mat-divider></mat-divider>

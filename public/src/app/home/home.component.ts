@@ -1,7 +1,16 @@
-import { Component, Inject, ViewChild, ViewContainerRef, OnInit, AfterViewInit } from '@angular/core';
+import {
+  Component,
+  Inject,
+  ViewChild,
+  ViewContainerRef,
+  OnInit,
+  AfterViewInit,
+} from '@angular/core';
 import { FetchGqlService } from '../services/fetch-gql.service';
 import { Router } from '@angular/router';
 import { DynamicLoaderService } from '../services/dynamic-loader.service';
+import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import { ImageDialogComponent } from '../image-dialog/image-dialog.component';
 
 @Component({
   selector: 'app-home',
@@ -10,15 +19,16 @@ import { DynamicLoaderService } from '../services/dynamic-loader.service';
 })
 export class HomeComponent implements OnInit, AfterViewInit {
   questions;
-  loaderService
+  loaderService;
 
   get uploadsUrl() {
     return 'http://localhost:3000/uploads/';
   }
 
-  @ViewChild('dynamic', { 
-    read: ViewContainerRef 
-  }) viewContainerRef: ViewContainerRef
+  @ViewChild('dynamic', {
+    read: ViewContainerRef,
+  })
+  viewContainerRef: ViewContainerRef;
 
   private query = {
     query: `
@@ -86,24 +96,30 @@ export class HomeComponent implements OnInit, AfterViewInit {
     private api: FetchGqlService,
     private router: Router,
     @Inject(DynamicLoaderService) service,
+    public dialog: MatDialog
   ) {
-    this.loaderService = service
+    this.loaderService = service;
   }
 
   ngOnInit(): void {
     this.getQs();
-    
   }
 
   // Load side profile card
   ngAfterViewInit(): void {
-    this.loaderService.setRootViewContainerRef(this.viewContainerRef)
-    this.loaderService.addDynamicComponent()
+    this.loaderService.setRootViewContainerRef(this.viewContainerRef);
+    this.loaderService.addDynamicComponent();
   }
 
   redirectToUser(event) {
-    console.log(event.target)
+    console.log(event.target);
     this.router.navigate([`./user/${event.target.id}`]);
+  }
+
+  openDialog(img) {
+    this.dialog.open(ImageDialogComponent, {
+      data: img
+    });
   }
 
   private async getQs() {

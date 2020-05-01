@@ -14,9 +14,6 @@ const {
   GraphQLScalarType,
 } = require("graphql");
 const GraphQLUpload = require("graphql-upload");
-const uniqueSlug = require("unique-slug");
-const fs = require("fs");
-const uploadURI = "C:/Users/Mikko/Desktop/snoop/uploads/";
 
 const authController = require("../controllers/authController");
 
@@ -25,6 +22,7 @@ const saltRound = 12;
 
 //const authController = require('../controllers/authController');
 const date = require("../utils/date");
+const fileHelper = require("../utils/savefile")
 const answer = require("../models/answer");
 const profileInfo = require("../models/profileinfo");
 const question = require("../models/question");
@@ -215,7 +213,6 @@ const RootQuery = new GraphQLObjectType({
       },
       resolve: async (parent, args) => {
         const allQs = await question.find({ Receiver: args.id });
-        console.log(allQs);
         const qsNoAnswers = [];
 
         allQs.forEach((q) => {
@@ -279,9 +276,9 @@ const RootQuery = new GraphQLObjectType({
       },
       resolve: async (parent, args) => {
         try {
-          const searchResults = []
-          
-          if(args.searchTerm != "" && typeof args.searchTerm === 'string') {
+          const searchResults = [];
+
+          if (args.searchTerm != "" && typeof args.searchTerm === "string") {
             const results = await user.find({
               Username: { $regex: `${args.searchTerm}`, $options: "i" },
               //Displayname: { $regex: `${args.searchTerm}`, $options: "i" },
@@ -289,7 +286,7 @@ const RootQuery = new GraphQLObjectType({
             searchResults.push(results);
           }
 
-          return searchResults[0]
+          return searchResults[0];
         } catch (e) {
           throw new Error(e.message);
         }
@@ -414,16 +411,6 @@ const RootQuery = new GraphQLObjectType({
   },
 });
 
-// Saves the image and returns the filename that will be saved to db
-const saveImage = async (image) => {
-  const fname = uniqueSlug() + ".jpg";
-  const path = `${uploadURI}${fname}`;
-  const stream = image.file.createReadStream();
-  stream.pipe(fs.createWriteStream(path));
-
-  return fname;
-};
-
 const Mutation = new GraphQLObjectType({
   name: "MutationType",
   fields: () => ({
@@ -490,7 +477,7 @@ const Mutation = new GraphQLObjectType({
 
           if (args.Image != undefined) {
             const image = args.Image;
-            newAnswer.Image = await saveImage(image);
+            newAnswer.Image = await fileHelper.saveImage(image);
           }
 
           const relatedQuestion = await question.findById(newAnswer.Question);
@@ -538,7 +525,7 @@ const Mutation = new GraphQLObjectType({
           const hashedPass = await bcrypt.hash(args.Password, saltRound);
 
           let newProfile = new profileInfo(args.ProfileInfo);
-          newProfile.ProfilePicture = "default.png"
+          newProfile.ProfilePicture = "default.png";
 
           const userWithHashAndProfile = {
             ...args,
