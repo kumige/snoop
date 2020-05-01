@@ -501,7 +501,11 @@ const Mutation = new GraphQLObjectType({
         try {
           const answerToDelete = await answer.findById(args.id);
           await question.findByIdAndDelete(answerToDelete.Question);
-          return await answer.findByIdAndDelete(args.id);
+          const res = await answer.findByIdAndDelete(args.id)
+          if (res.Image != null) {
+            fileHelper.deleteFile(res.Image)
+          }
+          return res
         } catch (e) {
           throw new Error(e.message);
         }

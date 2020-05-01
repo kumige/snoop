@@ -7,13 +7,21 @@
                     <div class="question">
                         <div class="horizontal">
                             <img class="profilePicture" src="{{ uploadsUrl }}PagChomp.png" alt="Profile image">
-                            <div class="vertical">
-                                <div>
-                                    <span id="{{ q.Sender.Username }}" class="qDisplayname" (click)="redirectToUser($event)">{{ q.Sender.Displayname }}</span> 
-                                    <span> asked:</span> 
+                            <div class="spaceBetween">
+                                <div class="vertical">
+                                    <div>
+                                        <span id="{{ q.Sender.Username }}" class="qDisplayname" (click)="redirectToUser($event)">{{ q.Sender.Displayname }}</span> 
+                                        <span> asked:</span> 
+                                    </div>
+                                    <span>{{ q.DateTime.date }}</span> 
                                 </div>
-                                <span>{{ q.DateTime.date }}</span> 
+                                <div>
+                                    <button mat-button (click)="deleteQuestion(i)">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                </div>
                             </div>
+                            
                         </div>
                         <div class="textCenter">
                             <span class="qText">{{ q.Text }}</span> 

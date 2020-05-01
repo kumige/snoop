@@ -2,31 +2,37 @@
   <h1>
     snoop
   </h1>
-  <button mat-button routerLink="/">Home</button>
-  <button mat-button routerLink="/login">Login</button>
-  <mat-form-field >
-    <mat-label></mat-label>
-    <input
-      type="text"
-      matInput
-      id="searchBar"
-      placeholder="Search users"
-      [formControl]="searchControl"
-      [matAutocomplete]="auto"
-      [ngModel]="searchTerm"
-      (ngModelChange)="searchTermChange($event)"
-    />
-    <mat-icon>search</mat-icon>
+  <div class="items">
+    <div>
+      <button  class="navButton" mat-button routerLink="/">Home</button>
+      <button class="navButton" mat-button routerLink="/login">Login</button>
+    </div>
 
-  </mat-form-field>
-  <mat-autocomplete
-    #auto="matAutocomplete"
-    (optionSelected)="redirectToUser($event.option.value)"
-  >
-    <mat-option *ngFor="let option of options" [value]="option">{{
-      option.Username
-    }}</mat-option>
-  </mat-autocomplete>
+    <div>
+      <mat-form-field>
+        <mat-label></mat-label>
+        <input
+          type="text"
+          matInput
+          id="searchBar"
+          placeholder="Search users"
+          [formControl]="searchControl"
+          [matAutocomplete]="auto"
+          [ngModel]="searchTerm"
+          (ngModelChange)="searchTermChange($event)"
+        />
+        <mat-icon>search</mat-icon>
+      </mat-form-field>
+      <mat-autocomplete
+        #auto="matAutocomplete"
+        (optionSelected)="redirectToUser($event.option.value)"
+      >
+        <mat-option *ngFor="let option of options" [value]="option">{{
+          option.Username
+        }}</mat-option>
+      </mat-autocomplete>
+    </div>
+  </div>
 </mat-toolbar>
 
 <router-outlet></router-outlet>

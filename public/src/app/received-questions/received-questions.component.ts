@@ -222,7 +222,6 @@ export class ReceivedQuestionsComponent implements OnInit {
     const li = document.querySelector(`li[data-index="${id}"]`);
     const form = li.querySelector('form');
     const butt = li.querySelector(`.centerButton`);
-    //console.log(butt.querySelector(`button`))
     console.log(li.querySelector('#expandMore'));
 
     // Check if another box is open and close it
@@ -259,5 +258,28 @@ export class ReceivedQuestionsComponent implements OnInit {
       expandMore.style.display = 'flex';
       expandLess.style.display = 'none';
     }
+  }
+
+  async deleteQuestion(i) {
+    console.log(this.questions, i)
+
+    const query = {
+      query: 
+      `
+      mutation{
+        deleteQuestion(id: "${this.questions[i].id}"){
+          id
+          Text
+          Favourites
+        }
+      }
+      `
+    }
+
+    const res = await this.api.fetchGraphql(query)
+    if (res != undefined) {
+      this.questions.splice(i, 1)
+    }
+
   }
 }

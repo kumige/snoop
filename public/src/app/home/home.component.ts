@@ -9,7 +9,7 @@ import {
 import { FetchGqlService } from '../services/fetch-gql.service';
 import { Router } from '@angular/router';
 import { DynamicLoaderService } from '../services/dynamic-loader.service';
-import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { ImageDialogComponent } from '../image-dialog/image-dialog.component';
 
 @Component({
@@ -125,6 +125,5 @@ export class HomeComponent implements OnInit, AfterViewInit {
   private async getQs() {
     this.questions = await this.api.fetchGraphql(this.query);
     this.questions = this.questions.qWithA;
-    console.log(this.questions);
   }
 }

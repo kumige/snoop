@@ -9,6 +9,8 @@ import {
 } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+import { ImageDialogComponent } from '../image-dialog/image-dialog.component';
 
 /** Error when invalid control is dirty, touched, or submitted. */
 export class MyErrorStateMatcher implements ErrorStateMatcher {
@@ -55,7 +57,8 @@ export class UserComponent implements OnInit {
     private api: FetchGqlService,
     private route: ActivatedRoute,
     private snackBar: MatSnackBar,
-    private router: Router
+    private router: Router,
+    public dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -189,6 +192,32 @@ export class UserComponent implements OnInit {
       let snackBarRef = this.snackBar.open('Question Sent!', 'Close', {
         duration: 3000,
       });
+    }
+  }
+
+  openDialog(img) {
+    this.dialog.open(ImageDialogComponent, {
+      data: img
+    });
+  }
+
+  async deleteAnswer(i) {
+    console.log(this.answers, i)
+
+    const query = {
+      query: 
+      `
+      mutation{
+        deleteAnswer(id: "${this.answers[i].Answer.id}"){
+          id
+        }
+      }
+      `
+    }
+
+    const res = await this.api.fetchGraphql(query)
+    if (res != undefined) {
+      this.answers.splice(i, 1)
     }
   }
 }
