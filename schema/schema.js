@@ -21,6 +21,7 @@ const bcrypt = require("bcrypt");
 const saltRound = 12;
 
 //const authController = require('../controllers/authController');
+const registerValidation = require("../utils/registerValidation");
 const date = require("../utils/date");
 const fileHelper = require("../utils/savefile");
 const answer = require("../models/answer");
@@ -521,6 +522,7 @@ const Mutation = new GraphQLObjectType({
       resolve: async (parent, args) => {
         try {
           const answerToDelete = await answer.findById(args.id);
+<<<<<<< HEAD
 
           // Delete related question
           const relatedQuestion = await question.findByIdAndDelete(
@@ -556,6 +558,13 @@ const Mutation = new GraphQLObjectType({
             fileHelper.deleteFile(res.Image);
           }
 
+=======
+          await question.findByIdAndDelete(answerToDelete.Question);
+          const res = await answer.findByIdAndDelete(args.id);
+          if (res.Image != null) {
+            fileHelper.deleteFile(res.Image);
+          }
+>>>>>>> 8196dcb3e97f8b4989c224a55a8d3527c06d9118
           return res;
         } catch (e) {
           throw new Error(e.message);
@@ -571,34 +580,46 @@ const Mutation = new GraphQLObjectType({
         Displayname: { type: new GraphQLNonNull(GraphQLString) },
         Email: { type: new GraphQLNonNull(GraphQLString) },
         Password: { type: new GraphQLNonNull(GraphQLString) },
-        ProfileInfo: {
-          type: new GraphQLNonNull(profileInfoInput),
-        },
       },
       resolve: async (parent, args) => {
         try {
-          const hashedPass = await bcrypt.hash(args.Password, saltRound);
+          // Gives all the register inputs for a function to check if they are valid
+          const valid = registerValidation.validation(
+            args.Username,
+            args.Displayname,
+            args.Email,
+            args.Password
+          );
 
-          let newProfile = new profileInfo(args.ProfileInfo);
-          newProfile.ProfilePicture = "default.png";
+          // If all the user inputs are valid, registers new user
+          // If all of the user inputs are not valid, throws an error saying what is wrong
+          if (valid.valid == true) {
+            const hashedPass = await bcrypt.hash(args.Password, saltRound);
 
-          const userWithHashAndProfile = {
-            ...args,
-            Password: hashedPass,
-            ProfileInfo: newProfile,
-            UserType: 0,
-          };
+            let newProfile = new profileInfo(args.ProfileInfo);
+            newProfile.ProfilePicture = "default.png";
 
-          //console.log(userWithHashAndProfile.Password);
-          const newUser = new user(userWithHashAndProfile);
+            const userWithHashAndProfile = {
+              ...args,
+              Password: hashedPass,
+              ProfileInfo: newProfile,
+              UserType: 0,
+            };
 
-          // Filling the profile info
-          newProfile.UserID = newUser.id;
-          newProfile.Bio = "";
-          newProfile.AnsweredQuestionCount = 0;
+            //console.log(userWithHashAndProfile.Password);
+            const newUser = new user(userWithHashAndProfile);
 
-          await newProfile.save();
-          return await newUser.save();
+            // Filling the profile info
+            newProfile.UserID = newUser.id;
+            newProfile.Bio = "";
+            newProfile.AnsweredQuestionCount = 0;
+
+            await newProfile.save();
+            return await newUser.save();
+          } else {
+            console.log("Unsuccessfull register: " + valid.message);
+            throw new Error(valid.message);
+          }
         } catch (e) {
           throw new Error(e.message);
         }

@@ -4,14 +4,13 @@ import { NgModule } from '@angular/core';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HttpClientModule } from '@angular/common/http';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
-import { MatProgressBarModule  } from '@angular/material/progress-bar';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatListModule } from '@angular/material/list';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -29,13 +28,15 @@ import { ProfileCardComponent } from './profile-card/profile-card.component';
 import { DynamicLoaderService } from './services/dynamic-loader.service';
 import { ImageDialogComponent } from './image-dialog/image-dialog.component';
 
-
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { RegisterComponent } from './register/register.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponent,
     HomeComponent,
+    RegisterComponent,
     UserComponent,
     ReceivedQuestionsComponent,
     ProfileCardComponent,
@@ -46,24 +47,26 @@ import { ImageDialogComponent } from './image-dialog/image-dialog.component';
     AppRoutingModule,
     HttpClientModule,
     BrowserAnimationsModule,
-    MatToolbarModule,  
-    MatIconModule,  
-    MatButtonModule,  
-    MatCardModule,  
+    MatToolbarModule,
+    MatIconModule,
+    MatButtonModule,
+    MatCardModule,
     MatProgressBarModule,
     MatDividerModule,
     MatListModule,
     FormsModule,
+    ReactiveFormsModule,
+    MatInputModule,
     MatFormFieldModule,
     MatInputModule,
     ReactiveFormsModule,
     MatSnackBarModule,
     MatAutocompleteModule,
     MatMenuModule,
-    MatDialogModule
+    MatDialogModule,
   ],
   providers: [DynamicLoaderService],
   bootstrap: [AppComponent],
-  entryComponents: [ProfileCardComponent]
+  entryComponents: [ProfileCardComponent],
 })
-export class AppModule { }
+export class AppModule {}
