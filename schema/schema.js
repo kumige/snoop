@@ -14,9 +14,6 @@ const {
   GraphQLScalarType,
 } = require("graphql");
 const GraphQLUpload = require("graphql-upload");
-const uniqueSlug = require("unique-slug");
-const fs = require("fs");
-const uploadURI = "C:/Users/Mikko/Desktop/snoop/uploads/";
 
 const authController = require("../controllers/authController");
 
@@ -26,6 +23,7 @@ const saltRound = 12;
 //const authController = require('../controllers/authController');
 const registerValidation = require("../utils/registerValidation");
 const date = require("../utils/date");
+const fileHelper = require("../utils/savefile");
 const answer = require("../models/answer");
 const profileInfo = require("../models/profileinfo");
 const question = require("../models/question");
@@ -96,7 +94,13 @@ const questionType = new GraphQLObjectType({
     Text: { type: GraphQLString },
     Favourites: { type: new GraphQLList(GraphQLID) },
     DateTime: { type: dateTimeType },
-    Answer: { type: answerType },
+    //Answer: { type: answerType },
+    Answer: {
+      type: answerType,
+      resolve(parent, args) {
+        return answer.findById(parent.Answer);
+      },
+    },
   }),
 });
 
@@ -142,12 +146,21 @@ const RootQuery = new GraphQLObjectType({
       },
     },
 
-    user: {
+    userById: {
       type: userType,
       description: "get user by id",
       args: { id: { type: GraphQLID } },
       resolve(parent, args) {
         return user.findById(args.id);
+      },
+    },
+
+    userByUsername: {
+      type: userType,
+      description: "get user by username",
+      args: { username: { type: GraphQLString } },
+      resolve(parent, args) {
+        return user.findOne({ Username: args.username });
       },
     },
 
@@ -193,9 +206,29 @@ const RootQuery = new GraphQLObjectType({
       },
     },
 
+    questionsForUser: {
+      type: new GraphQLList(questionType),
+      description: "Get unanswered questions of a user",
+      args: {
+        id: { type: GraphQLID },
+      },
+      resolve: async (parent, args) => {
+        const allQs = await question.find({ Receiver: args.id });
+        const qsNoAnswers = [];
+
+        allQs.forEach((q) => {
+          if (q.Answer == undefined) {
+            qsNoAnswers.push(q);
+          }
+        });
+
+        return qsNoAnswers;
+      },
+    },
+
     qWithA: {
       type: new GraphQLList(answerType),
-      description: "Get question with an answer by id.",
+      description: "Get questions with an answer.",
       args: {
         limit: { type: GraphQLInt, defaultValue: 10 },
         start: { type: GraphQLInt, defaultValue: 0 },
@@ -207,6 +240,57 @@ const RootQuery = new GraphQLObjectType({
           .limit(args.limit);
 
         return questions;
+      },
+    },
+
+    qWithAOfUser: {
+      type: new GraphQLList(questionType),
+      description: "Get questions with an answer.",
+      args: {
+        limit: { type: GraphQLInt, defaultValue: 10 },
+        start: { type: GraphQLInt, defaultValue: 0 },
+        UserID: { type: GraphQLID },
+      },
+      resolve: async (parent, args) => {
+        const questions = await question
+          .find({ Receiver: args.UserID })
+          .skip(args.start)
+          .limit(args.limit);
+
+        let qList = [];
+
+        questions.forEach((singleQ) => {
+          if (singleQ.Answer != undefined) {
+            qList.push(singleQ);
+          }
+        });
+
+        return qList;
+      },
+    },
+
+    searchUser: {
+      type: new GraphQLList(userType),
+      description: "add profile info",
+      args: {
+        searchTerm: { type: GraphQLString },
+      },
+      resolve: async (parent, args) => {
+        try {
+          const searchResults = [];
+
+          if (args.searchTerm != "" && typeof args.searchTerm === "string") {
+            const results = await user.find({
+              Username: { $regex: `${args.searchTerm}`, $options: "i" },
+              //Displayname: { $regex: `${args.searchTerm}`, $options: "i" },
+            });
+            searchResults.push(results);
+          }
+
+          return searchResults[0];
+        } catch (e) {
+          throw new Error(e.message);
+        }
       },
     },
 
@@ -328,16 +412,6 @@ const RootQuery = new GraphQLObjectType({
   },
 });
 
-// Saves the image and returns the filename that will be saved to db
-const saveImage = async (image) => {
-  const fname = uniqueSlug() + ".jpg";
-  const path = `${uploadURI}${fname}`;
-  const stream = image.file.createReadStream();
-  stream.pipe(fs.createWriteStream(path));
-
-  return fname;
-};
-
 const Mutation = new GraphQLObjectType({
   name: "MutationType",
   fields: () => ({
@@ -404,7 +478,7 @@ const Mutation = new GraphQLObjectType({
 
           if (args.Image != undefined) {
             const image = args.Image;
-            newAnswer.Image = await saveImage(image);
+            newAnswer.Image = await fileHelper.saveImage(image);
           }
 
           const relatedQuestion = await question.findById(newAnswer.Question);
@@ -428,7 +502,11 @@ const Mutation = new GraphQLObjectType({
         try {
           const answerToDelete = await answer.findById(args.id);
           await question.findByIdAndDelete(answerToDelete.Question);
-          return await answer.findByIdAndDelete(args.id);
+          const res = await answer.findByIdAndDelete(args.id);
+          if (res.Image != null) {
+            fileHelper.deleteFile(res.Image);
+          }
+          return res;
         } catch (e) {
           throw new Error(e.message);
         }
@@ -459,7 +537,8 @@ const Mutation = new GraphQLObjectType({
           if (valid.valid == true) {
             const hashedPass = await bcrypt.hash(args.Password, saltRound);
 
-            let newProfile = new profileInfo();
+            let newProfile = new profileInfo(args.ProfileInfo);
+            newProfile.ProfilePicture = "default.png";
 
             const userWithHashAndProfile = {
               ...args,

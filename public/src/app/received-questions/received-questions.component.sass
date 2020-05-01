@@ -5,12 +5,19 @@ li, ul
 .page
     display: flex
     justify-content: center
+    align-items: flex-start 
 
-.feed
-    border: 1px #b0b0b0
+.layoutFill 
+    margin: 0
+    width: 100%
+    min-height: 100%
+    height: 100%
 
-.placeholder
-    width: 252px
+#feed
+    width: 30rem
+    display: flex
+    justify-content: space-between
+    flex-flow: column
     
 .answerImage
     object-fit: contain
@@ -25,6 +32,47 @@ li, ul
     width: 36px
     height: 36px
     margin-right: 0.5em
+
+.centerButton
+        display: flex
+        justify-content: center
+        align-items: center
+
+.spaceBetween
+    width: 100%
+    display: flex
+    flex-flow: row
+    justify-content: space-between
+
+#expandLess
+    display: none
+    justify-content: center
+    align-items: center
+
+#expandMore
+    display: flex
+    justify-content: center
+    align-items: center
+
+#askBox
+    width: 30rem
+    display: none
+    flex-flow: column
+
+    #textInput
+        flex-grow: 2
+
+    #sendButton
+        height: 52px
+        margin-top: 3.5px
+        margin-bottom: 16px
+        flex-grow: 1
+
+    #buttonContainer
+        display: flex
+        justify-content: center
+
+    
 
 .qWithA
     margin-bottom: 16px
@@ -48,8 +96,6 @@ li, ul
 
         .qDisplayname
             cursor: pointer
-            &:hover
-                text-decoration: underline
             
         .imgContainer
             width: 100%
@@ -59,7 +105,6 @@ li, ul
             max-width: 480px
             max-height: 480px
             overflow: hidden
-            cursor: pointer
 
         .textCenter
             width: 100%
@@ -69,15 +114,10 @@ li, ul
             overflow-wrap: anywhere
         
         .horizontal
+            width: 100%
             display: flex
             flex-flow: row
 
         .vertical
             display: flex
-            flex-flow: column          
-
-#sideProfile
-    display: flex
-    justify-content: center
-    align-items: center 
-    margin: 32px
+            flex-flow: column
