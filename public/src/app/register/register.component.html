@@ -10,7 +10,9 @@
           <mat-error *ngIf="(f_register.username.touched && f_register.username.invalid) || (submitted == true && f_register.username.invalid)">
             <mat-error *ngIf="f_register.username.errors.required">Username is required.</mat-error>
             <mat-error *ngIf="f_register.username.errors.minlength">Username has to be atleast 5 characters long.</mat-error>
-            <mat-error *ngIf="f_register.username.errors.illegalCharacters && !f_register.username.errors.minlength">Username can not contain illegal characters.</mat-error>
+            <mat-error *ngIf="f_register.username.errors.maxlength">Username can not be longer than 20 characters.</mat-error>
+            <mat-error *ngIf="f_register.username.errors.hasSpaces && !f_register.username.errors.minlength && !f_register.username.errors.maxlength">Username can not contain spaces.</mat-error>
+            <mat-error *ngIf="f_register.username.errors.illegalCharacters && !f_register.username.errors.minlength && !f_register.username.errors.maxlength && !f_register.username.errors.hasSpaces">Username can not contain illegal characters.</mat-error>
           </mat-error>
         </mat-form-field>
 
@@ -21,7 +23,9 @@
           <mat-error *ngIf="(f_register.displayName.touched && f_register.displayName.invalid) || (submitted == true && f_register.displayName.invalid)">
             <mat-error *ngIf="f_register.displayName.errors.required">Display name is required.</mat-error>
             <mat-error *ngIf="f_register.displayName.errors.minlength">Display name has to be atleast 3 characters long.</mat-error>
-            <mat-error *ngIf="f_register.displayName.errors.illegalCharacters && !f_register.displayName.errors.minlength">Display name can not contain illegal characters.</mat-error>
+            <mat-error *ngIf="f_register.displayName.errors.maxlength">Display name can not be longer than 20 characters.</mat-error>
+            <mat-error *ngIf="f_register.displayName.errors.hasSpaces && !f_register.displayName.errors.minlength && !f_register.displayName.errors.maxlength">Display name can not contain spaces.</mat-error>
+            <mat-error *ngIf="f_register.displayName.errors.illegalCharacters && !f_register.displayName.errors.minlength && !f_register.displayName.errors.maxlength && !f_register.displayName.errors.hasSpaces">Display name can not contain illegal characters.</mat-error>
           </mat-error>
         </mat-form-field>
 
@@ -32,6 +36,8 @@
           <mat-error *ngIf="(f_register.email.touched && f_register.email.invalid) || (submitted == true && f_register.email.invalid)">
             <mat-error *ngIf="f_register.email.errors.required">Email is required.</mat-error>
             <mat-error *ngIf="f_register.email.errors.email">Please, enter valid email address.</mat-error>
+            <mat-error *ngIf="f_register.email.errors.maxlength && !f_register.email.errors.email">Email can not be longer than 30 characters.</mat-error>
+            <mat-error *ngIf="f_register.email.errors.hasSpaces && !f_register.email.errors.minlength && !f_register.email.errors.maxlength && !f_register.email.errors.email">Email can not contain spaces.</mat-error>
           </mat-error>
         </mat-form-field>
 
@@ -42,6 +48,7 @@
           <mat-error *ngIf="(f_register.password.touched && f_register.password.invalid) || (submitted == true && f_register.password.invalid)">
             <mat-error *ngIf="f_register.password.errors.required">Password is required.</mat-error>
             <mat-error *ngIf="f_register.password.errors.minlength">Password has to be atleast 6 characters long.</mat-error>
+            <mat-error *ngIf="f_register.password.errors.maxlength">Password can not be longer than 20 characters.</mat-error>
           </mat-error>
         </mat-form-field>
 
@@ -52,6 +59,7 @@
           <mat-error *ngIf="(f_register.rePassword.touched && f_register.rePassword.invalid) || (submitted == true && f_register.rePassword.invalid)">
             <mat-error *ngIf="f_register.rePassword.errors.required">Retyping your password is required.</mat-error>
             <mat-error *ngIf="f_register.rePassword.errors.minlength">Password has to be atleast 6 characters long.</mat-error>
+            <mat-error *ngIf="f_register.rePassword.errors.maxlength">Password can not be longer than 20 characters.</mat-error>
           </mat-error>
         </mat-form-field>
 

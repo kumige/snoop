@@ -15,4 +15,11 @@ export class customValidator {
     }
     return null;
   }
+
+  static checkForSpaces(control: AbstractControl): ValidationErrors | null {
+    if (control.value.indexOf(' ') >= 0) {
+      return { hasSpaces: true };
+    }
+    return null;
+  }
 }

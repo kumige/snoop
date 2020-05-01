@@ -18,21 +18,32 @@ export class RegisterComponent implements OnInit {
     username: new FormControl('', [
       Validators.required,
       Validators.minLength(5),
+      Validators.maxLength(20),
       customValidator.illegalCharacters,
+      customValidator.checkForSpaces,
     ]),
     displayName: new FormControl('', [
       Validators.required,
       Validators.minLength(3),
+      Validators.maxLength(20),
       customValidator.illegalCharacters,
+      customValidator.checkForSpaces,
     ]),
-    email: new FormControl('', [Validators.required, Validators.email]),
+    email: new FormControl('', [
+      Validators.required,
+      Validators.email,
+      Validators.maxLength(30),
+      customValidator.checkForSpaces,
+    ]),
     password: new FormControl('', [
       Validators.required,
       Validators.minLength(6),
+      Validators.maxLength(20),
     ]),
     rePassword: new FormControl('', [
       Validators.required,
       Validators.minLength(6),
+      Validators.maxLength(20),
     ]),
   });
   submitted = false;
