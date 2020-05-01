@@ -522,7 +522,6 @@ const Mutation = new GraphQLObjectType({
       resolve: async (parent, args) => {
         try {
           const answerToDelete = await answer.findById(args.id);
-<<<<<<< HEAD
 
           // Delete related question
           const relatedQuestion = await question.findByIdAndDelete(
@@ -558,13 +557,6 @@ const Mutation = new GraphQLObjectType({
             fileHelper.deleteFile(res.Image);
           }
 
-=======
-          await question.findByIdAndDelete(answerToDelete.Question);
-          const res = await answer.findByIdAndDelete(args.id);
-          if (res.Image != null) {
-            fileHelper.deleteFile(res.Image);
-          }
->>>>>>> 8196dcb3e97f8b4989c224a55a8d3527c06d9118
           return res;
         } catch (e) {
           throw new Error(e.message);
