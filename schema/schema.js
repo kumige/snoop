@@ -22,7 +22,7 @@ const saltRound = 12;
 
 //const authController = require('../controllers/authController');
 const date = require("../utils/date");
-const fileHelper = require("../utils/savefile")
+const fileHelper = require("../utils/savefile");
 const answer = require("../models/answer");
 const profileInfo = require("../models/profileinfo");
 const question = require("../models/question");
@@ -469,8 +469,6 @@ const Mutation = new GraphQLObjectType({
         try {
           const newAnswer = new answer({
             Question: args.QuestionID,
-            Sender: args.Sender,
-            Receiver: args.Receiver,
             Text: args.Text,
             DateTime: date.now(),
           });
@@ -484,7 +482,30 @@ const Mutation = new GraphQLObjectType({
           relatedQuestion.Answer = newAnswer._id;
 
           relatedQuestion.save();
-          return await newAnswer.save();
+          const aToReturn = await newAnswer.save();
+
+          // Update answered questions count
+          let answerCount = 0;
+          await question.find(
+            {
+              Receiver: relatedQuestion.Receiver,
+            },
+            (err, questions) => {
+              console.log(questions);
+              questions.forEach((q) => {
+                if (q.Answer != undefined) {
+                  answerCount += 1;
+                }
+              });
+            }
+          );
+          let nProfile = await profileInfo.find({
+            UserID: relatedQuestion.Receiver,
+          });
+          nProfile[0].AnsweredQuestionCount = answerCount;
+          nProfile[0].save();
+
+          return aToReturn;
         } catch (error) {
           console.log(error.message);
         }
@@ -500,12 +521,42 @@ const Mutation = new GraphQLObjectType({
       resolve: async (parent, args) => {
         try {
           const answerToDelete = await answer.findById(args.id);
-          await question.findByIdAndDelete(answerToDelete.Question);
-          const res = await answer.findByIdAndDelete(args.id)
+
+          // Delete related question
+          const relatedQuestion = await question.findByIdAndDelete(
+            answerToDelete.Question
+          );
+
+          const res = await answer.findByIdAndDelete(args.id);
+
+          // Update answered questions count
+          let answerCount = 0;
+          await question.find(
+            {
+              Receiver: relatedQuestion.Receiver,
+            },
+            (err, questions) => {
+              console.log(questions);
+
+              questions.forEach((q) => {
+                if (q.Answer != undefined) {
+                  answerCount += 1;
+                }
+              });
+            }
+          );
+          let nProfile = await profileInfo.find({
+            UserID: relatedQuestion.Receiver,
+          });
+          nProfile[0].AnsweredQuestionCount = answerCount;
+          nProfile[0].save();
+
+          // Delete image
           if (res.Image != null) {
-            fileHelper.deleteFile(res.Image)
+            fileHelper.deleteFile(res.Image);
           }
-          return res
+
+          return res;
         } catch (e) {
           throw new Error(e.message);
         }

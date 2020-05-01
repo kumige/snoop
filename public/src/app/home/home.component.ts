@@ -125,5 +125,6 @@ export class HomeComponent implements OnInit, AfterViewInit {
   private async getQs() {
     this.questions = await this.api.fetchGraphql(this.query);
     this.questions = this.questions.qWithA;
+    console.log(this.questions)
   }
 }
