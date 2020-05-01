@@ -215,7 +215,7 @@ const RootQuery = new GraphQLObjectType({
       },
       resolve: async (parent, args) => {
         const allQs = await question.find({ Receiver: args.id });
-        console.log(allQs)
+        console.log(allQs);
         const qsNoAnswers = [];
 
         allQs.forEach((q) => {
@@ -268,6 +268,31 @@ const RootQuery = new GraphQLObjectType({
         });
 
         return qList;
+      },
+    },
+
+    searchUser: {
+      type: new GraphQLList(userType),
+      description: "add profile info",
+      args: {
+        searchTerm: { type: GraphQLString },
+      },
+      resolve: async (parent, args) => {
+        try {
+          const searchResults = []
+          
+          if(args.searchTerm != "" && typeof args.searchTerm === 'string') {
+            const results = await user.find({
+              Username: { $regex: `${args.searchTerm}`, $options: "i" },
+              //Displayname: { $regex: `${args.searchTerm}`, $options: "i" },
+            });
+            searchResults.push(results);
+          }
+
+          return searchResults[0]
+        } catch (e) {
+          throw new Error(e.message);
+        }
       },
     },
 
@@ -463,8 +488,6 @@ const Mutation = new GraphQLObjectType({
             DateTime: date.now(),
           });
 
-          console.log(args)
-
           if (args.Image != undefined) {
             const image = args.Image;
             newAnswer.Image = await saveImage(image);
@@ -515,6 +538,7 @@ const Mutation = new GraphQLObjectType({
           const hashedPass = await bcrypt.hash(args.Password, saltRound);
 
           let newProfile = new profileInfo(args.ProfileInfo);
+          newProfile.ProfilePicture = "default.png"
 
           const userWithHashAndProfile = {
             ...args,
