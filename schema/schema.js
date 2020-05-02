@@ -702,6 +702,26 @@ const Mutation = new GraphQLObjectType({
       },
     },
 
+    modifyDisplayName: {
+      type: userType,
+      description: "modify display name",
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        Displayname: { type: GraphQLString },
+      },
+      resolve: async (parent, args, { req, res }) => {
+        try {
+          await authController.checkAuth(req, res);
+
+          return await user.findByIdAndUpdate(args.id, args.Displayname, {
+            new: true,
+          });
+        } catch (e) {
+          throw new Error(e.message);
+        }
+      },
+    },
+
     addProfileInfo: {
       type: profileInfoType,
       description: "add profile info",
