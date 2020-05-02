@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { FetchGqlService } from '../services/fetch-gql.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
@@ -11,6 +11,7 @@ import { ErrorStateMatcher } from '@angular/material/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ImageDialogComponent } from '../image-dialog/image-dialog.component';
+import { Observable } from 'rxjs';
 
 /** Error when invalid control is dirty, touched, or submitted. */
 export class MyErrorStateMatcher implements ErrorStateMatcher {
@@ -59,7 +60,9 @@ export class UserComponent implements OnInit {
     private snackBar: MatSnackBar,
     private router: Router,
     public dialog: MatDialog
-  ) {}
+  ) {
+    this.router.routeReuseStrategy.shouldReuseRoute = () => false
+  }
 
   ngOnInit(): void {
     this.route.params.subscribe((params) => {
@@ -69,7 +72,7 @@ export class UserComponent implements OnInit {
   }
 
   redirectToUser(event) {
-    this.router.navigate([`./user/${event.target.id}`])
+    this.router.navigate([`./user/${event.target.id}`]);
   }
 
   async getUserData() {
@@ -99,8 +102,16 @@ export class UserComponent implements OnInit {
     };
     this.userData = await this.api.fetchGraphql(query);
     this.userData = this.userData.userByUsername;
+
+    console.log(this.userData)
+    this.userData.ProfileInfo.Followers.forEach((userID) => {
+      if (userID == '5ea572a26354f617884901bd') {
+        // TODO: Change to logged in user
+        this.toggleFollowButton();
+      }
+    });
+
     this.loadAnswers(); // TODO: change query to work with username so it doesn't have to wait for the query above to complete
-    console.log(this.userData);
   }
 
   async loadAnswers() {
@@ -165,17 +176,15 @@ export class UserComponent implements OnInit {
 
   async sendQuestion(event) {
     const question = event.target.question.value;
-    console.log(event.target);
     this.formControl.reset();
     this.formControl.markAsPristine();
     this.formControl.markAsUntouched();
     this.formControl.updateValueAndValidity();
 
-    // TODO: REPLACE SENDER WITH LOGGED IN USER
     const query = {
       query: `
       mutation{
-        addQuestion(Sender: "5ea53bd3b6b8370d781a4595", Receiver: "${this.userData.id}", Text: "${question}"){ 
+        addQuestion(Receiver: "${this.userData.id}", Text: "${question}"){ 
           id
           Text
           DateTime {
@@ -188,8 +197,13 @@ export class UserComponent implements OnInit {
     };
 
     const qInfo = await this.api.fetchGraphql(query);
-    if (qInfo != undefined) {
-      let snackBarRef = this.snackBar.open('Question Sent!', 'Close', {
+    console.log(qInfo)
+    if (qInfo.addQuestion != null) {
+      this.snackBar.open('Question Sent!', 'Close', {
+        duration: 3000,
+      });
+    } else {
+      this.snackBar.open('Please log in to send a question.', 'Close', {
         duration: 3000,
       });
     }
@@ -197,27 +211,90 @@ export class UserComponent implements OnInit {
 
   openDialog(img) {
     this.dialog.open(ImageDialogComponent, {
-      data: img
+      data: img,
     });
   }
 
   async deleteAnswer(i) {
-    console.log(this.answers, i)
-
     const query = {
-      query: 
-      `
+      query: `
       mutation{
         deleteAnswer(id: "${this.answers[i].Answer.id}"){
           id
         }
       }
-      `
-    }
+      `,
+    };
 
-    const res = await this.api.fetchGraphql(query)
-    if (res != undefined) {
-      this.answers.splice(i, 1)
+    const res = await this.api.fetchGraphql(query);
+    if (res.deleteAnswer != null) {
+      this.answers.splice(i, 1);
     }
+  }
+
+  async followUser() {
+    // TODO: REPLACE SENDER WITH LOGGED IN USER
+    const query = {
+      query: `
+      mutation{
+        followUser(UserID: "5ea572a26354f617884901bd", UserToFollow: "${this.userData.id}"){
+          id
+          UserID
+        }
+      }
+      `,
+    };
+    this.toggleFollowButton();
+
+    const res = await this.api.fetchGraphql(query);
+    if (res != undefined) {
+    }
+  }
+
+  async unfollowUser() {
+    const query = {
+      // TODO: REPLACE SENDER WITH LOGGED IN USER
+      query: `
+      mutation{
+        unfollowUser(UserID: "5ea572a26354f617884901bd", UserToUnfollow: "${this.userData.id}"){
+          id
+          UserID
+        }
+      }
+      `,
+    };
+    this.toggleFollowButton();
+
+    await this.api.fetchGraphql(query);
+  }
+
+  toggleFollowButton() {
+    this.waitForElementToAppear('followButton').subscribe((followButton) => {
+      const followingButton = document.getElementById('followingButton');
+
+      if (followButton.style.display == 'flex') {
+        followButton.style.display = 'none';
+        followingButton.style.display = 'flex';
+      } else {
+        followButton.style.display = 'flex';
+        followingButton.style.display = 'none';
+      }
+    });
+  }
+
+  waitForElementToAppear(elementId) {
+    return Observable.create(function (observer) {
+      var el_ref;
+      var f = () => {
+        el_ref = document.getElementById(elementId);
+        if (el_ref) {
+          observer.next(el_ref);
+          observer.complete();
+          return;
+        }
+        window.requestAnimationFrame(f);
+      };
+      f();
+    });
   }
 }

@@ -15,7 +15,7 @@ import {
 } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 /** Error when invalid control is dirty, touched, or submitted. */
 export class MyErrorStateMatcher implements ErrorStateMatcher {
@@ -37,6 +37,9 @@ export class ReceivedQuestionsComponent implements OnInit {
   file;
   boxIsOpen = false;
   currentBox;
+  options = {
+    headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
+  }
 
   gqlUrl = 'http://localhost:3000/graphql';
   get uploadsUrl() {
@@ -48,7 +51,6 @@ export class ReceivedQuestionsComponent implements OnInit {
   }
 
   formControl = new FormControl('', [Validators.required]);
-
   matcher = new MyErrorStateMatcher();
 
   @ViewChild('dynamic', {
@@ -154,13 +156,13 @@ export class ReceivedQuestionsComponent implements OnInit {
         this.formControl.updateValueAndValidity();
 
         const qInfo = await this.api.fetchGraphql(query);
-
-        if (qInfo != undefined) {
+        console.log(qInfo)
+        if (qInfo.addAnswer != null) {
           let snackBarRef = this.snackBar.open('Answer Sent!', 'Close', {
             duration: 3000,
           });
+          this.questions.splice(qIndex, 1);
         }
-        this.questions.splice(qIndex, 1);
       }
     }
   }
@@ -198,8 +200,10 @@ export class ReceivedQuestionsComponent implements OnInit {
     fd.append('operations', JSON.stringify(operations));
     fd.append('map', JSON.stringify(_map));
     fd.append('file', this.file, this.file.name);
+    fd.append('token', localStorage.getItem('token'))
 
-    const res = this.http.post(this.gqlUrl, fd).subscribe();
+
+    const res = this.http.post(this.gqlUrl, fd, this.options).subscribe();
 
     if (res != undefined) {
       let snackBarRef = this.snackBar.open('Answer Sent!', 'Close', {

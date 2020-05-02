@@ -419,14 +419,18 @@ const Mutation = new GraphQLObjectType({
       type: questionType,
       description: "add a question",
       args: {
-        Sender: { type: new GraphQLNonNull(GraphQLString) },
         Receiver: { type: new GraphQLNonNull(GraphQLString) },
         Text: { type: new GraphQLNonNull(GraphQLString) },
       },
-      resolve: async (parent, args) => {
+      resolve: async (parent, args, { req, res }) => {
         try {
+          const authResponse = await authController.checkAuth(req, res);
+          const sender = await user.findOne({
+            Username: authResponse.Username,
+          });
+
           const newQuestion = new question({
-            Sender: args.Sender,
+            Sender: sender._id,
             Receiver: args.Receiver,
             Text: args.Text,
             Favourites: [],
@@ -445,9 +449,23 @@ const Mutation = new GraphQLObjectType({
       args: {
         id: { type: new GraphQLNonNull(GraphQLID) },
       },
-      resolve: async (parent, args) => {
+      resolve: async (parent, args, { req, res }) => {
         try {
-          return await question.findByIdAndDelete(args.id);
+          const authResponse = await authController.checkAuth(req, res);
+
+          // Check if question belongs to the logged in user
+          const questions = await question.find({ Receiver: authResponse._id });
+          const p = new Promise((resolve, reject) => {
+            questions.forEach((singleQ) => {
+              if (singleQ._id.toString() == args.id.toString()) {
+                resolve(singleQ);
+              }
+            });
+          });
+
+          return p.then(async (data) => {
+            return await question.findByIdAndDelete(data._id);
+          });
         } catch (e) {
           throw new Error(e.message);
         }
@@ -466,47 +484,58 @@ const Mutation = new GraphQLObjectType({
         },
         Giphy: { type: GraphQLString },
       },
-      resolve: async (parent, args) => {
+      resolve: async (parent, args, { req, res }) => {
         try {
+          const authResponse = await authController.checkAuth(req, res);
+          const loggedInUser = await user.findOne({
+            Username: authResponse.Username,
+          });
+
           const newAnswer = new answer({
             Question: args.QuestionID,
             Text: args.Text,
             DateTime: date.now(),
           });
 
-          if (args.Image != undefined) {
-            const image = args.Image;
-            newAnswer.Image = await fileHelper.saveImage(image);
-          }
-
           const relatedQuestion = await question.findById(newAnswer.Question);
           relatedQuestion.Answer = newAnswer._id;
 
-          relatedQuestion.save();
-          const aToReturn = await newAnswer.save();
+          // Check if the logged in user was the same as the question receiver
+          if (
+            loggedInUser._id.toString() == relatedQuestion.Receiver.toString()
+          ) {
+            console.log("paska");
 
-          // Update answered questions count
-          let answerCount = 0;
-          await question.find(
-            {
-              Receiver: relatedQuestion.Receiver,
-            },
-            (err, questions) => {
-              console.log(questions);
-              questions.forEach((q) => {
-                if (q.Answer != undefined) {
-                  answerCount += 1;
-                }
-              });
+            if (args.Image != undefined) {
+              const image = args.Image;
+              newAnswer.Image = await fileHelper.saveImage(image);
             }
-          );
-          let nProfile = await profileInfo.find({
-            UserID: relatedQuestion.Receiver,
-          });
-          nProfile[0].AnsweredQuestionCount = answerCount;
-          nProfile[0].save();
 
-          return aToReturn;
+            relatedQuestion.save();
+            const aToReturn = await newAnswer.save();
+
+            // Update answered questions count
+            let answerCount = 0;
+            await question.find(
+              {
+                Receiver: relatedQuestion.Receiver,
+              },
+              (err, questions) => {
+                questions.forEach((q) => {
+                  if (q.Answer != undefined) {
+                    answerCount += 1;
+                  }
+                });
+              }
+            );
+            let nProfile = await profileInfo.find({
+              UserID: relatedQuestion.Receiver,
+            });
+            nProfile[0].AnsweredQuestionCount = answerCount;
+            nProfile[0].save();
+
+            return aToReturn;
+          } else return null;
         } catch (error) {
           console.log(error.message);
         }
@@ -519,45 +548,49 @@ const Mutation = new GraphQLObjectType({
       args: {
         id: { type: new GraphQLNonNull(GraphQLID) },
       },
-      resolve: async (parent, args) => {
+      resolve: async (parent, args, { req, res }) => {
         try {
+          const authResponse = await authController.checkAuth(req, res);
           const answerToDelete = await answer.findById(args.id);
+          const questionToDelete = await question.findById(answerToDelete.Question);
 
-          // Delete related question
-          const relatedQuestion = await question.findByIdAndDelete(
-            answerToDelete.Question
-          );
+          // Check if the answerer is the logged in user
+          if (questionToDelete.Receiver.toString() == authResponse._id.toString()) {
+            // Delete related question
+            const relatedQuestion = await question.findByIdAndDelete(
+              answerToDelete.Question
+            );
 
-          const res = await answer.findByIdAndDelete(args.id);
+            const res = await answer.findByIdAndDelete(args.id);
 
-          // Update answered questions count
-          let answerCount = 0;
-          await question.find(
-            {
-              Receiver: relatedQuestion.Receiver,
-            },
-            (err, questions) => {
-              console.log(questions);
+            // Update answered questions count
+            let answerCount = 0;
+            await question.find(
+              {
+                Receiver: relatedQuestion.Receiver,
+              },
+              (err, questions) => {
+                questions.forEach((q) => {
+                  if (q.Answer != undefined) {
+                    answerCount += 1;
+                  }
+                });
+              }
+            );
+            let nProfile = await profileInfo.find({
+              UserID: relatedQuestion.Receiver,
+            });
+            nProfile[0].AnsweredQuestionCount = answerCount;
+            nProfile[0].save();
 
-              questions.forEach((q) => {
-                if (q.Answer != undefined) {
-                  answerCount += 1;
-                }
-              });
+            // Delete image
+            if (res.Image != null) {
+              fileHelper.deleteFile(res.Image);
             }
-          );
-          let nProfile = await profileInfo.find({
-            UserID: relatedQuestion.Receiver,
-          });
-          nProfile[0].AnsweredQuestionCount = answerCount;
-          nProfile[0].save();
 
-          // Delete image
-          if (res.Image != null) {
-            fileHelper.deleteFile(res.Image);
-          }
+            return res;
+          } else return null
 
-          return res;
         } catch (e) {
           throw new Error(e.message);
         }

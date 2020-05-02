@@ -10,6 +10,10 @@
                     </div>
                     
                 </div>
+                <div style="flex-grow: 1;"></div>
+                <button mat-raised-button color="primary" id="followButton" (click)="followUser()" style="display: flex;">Follow</button>
+                <button mat-stroked-button color="primary" id="followingButton" (click)="unfollowUser()">Following</button>
+
                 <div id="countsContainer">
                     <span>Favourites: {{ profileInfo.favouriteCount }}</span>
                     <span>Followers: {{ profileInfo.followerCount }}</span>
@@ -106,12 +110,15 @@
     <div></div>
 </div>
 
-<ng-template #notfound>
-    <mat-card>
-        <mat-card-content>
-            <div style="text-align: center;">
-                User not found.
-            </div>
-        </mat-card-content>
-    </mat-card>
+<ng-template #notfound id="profile">
+    <div id="notFound">
+        <mat-card id="profile">
+            <mat-card-content>
+                <div style="text-align: center;">
+                    
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+    
 </ng-template>

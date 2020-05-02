@@ -1,7 +1,7 @@
 const uniqueSlug = require("unique-slug");
 const fs = require("fs");
 const sharp = require("sharp");
-const uploadURI = "D:/ServersideScriptCourse/Snoop/";
+const uploadURI = process.env.UPLOADS_DIR;
 
 // Saves the image and returns the filename that will be saved to db
 const saveImage = async (image) => {
