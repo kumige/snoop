@@ -1,3 +1,37 @@
 <div class="page mat-app-background">
-  <p>settings works!</p>
+  <h2>Profile settings</h2>
+
+  <!-- DISPLAY NAME CHANGE -->
+  <mat-card class="card_displayname">
+    <span *ngIf="!changeDisplayNToggle">{{ userData?.Displayname }}</span>
+
+    <!-- prettier-ignore -->
+    <form *ngIf="changeDisplayNToggle" [formGroup]="displayNameForm" (ngSubmit)="onSubmitDN()">
+      <div class="displayName_form">
+      <mat-form-field id="textInput">
+        <mat-label for="displayName">New display name</mat-label>
+        <input matInput type="text" class="inputs" formControlName="displayName" placeholder="{{ userData?.Displayname }}"/>
+        <mat-error *ngIf="f_displayName.displayName.touched && f_displayName.displayName.invalid">
+          <mat-error *ngIf="f_displayName.displayName.errors.minlength">Display name has to be atleast 3 characters long.</mat-error>
+            <mat-error *ngIf="f_displayName.displayName.errors.maxlength">Display name can not be longer than 20 characters.</mat-error>
+            <mat-error *ngIf="f_displayName.displayName.errors.hasSpaces && !f_displayName.displayName.errors.minlength && !f_displayName.displayName.errors.maxlength">Display name can not contain spaces.</mat-error>
+            <mat-error *ngIf="f_displayName.displayName.errors.illegalCharacters && !f_displayName.displayName.errors.minlength && !f_displayName.displayName.errors.maxlength && !f_displayName.displayName.errors.hasSpaces">Display name can not contain illegal characters.</mat-error>
+        </mat-error>
+      </mat-form-field>
+      <div class="displayName_buttons">
+        <button mat-raised-button color="primary" type="submit" class="displayName_updateBtn">
+          Update
+        </button>
+        <button mat-raised-button color="primary" (click)="toggleDisplayName()" class="displayName_cancelBtn">
+          Cancel
+        </button>
+
+      </div>
+      </div>
+    </form>
+    <!-- prettier-ignore -->
+    <button *ngIf="!changeDisplayNToggle" mat-button color="primary" (click)="toggleDisplayName()">
+      Change display name
+    </button>
+  </mat-card>
 </div>
