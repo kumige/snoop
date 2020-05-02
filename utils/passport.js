@@ -25,7 +25,6 @@ passport.use(
 
       const strippedUser = user.toObject();
       delete strippedUser.Password;
-      delete strippedUser.ProfileInfo;
       console.log("deleted pwd", strippedUser);
       return done(null, strippedUser, { message: "Logged In Successfully" });
     } catch (err) {
@@ -48,7 +47,6 @@ passport.use(
         const user = await userModel.findById(jwtPayload._id, "-password -__v");
         const strippedUser = user.toObject();
         delete strippedUser.Password;
-        delete strippedUser.ProfileInfo;
         console.log("pl user", strippedUser);
         if (strippedUser !== null) {
           return done(null, strippedUser);

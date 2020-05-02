@@ -416,7 +416,9 @@ const RootQuery = new GraphQLObjectType({
       resolve: async (parent, args, { req, res }) => {
         try {
           const authResult = await authController.checkAuth(req, res);
-          return authResult.Username;
+          authResult.token = "No";
+          authResult.id = authResult._id;
+          return authResult;
         } catch (e) {
           throw new Error(e);
         }
@@ -706,14 +708,12 @@ const Mutation = new GraphQLObjectType({
       type: userType,
       description: "modify display name",
       args: {
-        id: { type: new GraphQLNonNull(GraphQLID) },
         Displayname: { type: GraphQLString },
       },
       resolve: async (parent, args, { req, res }) => {
         try {
-          await authController.checkAuth(req, res);
-
-          return await user.findByIdAndUpdate(args.id, args.Displayname, {
+          authresult = await authController.checkAuth(req, res);
+          return await user.findByIdAndUpdate(authresult.id, args.Displayname, {
             new: true,
           });
         } catch (e) {
