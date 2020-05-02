@@ -6,7 +6,7 @@ import {
   ValidatorFn,
 } from '@angular/forms';
 import { FetchGqlService } from '../services/fetch-gql.service';
-import { checkCharacters } from './customValidators';
+import { customValidator } from './customValidators';
 
 @Component({
   selector: 'app-register',
@@ -18,21 +18,32 @@ export class RegisterComponent implements OnInit {
     username: new FormControl('', [
       Validators.required,
       Validators.minLength(5),
-      checkCharacters.illegalCharacters,
+      Validators.maxLength(20),
+      customValidator.illegalCharacters,
+      customValidator.checkForSpaces,
     ]),
     displayName: new FormControl('', [
       Validators.required,
       Validators.minLength(3),
-      checkCharacters.illegalCharacters,
+      Validators.maxLength(20),
+      customValidator.illegalCharacters,
+      customValidator.checkForSpaces,
     ]),
-    email: new FormControl('', [Validators.required, Validators.email]),
+    email: new FormControl('', [
+      Validators.required,
+      Validators.email,
+      Validators.maxLength(30),
+      customValidator.checkForSpaces,
+    ]),
     password: new FormControl('', [
       Validators.required,
       Validators.minLength(6),
+      Validators.maxLength(20),
     ]),
     rePassword: new FormControl('', [
       Validators.required,
       Validators.minLength(6),
+      Validators.maxLength(20),
     ]),
   });
   submitted = false;
@@ -49,6 +60,7 @@ export class RegisterComponent implements OnInit {
 
   // prettier-ignore
   onSubmit() {
+    console.log(this.registerForm.errors)
     this.submitted = true;
     console.log('Submitting registering ' + this.registerForm.valid);
     console.log(this.registerForm.controls);

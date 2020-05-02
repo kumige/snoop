@@ -1,28 +1,33 @@
 <div class="page mat-app-background layoutFill">
   <h2>Login</h2>
-  <mat-card>
+  <mat-card class="card">
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
       <div class="login_form">
-        <label class="label_username" for="username">Username</label>
-        <input type="text" formControlName="username" class="username_input" />
         <!-- prettier-ignore -->
-        <div *ngIf="(f_login.username.touched && f_login.username.invalid) || (submitted == true && f_login.username.invalid)">
-      <div *ngIf="f_login.username.errors.required">Username is required.</div>
-      </div>
+        <mat-form-field id="textInput">
+          <mat-label class="label_username" for="username">Username</mat-label>
+          <input matInput type="text" formControlName="username" class="username_input"/>
+          <mat-error *ngIf="(f_login.username.touched && f_login.username.invalid) || (submitted == true && f_login.username.invalid)">
+            <mat-error *ngIf="f_login.username.errors.required">Username is required.</mat-error>
+          </mat-error>
+        </mat-form-field>
 
-        <label class="label_password" for="password">Password</label>
-        <input type="text" formControlName="password" class="form-control" />
         <!-- prettier-ignore -->
-        <div *ngIf="(f_login.password.touched && f_login.password.invalid) || (submitted == true && f_login.password.invalid)">
-      <div *ngIf="f_login.password.errors.required">Password is required.</div>
-      </div>
+        <mat-form-field id="textInput">
+          <mat-label class="label_password" for="password">Password</mat-label>
+          <input matInput type="password" formControlName="password" class="form-control"/>
+          <mat-error *ngIf="(f_login.password.touched && f_login.password.invalid) || (submitted == true && f_login.password.invalid)">
+            <mat-error *ngIf="f_login.password.errors.required">Password is required.</mat-error>
+          </mat-error>
+        </mat-form-field>
 
-        <button class="btn_login" type="submit">
+        <!-- prettier-ignore -->
+        <button mat-raised-button color="primary" class="btn_login" type="submit" >
           Login
         </button>
-        <div *ngIf="loginError == true">
-          <label class="login_errorMsg">Incorrect username or password</label>
-        </div>
+        <mat-error class="login_errorMsg" *ngIf="loginError == true">
+          <label>Incorrect username or password</label>
+        </mat-error>
       </div>
     </form>
   </mat-card>
