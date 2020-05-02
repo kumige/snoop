@@ -409,6 +409,19 @@ const RootQuery = new GraphQLObjectType({
         }
       },
     },
+
+    userCheck: {
+      type: userType,
+      description: "Gets current user, authentication required",
+      resolve: async (parent, args, { req, res }) => {
+        try {
+          const authResult = await authController.checkAuth(req, res);
+          return authResult.Username;
+        } catch (e) {
+          throw new Error(e);
+        }
+      },
+    },
   },
 });
 
@@ -552,10 +565,14 @@ const Mutation = new GraphQLObjectType({
         try {
           const authResponse = await authController.checkAuth(req, res);
           const answerToDelete = await answer.findById(args.id);
-          const questionToDelete = await question.findById(answerToDelete.Question);
+          const questionToDelete = await question.findById(
+            answerToDelete.Question
+          );
 
           // Check if the answerer is the logged in user
-          if (questionToDelete.Receiver.toString() == authResponse._id.toString()) {
+          if (
+            questionToDelete.Receiver.toString() == authResponse._id.toString()
+          ) {
             // Delete related question
             const relatedQuestion = await question.findByIdAndDelete(
               answerToDelete.Question
@@ -589,8 +606,7 @@ const Mutation = new GraphQLObjectType({
             }
 
             return res;
-          } else return null
-
+          } else return null;
         } catch (e) {
           throw new Error(e.message);
         }
