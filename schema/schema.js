@@ -21,7 +21,7 @@ const bcrypt = require("bcrypt");
 const saltRound = 12;
 
 //const authController = require('../controllers/authController');
-const registerValidation = require("../utils/registerValidation");
+const validations = require("../utils/validations");
 const date = require("../utils/date");
 const fileHelper = require("../utils/savefile");
 const answer = require("../models/answer");
@@ -626,7 +626,7 @@ const Mutation = new GraphQLObjectType({
       resolve: async (parent, args) => {
         try {
           // Gives all the register inputs for a function to check if they are valid
-          const valid = registerValidation.validation(
+          const valid = validations.registerValidation(
             args.Username,
             args.Displayname,
             args.Email,
@@ -635,7 +635,7 @@ const Mutation = new GraphQLObjectType({
 
           // If all the user inputs are valid, registers new user
           // If all of the user inputs are not valid, throws an error saying what is wrong
-          if (valid.valid == true) {
+          if (valid.valid) {
             const hashedPass = await bcrypt.hash(args.Password, saltRound);
 
             let newProfile = new profileInfo(args.ProfileInfo);
@@ -712,9 +712,85 @@ const Mutation = new GraphQLObjectType({
       resolve: async (parent, args, { req, res }) => {
         try {
           const authResult = await authController.checkAuth(req, res);
-          return await user.findByIdAndUpdate(authResult._id, args, {
-            new: true,
-          });
+
+          const validDisplayName = validations.displayNameValidation(
+            args.Displayname
+          );
+
+          if (validDisplayName.valid) {
+            return await user.findByIdAndUpdate(authResult._id, args, {
+              new: true,
+            });
+          } else {
+            console.log("Unsuccessfull register: " + validDisplayName.message);
+            throw new Error(validDisplayName.message);
+          }
+        } catch (e) {
+          throw new Error(e.message);
+        }
+      },
+    },
+
+    modifyPassword: {
+      type: userType,
+      description: "modify password",
+      args: {
+        Password: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve: async (parent, args, { req, res }) => {
+        try {
+          const authResult = await authController.checkAuth(req, res);
+
+          const validPassword = validations.passwordValidation(args.Password);
+
+          // Checks if the password is valid
+          // If valid, hashes it and changes users password
+          // If invalid, returns error
+          if (validPassword.valid) {
+            const hashedPass = await bcrypt.hash(args.Password, saltRound);
+
+            return await user.findByIdAndUpdate(
+              authResult._id,
+              { Password: hashedPass },
+              {
+                new: true,
+              }
+            );
+          } else {
+            console.log("Unsuccessfull register: " + validPassword.message);
+            throw new Error(validPassword.message);
+          }
+        } catch (e) {
+          throw new Error(e.message);
+        }
+      },
+    },
+
+    modifyBio: {
+      type: profileInfoType,
+      description: "modify bio",
+      args: {
+        Bio: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve: async (parent, args, { req, res }) => {
+        try {
+          const authResult = await authController.checkAuth(req, res);
+
+          const validBio = validations.bioValidation(args.Bio);
+
+          if (validBio.valid) {
+            console.log(authResult._id);
+            return await profileInfo.findOneAndUpdate(
+              { UserID: authResult._id },
+              args,
+              {
+                new: true,
+              }
+            );
+          } else {
+            console.log("Unsuccessfull register: " + validBio.message);
+            throw new Error(validBio.message);
+          }
         } catch (e) {
           throw new Error(e.message);
         }

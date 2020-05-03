@@ -2,36 +2,141 @@
   <h2>Profile settings</h2>
 
   <!-- DISPLAY NAME CHANGE -->
-  <mat-card class="card_displayname">
-    <span *ngIf="!changeDisplayNToggle">{{ userData?.Displayname }}</span>
+
+  <mat-card class="card">
+    <h2 class="titles">Display name</h2>
+
+    <div *ngIf="!changeDisplayNToggle" class="userDataDiv">
+      <span>{{ userData?.Displayname }}</span>
+    </div>
+
+    <!-- prettier-ignore -->
+    <div *ngIf="!changeDisplayNToggle" class="editButtonsDiv">
+      <button mat-raised-button color="primary" (click)="toggleDisplayName()" class="editButtons">
+        <mat-icon>edit</mat-icon>
+      </button>
+    </div>
 
     <!-- prettier-ignore -->
     <form *ngIf="changeDisplayNToggle" [formGroup]="displayNameForm" (ngSubmit)="onSubmitDN()">
-      <div class="displayName_form">
+      <div class="forms">
+
       <mat-form-field id="textInput">
         <mat-label for="displayName">New display name</mat-label>
-        <input matInput type="text" class="inputs" formControlName="displayName" placeholder="{{ userData?.Displayname }}"/>
+        <input matInput type="text" formControlName="displayName" [ngModel]="userData?.Displayname">
         <mat-error *ngIf="f_displayName.displayName.touched && f_displayName.displayName.invalid">
+          <mat-error *ngIf="f_displayName.displayName.errors.required">Display name can not be empty.</mat-error>
           <mat-error *ngIf="f_displayName.displayName.errors.minlength">Display name has to be atleast 3 characters long.</mat-error>
-            <mat-error *ngIf="f_displayName.displayName.errors.maxlength">Display name can not be longer than 20 characters.</mat-error>
-            <mat-error *ngIf="f_displayName.displayName.errors.hasSpaces && !f_displayName.displayName.errors.minlength && !f_displayName.displayName.errors.maxlength">Display name can not contain spaces.</mat-error>
-            <mat-error *ngIf="f_displayName.displayName.errors.illegalCharacters && !f_displayName.displayName.errors.minlength && !f_displayName.displayName.errors.maxlength && !f_displayName.displayName.errors.hasSpaces">Display name can not contain illegal characters.</mat-error>
+          <mat-error *ngIf="f_displayName.displayName.errors.maxlength">Display name can not be longer than 20 characters.</mat-error>
+          <mat-error *ngIf="f_displayName.displayName.errors.hasSpaces && !f_displayName.displayName.errors.minlength && !f_displayName.displayName.errors.maxlength">Display name can not contain spaces.</mat-error>
+          <mat-error *ngIf="f_displayName.displayName.errors.illegalCharacters && !f_displayName.displayName.errors.minlength && !f_displayName.displayName.errors.maxlength && !f_displayName.displayName.errors.hasSpaces">Display name can not contain illegal characters.</mat-error>
         </mat-error>
       </mat-form-field>
-      <div class="displayName_buttons">
-        <button mat-raised-button color="primary" type="submit" class="displayName_updateBtn">
+
+      <div class="buttons">
+        <button mat-raised-button color="primary" type="submit" class="updateBtn">
           Update
         </button>
-        <button mat-raised-button color="primary" (click)="toggleDisplayName()" class="displayName_cancelBtn">
+        <button mat-raised-button color="primary" (click)="toggleDisplayName()" class="cancelBtn" type="button">
+          Cancel
+        </button>
+      </div>
+
+      </div>
+    </form>
+  </mat-card>
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+  <!-- BIO CHANGE -->
+
+  <mat-card class="card">
+    <h2 class="titles">Bio</h2>
+
+    <!-- prettier-ignore -->
+    <div *ngIf="!changeBioToggle" class="bioDataDiv">
+      <div>
+        <span class="bio">{{ userData?.ProfileInfo.Bio }}</span>
+      </div>
+    </div>
+
+    <!-- prettier-ignore -->
+    <div *ngIf="!changeBioToggle" class="editButtonsDiv">
+      <button mat-raised-button color="primary" (click)="toggleBio()" class="editButtons">
+        <mat-icon>edit</mat-icon>
+      </button>
+    </div>
+
+    <!-- prettier-ignore -->
+    <form *ngIf="changeBioToggle" [formGroup]="bioForm" (ngSubmit)="onSubmitBio()">
+      <div class="forms">
+
+      <mat-form-field id="textAreaInput">
+        <mat-label for="bio">New bio</mat-label>
+        <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="1" type="text" formControlName="bio" [ngModel]="userData?.ProfileInfo.Bio"></textarea>
+        <mat-error *ngIf="f_bio.bio.touched && f_bio.bio.invalid">
+          <mat-error *ngIf="f_bio.bio.errors.required">Bio can not be empty.</mat-error>
+          <mat-error *ngIf="f_bio.bio.errors.minlength">Bio has to be atleast 3 characters long.</mat-error>
+          <mat-error *ngIf="f_bio.bio.errors.maxlength">Bio can not be longer than 250 characters.</mat-error>
+          <mat-error *ngIf="f_bio.bio.errors.illegalCharacters && !f_bio.bio.errors.minlength && !f_bio.bio.errors.maxlength">Bio can not contain &#60; and &#62;.</mat-error>
+        </mat-error>
+      </mat-form-field>
+
+      <div class="buttons">
+        <button mat-raised-button color="primary" type="submit" class="updateBtn">
+          Update
+        </button>
+        <button mat-raised-button color="primary" (click)="toggleBio()" class="cancelBtn" type="button">
           Cancel
         </button>
 
       </div>
       </div>
     </form>
+  </mat-card>
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+  <!-- PASSWORD CHANGE -->
+
+  <mat-card class="card">
+    <h2 class="titles">Password</h2>
+
+    <div *ngIf="!changePasswordToggle" class="userDataDiv">
+      <span>******</span>
+    </div>
+
     <!-- prettier-ignore -->
-    <button *ngIf="!changeDisplayNToggle" mat-button color="primary" (click)="toggleDisplayName()">
-      Change display name
-    </button>
+    <div *ngIf="!changePasswordToggle" class="editButtonsDiv">
+      <button mat-raised-button color="primary" (click)="togglePassword()" class="editButtons">
+        <mat-icon>edit</mat-icon>
+      </button>
+    </div>
+
+    <!-- prettier-ignore -->
+    <form *ngIf="changePasswordToggle" [formGroup]="passwordForm" (ngSubmit)="onSubmitPassword()">
+      <div class="forms">
+
+      <mat-form-field id="textInput">
+        <mat-label for="password">New password</mat-label>
+        <input matInput type="password" formControlName="password" placeholder="******">
+      </mat-form-field>
+
+      <mat-form-field id="textInput">
+        <mat-label for="confirmPassword">Confirm new password</mat-label>
+        <input matInput type="password" formControlName="confirmPassword" placeholder="******">
+      </mat-form-field>
+
+      <div class="buttons">
+        <button mat-raised-button color="primary" type="submit" class="updateBtn">
+          Update
+        </button>
+        <button mat-raised-button color="primary" (click)="togglePassword()" class="cancelBtn" type="button">
+          Cancel
+        </button>
+
+      </div>
+      </div>
+    </form>
   </mat-card>
 </div>

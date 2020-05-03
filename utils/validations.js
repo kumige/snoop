@@ -1,4 +1,4 @@
-const validation = (Username, Displayname, Email, Password) => {
+const registerValidation = (Username, Displayname, Email, Password) => {
   if (Username.length < 5) {
     return {
       valid: false,
@@ -88,4 +88,79 @@ const hasSpace = (text) => {
   }
 };
 
-module.exports = { validation };
+const specialVariableCheckBio = (text) => {
+  var specialCharacters = /[<>]/;
+  if (specialCharacters.test(text)) {
+    return true;
+  }
+};
+
+const displayNameValidation = (displayName) => {
+  if (displayName.length < 3) {
+    return {
+      valid: false,
+      message: "Display name has to be atleast 3 characters long",
+    };
+  } else if (displayName.length > 20) {
+    return {
+      valid: false,
+      message: "Display name can not be longer than 20 characters",
+    };
+  } else if (hasSpace(displayName)) {
+    return {
+      valid: false,
+      message: "Display name can not include spaces",
+    };
+  } else if (specialVariableCheck(displayName)) {
+    return {
+      valid: false,
+      message: "Displayname can not include illegal characters",
+    };
+  } else {
+    return { valid: true };
+  }
+};
+
+const bioValidation = (bio) => {
+  if (bio.length < 3) {
+    return {
+      valid: false,
+      message: "Bio has to be atleast 3 characters long",
+    };
+  } else if (bio.length > 250) {
+    return {
+      valid: false,
+      message: "Bio can not be longer than 250 characters",
+    };
+  } else if (specialVariableCheckBio(bio)) {
+    return {
+      valid: false,
+      message: "Bio can not include illegal characters (< and >)",
+    };
+  } else {
+    return { valid: true };
+  }
+};
+
+const passwordValidation = (password) => {
+  if (password.length < 6) {
+    return {
+      valid: false,
+      message: "Password has to be atleast 6 characters long",
+    };
+  } else if (password.length > 20) {
+    return {
+      valid: false,
+      message: "Password can not be longer than 20 characters",
+    };
+  } else {
+    return { valid: true };
+  }
+};
+
+module.exports = {
+  registerValidation,
+  displayNameValidation,
+  bioValidation,
+  passwordValidation,
+};
