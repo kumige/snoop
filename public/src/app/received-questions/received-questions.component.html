@@ -6,7 +6,7 @@
                 <li *ngFor="let q of questions; let i = index" [attr.data-index]="i" class="qWithA" id="i" >
                     <div class="question">
                         <div class="horizontal">
-                            <img class="profilePicture" src="{{ uploadsUrl }}PagChomp.png" alt="Profile image">
+                            <img class="profilePicture" src="{{ uploadsUrl }}{{ q.Sender.ProfileInfo.ProfilePicture }}" alt="Profile image">
                             <div class="spaceBetween">
                                 <div class="vertical">
                                     <div>
@@ -26,19 +26,18 @@
                         <div class="textCenter">
                             <span class="qText">{{ q.Text }}</span> 
                         </div>
-                        <!---<button mat-raised-button type="button" color="primary" id="openBox" (click)="openBox($event)">Answer</button>--->
 
                     </div>
                     <form (ngSubmit)="sendAnswer($event)" id="askBox" >
                         <mat-form-field appearance="outline" id="textInput">
                             <mat-label>Answer</mat-label>
-                            <input matInput name="question" [formControl]="formControl" [errorStateMatcher]="matcher">
+                            <input matInput name="question" [formControl]="formControl" [errorStateMatcher]="matcher" maxlength="256">
                             <mat-error *ngIf="formControl.hasError('required')">
                                 Field is required
                             </mat-error>
                         </mat-form-field>
                         <div id="buttonContainer">
-                            <button mat-button color="primary" type="button" id="sendButton" (click)="chooseFile()">
+                            <button mat-stroked-button color="primary" type="button" id="uploadButton" (click)="chooseFile()">
                                 <mat-icon>file_upload</mat-icon> 
                             </button>
                             <button mat-raised-button type="submit" color="primary" id="sendButton">Answer</button>
@@ -64,11 +63,19 @@
 </div>
 
 <ng-template #notfound class="mat-app-background layoutFill">
-    <mat-card>
-        <mat-card-content>
-            <div style="text-align: center;">
-                You have no unanswered questions.
-            </div>
-        </mat-card-content>
-    </mat-card>
+    <div id="errorContainer">
+        <mat-card *ngIf="questions.length == 0" id="noQuestions">
+            <mat-card-content>
+                <div class="error">
+                </div>
+            </mat-card-content>
+        </mat-card>
+        <mat-card id="errorCard">
+            <mat-card-content>
+                <div class="error">
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+    
 </ng-template>

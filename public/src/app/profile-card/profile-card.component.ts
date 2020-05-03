@@ -24,12 +24,17 @@ export class ProfileCardComponent implements OnInit {
     private api: FetchGqlService,
     private router: Router,
     private auth: GetAuthUserService
-  ) {}
+  ) {
+  }
 
   ngOnInit(): void {
     this.auth.getLoggedInUser().then(userData => {
       this.loggedInUser = userData
+      if(this.loggedInUser != null) {
       this.getProfileInfo();
+
+      }
+
     })
   }
 
@@ -60,7 +65,6 @@ export class ProfileCardComponent implements OnInit {
   }
 
   redirectToUser(event) {
-    console.log(event);
     this.router.navigate([`../user/${event.target.id}`]);
   }
 }

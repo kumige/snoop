@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { FetchGqlService } from './services/fetch-gql.service';
 import { Router } from '@angular/router';
-import { MatMenuTrigger } from '@angular/material/menu';
 
 @Component({
   selector: 'app-root',
@@ -18,8 +17,6 @@ export class AppComponent implements OnInit {
   filteredOptions = new Observable();
   searchTerm;
   matMenu;
-
-  //@ViewChild('appMenu') trigger: MatMenuTrigger;
 
   constructor(private api: FetchGqlService, private router: Router) {}
 

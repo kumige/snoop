@@ -64,9 +64,15 @@ li, ul
 
     #sendButton
         height: 52px
-        margin-top: 3.5px
         margin-bottom: 16px
         flex-grow: 1
+        margin-left: 4px
+
+    #uploadButton
+        height: 52px
+        margin-bottom: 16px
+        flex-grow: 1
+        margin-right: 4px
 
     #buttonContainer
         display: flex
@@ -121,3 +127,17 @@ li, ul
         .vertical
             display: flex
             flex-flow: column
+#errorContainer
+    display: flex
+    justify-content: center
+    height: 52px
+
+    #errorCard
+        display: none
+        width: 30rem
+
+    #noQuestions
+        width: 30rem
+
+    .error
+        text-align: center

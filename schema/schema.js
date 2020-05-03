@@ -451,7 +451,10 @@ const Mutation = new GraphQLObjectType({
             Favourites: [],
             DateTime: date.now(),
           });
-          return await newQuestion.save();
+
+          if(args.Text.toString().length <= 256){
+            return await newQuestion.save();
+          } else return null
         } catch (error) {
           console.log(error.message);
         }
@@ -548,7 +551,10 @@ const Mutation = new GraphQLObjectType({
             nProfile[0].AnsweredQuestionCount = answerCount;
             nProfile[0].save();
 
-            return aToReturn;
+            if(args.Text.toString().length <= 256) {
+              return aToReturn;
+            } else return null
+            
           } else return null;
         } catch (error) {
           console.log(error.message);

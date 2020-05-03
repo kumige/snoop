@@ -1,124 +1,180 @@
-<div class="page mat-app-background" *ngIf="user != null else notfound">
-    <mat-card>
-        <mat-card-content id="profile">  
-            <div id="profileVerticalContainer">
-                <div id="profPicAndName">
-                    <img class="profilePicture" src="{{ uploadsUrl }}{{ user.ProfileInfo.ProfilePicture }}" alt="Profile image">
-                    <div id="namesContainer">
-                        <span>{{ user.Username }}</span>
-                        <span>{{ user.Displayname }}</span>
-                    </div>
-                    
+<div class="page mat-app-background" *ngIf="user != null; else notfound">
+  <mat-card>
+    <mat-card-content id="profile">
+      <div id="profileVerticalContainer">
+        <div id="profPicAndName">
+          <img
+            class="profilePicture"
+            src="{{ uploadsUrl }}{{ user.ProfileInfo.ProfilePicture }}"
+            alt="Profile image"
+          />
+          <div id="namesContainer">
+            <span>{{ user.Username }}</span>
+            <span>{{ user.Displayname }}</span>
+          </div>
+        </div>
+        <div style="flex-grow: 1;"></div>
+        <div *ngIf="this.loggedInUser != null">
+          <button
+            mat-raised-button
+            *ngIf="this.userData.id != this.loggedInUser.id"
+            color="primary"
+            id="followButton"
+            (click)="followUser()"
+            style="display: flex;"
+          >
+            Follow
+          </button>
+          <button
+            mat-stroked-button
+            *ngIf="this.userData.id != this.loggedInUser.id"
+            color="primary"
+            id="followingButton"
+            (click)="unfollowUser()"
+          >
+            Following
+          </button>
+        </div>
+
+        <div id="countsContainer">
+          <span>Favourites: {{ profileInfo.favouriteCount }}</span>
+          <span>Followers: {{ profileInfo.followerCount }}</span>
+          <span>Following: {{ profileInfo.followingCount }}</span>
+        </div>
+      </div>
+
+      <div id="bioContainer">
+        <span>{{ user.ProfileInfo.Bio }}</span>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <div *ngIf="this.loggedInUser != null">
+    <mat-card *ngIf="this.userData.id != this.loggedInUser.id">
+      <mat-card-content>
+        <form (ngSubmit)="sendQuestion($event)" id="askBox">
+          <mat-form-field appearance="outline" id="textInput">
+            <mat-label>Ask {{ user.Displayname }} something</mat-label>
+            <input
+              matInput
+              name="question"
+              [formControl]="formControl"
+              [errorStateMatcher]="matcher"
+              maxlength="256"
+            />
+            <mat-error *ngIf="formControl.hasError('required')">
+              Field is required
+            </mat-error>
+          </mat-form-field>
+          <button
+            mat-raised-button
+            type="submit"
+            color="primary"
+            id="sendButton"
+          >
+            Send
+          </button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <mat-card>
+    <mat-card-content id="feed">
+      <h2 id="answerTitle">
+        {{ user.Displayname }}'s Answers ({{
+          user.ProfileInfo.AnsweredQuestionCount
+        }})
+      </h2>
+
+      <ul>
+        <li *ngFor="let q of answers; let i = index" class="qWithA">
+          <div class="question">
+            <div class="horizontal">
+              <img
+                class="profilePicture"
+                src="{{ uploadsUrl }}{{ q.Sender.ProfileInfo.ProfilePicture }}"
+                alt="Profile image"
+              />
+              <div class="vertical">
+                <div>
+                  <span
+                    id="{{ q.Sender.Username }}"
+                    class="qDisplayname"
+                    (click)="redirectToUser($event)"
+                    >{{ q.Sender.Displayname }}</span
+                  >
+                  <span> asked:</span>
                 </div>
-                <div style="flex-grow: 1;"></div>
-                <button mat-raised-button color="primary" id="followButton" (click)="followUser()" style="display: flex;">Follow</button>
-                <button mat-stroked-button color="primary" id="followingButton" (click)="unfollowUser()">Following</button>
-
-                <div id="countsContainer">
-                    <span>Favourites: {{ profileInfo.favouriteCount }}</span>
-                    <span>Followers: {{ profileInfo.followerCount }}</span>
-                    <span>Following: {{ profileInfo.followingCount }}</span>
+                <span>{{ q.DateTime.date }}</span>
+              </div>
+            </div>
+            <div class="textCenter">
+              <span class="qText">{{ q.Text }}</span>
+            </div>
+          </div>
+          <mat-divider></mat-divider>
+          <div class="answer">
+            <div class="horizontal">
+              <img
+                class="profilePicture"
+                src="{{ uploadsUrl }}{{
+                  q.Receiver.ProfileInfo.ProfilePicture
+                }}"
+                alt="Profile image"
+              />
+              <div class="spaceBetween">
+                <div class="vertical">
+                  <div>
+                    <span
+                      id="{{ q.Receiver.Username }}"
+                      class="qDisplayname"
+                      (click)="redirectToUser($event)"
+                      >{{ q.Receiver.Displayname }}'s</span
+                    >
+                    <span> answer:</span>
+                  </div>
+                  <span>{{ q.DateTime.date }}</span>
                 </div>
+
+                <div *ngIf="this.loggedInUser != null">
+                  <button
+                    mat-button
+                    (click)="deleteAnswer(i)"
+                    *ngIf="this.userData.id == this.loggedInUser.id"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
             </div>
-            
-            <div id="bioContainer">
-                <span>{{ user.ProfileInfo.Bio }}</span>
+            <div class="textCenter">
+              <span class="aText">{{ q.Answer.Text }}</span>
             </div>
-            
-    
-        </mat-card-content> 
-    </mat-card>
-    <mat-card>
-        <mat-card-content>  
-            <form (ngSubmit)="sendQuestion($event)" id="askBox">
-                <mat-form-field appearance="outline" id="textInput">
-                    <mat-label>Ask {{ user.Displayname }} something</mat-label>
-                    <input matInput name="question" [formControl]="formControl" [errorStateMatcher]="matcher">
-                    <mat-error *ngIf="formControl.hasError('required')">
-                        Field is required
-                    </mat-error>
-                </mat-form-field>
-                <button mat-raised-button type="submit" color="primary" id="sendButton">Send</button>
-            </form>
-            
 
-
-        </mat-card-content> 
-    </mat-card>
-
-    <mat-card>
-        <mat-card-content id="feed">  
-
-            <h2 id="answerTitle">
-                {{ user.Displayname }}'s Answers
-            </h2>
-
-            <ul>  
-                <li *ngFor="let q of answers; let i = index;" class="qWithA">
-                    <div class="question">
-                        <div class="horizontal">
-                            <img class="profilePicture" src="{{ uploadsUrl }}PagChomp.png" alt="Profile image">
-                            <div class="vertical">
-                                <div>
-                                    <span id="{{ q.Sender.Username }}" class="qDisplayname" (click)="redirectToUser($event)">{{ q.Sender.Displayname }}</span> 
-                                    <span> asked:</span> 
-                                </div>
-                                <span>{{ q.DateTime.date }}</span> 
-                            </div>
-                        </div>
-                        <div class="textCenter">
-                            <span class="qText">{{ q.Text }}</span> 
-                        </div>
-                         
-                    </div>
-                    <mat-divider></mat-divider>
-                    <div class="answer">
-                        <div class="horizontal">
-                            <img class="profilePicture" src="{{ uploadsUrl }}PagChomp.png" alt="Profile image">
-                            <div class="spaceBetween">
-
-                                <div class="vertical">
-                                    <div>
-                                        <span id="{{ q.Sender.Username }}" class="qDisplayname" (click)="redirectToUser($event)">{{ q.Receiver.Displayname }}'s</span> 
-                                        <span> answer:</span> 
-                                    </div>
-                                    <span>{{ q.DateTime.date }}</span> 
-                                </div>
-                                
-                                <div>
-                                    <button mat-button (click)="deleteAnswer(i)" *ngIf="this.userData.id == this.loggedInUser.id">
-                                        <mat-icon>delete</mat-icon>
-                                    </button>
-                                </div>
-                            </div>
-                            
-                        </div>
-                        <div class="textCenter">
-                            <span class="aText">{{ q.Answer.Text }}</span>  
-                        </div>
-
-                        <div class="imgContainer">
-                            <img *ngIf="q.Answer.Image != null" class="answerImage" src="{{ uploadsUrl }}tn{{  q.Answer.Image  }}" alt="Answer image" (click)="openDialog(q.Answer.Image)">
-                        </div>
-                    </div>
-                    <mat-divider></mat-divider>
-                </li>  
-            </ul>  
-
-        </mat-card-content> 
-    </mat-card>
-    <div></div>
+            <div class="imgContainer">
+              <img
+                *ngIf="q.Answer.Image != null"
+                class="answerImage"
+                src="{{ uploadsUrl }}tn{{ q.Answer.Image }}"
+                alt="Answer image"
+                (click)="openDialog(q.Answer.Image)"
+              />
+            </div>
+          </div>
+          <mat-divider></mat-divider>
+        </li>
+      </ul>
+    </mat-card-content>
+  </mat-card>
+  <div></div>
 </div>
 
 <ng-template #notfound id="profile">
-    <div id="notFound">
-        <mat-card id="profile">
-            <mat-card-content>
-                <div style="text-align: center;">
-                    
-                </div>
-            </mat-card-content>
-        </mat-card>
-    </div>
-    
+  <div id="notFound">
+    <mat-card id="profile">
+      <mat-card-content>
+        <div style="text-align: center;"></div>
+      </mat-card-content>
+    </mat-card>
+  </div>
 </ng-template>

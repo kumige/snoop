@@ -1,5 +1,5 @@
-<mat-card id="profileCard">
-    <mat-card-content id="profileInfo">
+<mat-card id="profileCard" *ngIf="this.loggedInUser else noprofile">
+    <mat-card-content class="profileInfo">
         <img class="profilePicture" src="{{ uploadsUrl }}{{ userData.ProfileInfo.ProfilePicture }}" alt="Profile image">
         <span id="{{ userData.Username }}" (click)="redirectToUser($event)" class="displayName">{{ userData.Displayname }}</span>
         <div>
@@ -11,3 +11,7 @@
         <span class="bio">{{ userData.ProfileInfo.Bio }}</span>
     </mat-card-content>
 </mat-card>
+
+<ng-template #noprofile>
+    <div style="width: 252px;"></div>
+</ng-template>

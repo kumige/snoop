@@ -71,9 +71,12 @@ export class ReceivedQuestionsComponent implements OnInit {
 
   ngOnInit(): void {
     this.questions = [];
-    this.auth.getLoggedInUser().then(userData => {
+    this.auth.getLoggedInUser().then((userData) => {
       this.loggedInUser = userData;
-      this.getQs();
+      if (this.loggedInUser != null) {
+        this.getQs();
+      }
+      this.checkErrors()
     });
   }
 
@@ -119,7 +122,7 @@ export class ReceivedQuestionsComponent implements OnInit {
 
     this.questions = await this.api.fetchGraphql(query);
     this.questions = this.questions.questionsForUser;
-    console.log(this.questions);
+    
   }
 
   redirectToUser(event) {
@@ -162,7 +165,7 @@ export class ReceivedQuestionsComponent implements OnInit {
         const qInfo = await this.api.fetchGraphql(query);
         console.log(qInfo);
         if (qInfo.addAnswer != null) {
-          let snackBarRef = this.snackBar.open('Answer Sent!', 'Close', {
+          this.snackBar.open('Answer Sent!', 'Close', {
             duration: 3000,
           });
           this.questions.splice(qIndex, 1);
@@ -235,7 +238,6 @@ export class ReceivedQuestionsComponent implements OnInit {
   openBox(id) {
     const li = document.querySelector(`li[data-index="${id}"]`);
     const form = li.querySelector('form');
-    const butt = li.querySelector(`.centerButton`);
 
     // Check if another box is open and close it
     if (this.boxIsOpen == true && this.currentBox != id) {
@@ -288,6 +290,21 @@ export class ReceivedQuestionsComponent implements OnInit {
     const res = await this.api.fetchGraphql(query);
     if (res != undefined) {
       this.questions.splice(i, 1);
+    }
+  }
+
+  checkErrors() {
+    let errorCard = document.getElementById('errorCard');
+    let noQuestions = document.getElementById('noQuestions');
+    let errors = document.getElementsByClassName('error');
+    if (!this.loggedInUser) {
+      errorCard.style.display = 'block';
+      noQuestions.style.display = 'none';
+      errors[1].innerHTML = 'You are not logged in';
+    } else {
+      errorCard.style.display = 'none';
+      noQuestions.style.display = 'block';
+      errors[0].innerHTML = 'You have no unanswered questions';
     }
   }
 }

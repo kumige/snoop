@@ -70,11 +70,13 @@ export class UserComponent implements OnInit {
   ngOnInit(): void {
     this.route.params.subscribe((params) => {
       this.username = params.username;
-      this.auth.getLoggedInUser().then(user => {
-        this.loggedInUser = user
-        this.getUserData();
-      })
+      
     });
+    this.auth.getLoggedInUser().then(user => {
+      console.log(user)
+      this.loggedInUser = user
+      this.getUserData();
+    })
   }
 
   redirectToUser(event) {
@@ -108,9 +110,12 @@ export class UserComponent implements OnInit {
     this.userData = this.userData.userByUsername;
 
     this.userData.ProfileInfo.Followers.forEach((userID) => {
-      if (userID == this.loggedInUser.id) {
-        this.toggleFollowButton();
+      if(this.loggedInUser != null) {
+        if (userID == this.loggedInUser.id) {
+          this.toggleFollowButton();
+        }
       }
+      
     });
 
     this.loadAnswers();
