@@ -15,7 +15,8 @@ import {
 } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
+import { GetAuthUserService } from '../services/get-auth-user.service';
 
 /** Error when invalid control is dirty, touched, or submitted. */
 export class MyErrorStateMatcher implements ErrorStateMatcher {
@@ -38,8 +39,9 @@ export class ReceivedQuestionsComponent implements OnInit {
   boxIsOpen = false;
   currentBox;
   options = {
-    headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
-  }
+    headers: { Authorization: 'Bearer ' + localStorage.getItem('token') },
+  };
+  loggedInUser;
 
   gqlUrl = 'http://localhost:3000/graphql';
   get uploadsUrl() {
@@ -63,20 +65,23 @@ export class ReceivedQuestionsComponent implements OnInit {
     private api: FetchGqlService,
     private router: Router,
     private snackBar: MatSnackBar,
-    private http: HttpClient
+    private http: HttpClient,
+    private auth: GetAuthUserService
   ) {}
 
   ngOnInit(): void {
     this.questions = [];
-    this.getQs();
+    this.auth.getLoggedInUser().then(userData => {
+      this.loggedInUser = userData;
+      this.getQs();
+    });
   }
 
   private async getQs() {
-    // TODO: Change id to logged in user
     const query = {
       query: `
       query{
-        questionsForUser(id: "5ea572a26354f617884901bd"){
+        questionsForUser(id: "${this.loggedInUser.id}"){
           id
           Sender {
             id
@@ -129,7 +134,6 @@ export class ReceivedQuestionsComponent implements OnInit {
     if (this.file != undefined) {
       this.sendWithImage(answer, qID, qIndex);
     } else {
-      // TODO: REPLACE SENDER WITH LOGGED IN USER
       const query = {
         query: `
       mutation{
@@ -156,7 +160,7 @@ export class ReceivedQuestionsComponent implements OnInit {
         this.formControl.updateValueAndValidity();
 
         const qInfo = await this.api.fetchGraphql(query);
-        console.log(qInfo)
+        console.log(qInfo);
         if (qInfo.addAnswer != null) {
           let snackBarRef = this.snackBar.open('Answer Sent!', 'Close', {
             duration: 3000,
@@ -200,17 +204,23 @@ export class ReceivedQuestionsComponent implements OnInit {
     fd.append('operations', JSON.stringify(operations));
     fd.append('map', JSON.stringify(_map));
     fd.append('file', this.file, this.file.name);
-    fd.append('token', localStorage.getItem('token'))
-
 
     const res = this.http.post(this.gqlUrl, fd, this.options).subscribe();
 
     if (res != undefined) {
-      let snackBarRef = this.snackBar.open('Answer Sent!', 'Close', {
+      this.snackBar.open('Answer Sent!', 'Close', {
         duration: 3000,
       });
+      this.questions.splice(qIndex, 1);
+    } else {
+      this.snackBar.open(
+        'We encoutered an error while sending your answer',
+        'Close',
+        {
+          duration: 3000,
+        }
+      );
     }
-    this.questions.splice(qIndex, 1);
   }
 
   addFile(event) {
@@ -226,7 +236,6 @@ export class ReceivedQuestionsComponent implements OnInit {
     const li = document.querySelector(`li[data-index="${id}"]`);
     const form = li.querySelector('form');
     const butt = li.querySelector(`.centerButton`);
-    console.log(li.querySelector('#expandMore'));
 
     // Check if another box is open and close it
     if (this.boxIsOpen == true && this.currentBox != id) {
@@ -265,25 +274,20 @@ export class ReceivedQuestionsComponent implements OnInit {
   }
 
   async deleteQuestion(i) {
-    console.log(this.questions, i)
-
     const query = {
-      query: 
-      `
+      query: `
       mutation{
         deleteQuestion(id: "${this.questions[i].id}"){
           id
           Text
-          Favourites
         }
       }
-      `
-    }
+      `,
+    };
 
-    const res = await this.api.fetchGraphql(query)
+    const res = await this.api.fetchGraphql(query);
     if (res != undefined) {
-      this.questions.splice(i, 1)
+      this.questions.splice(i, 1);
     }
-
   }
 }

@@ -12,6 +12,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ImageDialogComponent } from '../image-dialog/image-dialog.component';
 import { Observable } from 'rxjs';
+import { GetAuthUserService } from '../services/get-auth-user.service';
 
 /** Error when invalid control is dirty, touched, or submitted. */
 export class MyErrorStateMatcher implements ErrorStateMatcher {
@@ -33,6 +34,7 @@ export class UserComponent implements OnInit {
   userData;
   ProfileInfo;
   answers;
+  loggedInUser;
 
   get uploadsUrl() {
     return 'http://localhost:3000/uploads/';
@@ -59,7 +61,8 @@ export class UserComponent implements OnInit {
     private route: ActivatedRoute,
     private snackBar: MatSnackBar,
     private router: Router,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    private auth: GetAuthUserService
   ) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false
   }
@@ -67,7 +70,10 @@ export class UserComponent implements OnInit {
   ngOnInit(): void {
     this.route.params.subscribe((params) => {
       this.username = params.username;
-      this.getUserData();
+      this.auth.getLoggedInUser().then(user => {
+        this.loggedInUser = user
+        this.getUserData();
+      })
     });
   }
 
@@ -78,40 +84,36 @@ export class UserComponent implements OnInit {
   async getUserData() {
     const query = {
       query: `
-    query{
-      userByUsername(username: "${this.username}"){
-        id
-        token
-        Email
-        Username
-        Displayname
-        ProfileInfo {
+      query{
+        userByUsername(username: "${this.username}"){
           id
-          UserID
-          Bio
-          ProfilePicture
-          Following
-          Followers
-          Favourites
-          AnsweredQuestionCount
+          Username
+          Displayname
+          ProfileInfo {
+            id
+            UserID
+            Bio
+            ProfilePicture
+            Following
+            Followers
+            Favourites
+            AnsweredQuestionCount
+          }
+          LastLogin
         }
-        LastLogin
       }
-    }
     `,
     };
     this.userData = await this.api.fetchGraphql(query);
     this.userData = this.userData.userByUsername;
 
-    console.log(this.userData)
     this.userData.ProfileInfo.Followers.forEach((userID) => {
-      if (userID == '5ea572a26354f617884901bd') {
-        // TODO: Change to logged in user
+      if (userID == this.loggedInUser.id) {
         this.toggleFollowButton();
       }
     });
 
-    this.loadAnswers(); // TODO: change query to work with username so it doesn't have to wait for the query above to complete
+    this.loadAnswers();
   }
 
   async loadAnswers() {
@@ -233,11 +235,11 @@ export class UserComponent implements OnInit {
   }
 
   async followUser() {
-    // TODO: REPLACE SENDER WITH LOGGED IN USER
+    console.log(this.userData.id)
     const query = {
       query: `
       mutation{
-        followUser(UserID: "5ea572a26354f617884901bd", UserToFollow: "${this.userData.id}"){
+        followUser(UserToFollow: "${this.userData.id}"){
           id
           UserID
         }
@@ -247,16 +249,16 @@ export class UserComponent implements OnInit {
     this.toggleFollowButton();
 
     const res = await this.api.fetchGraphql(query);
+    console.log(res)
     if (res != undefined) {
     }
   }
 
   async unfollowUser() {
     const query = {
-      // TODO: REPLACE SENDER WITH LOGGED IN USER
       query: `
       mutation{
-        unfollowUser(UserID: "5ea572a26354f617884901bd", UserToUnfollow: "${this.userData.id}"){
+        unfollowUser(UserToUnfollow: "${this.userData.id}"){
           id
           UserID
         }

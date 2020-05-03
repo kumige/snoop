@@ -1,40 +1,49 @@
 import { Component, OnInit } from '@angular/core';
 import { FetchGqlService } from '../services/fetch-gql.service';
 import { Router } from '@angular/router';
+import { GetAuthUserService } from '../services/get-auth-user.service';
 
 @Component({
   selector: 'app-profile-card',
   templateUrl: './profile-card.component.html',
-  styleUrls: ['./profile-card.component.sass']
+  styleUrls: ['./profile-card.component.sass'],
 })
 export class ProfileCardComponent implements OnInit {
-  user
+  user;
+  loggedInUser;
 
   get userData() {
-    return this.user
+    return this.user;
   }
 
   get uploadsUrl() {
     return 'http://localhost:3000/uploads/';
   }
 
-  constructor(private api: FetchGqlService, private router: Router) { }
+  constructor(
+    private api: FetchGqlService,
+    private router: Router,
+    private auth: GetAuthUserService
+  ) {}
 
   ngOnInit(): void {
-    this.getProfileInfo()
+    this.auth.getLoggedInUser().then(userData => {
+      this.loggedInUser = userData
+      this.getProfileInfo();
+    })
   }
 
-  async getProfileInfo() { // TODO: Change query to logged in user
+  async getProfileInfo() {
     const query = {
-      query: 
-      `
+      query: `
       query{
-        userByUsername(username: "mikko"){
+        userById(id: "${this.loggedInUser.id}"){
           id
           Username
           Displayname
           ProfileInfo {
             id
+            UserID
             Bio
             ProfilePicture
             Following
@@ -44,16 +53,14 @@ export class ProfileCardComponent implements OnInit {
           } 
         }
       }
-      `
-    }
+      `,
+    };
     this.user = await this.api.fetchGraphql(query);
-    this.user = this.user.userByUsername;
-    console.log(this.user);
+    this.user = this.user.userById;
   }
 
   redirectToUser(event) {
-    console.log(event)
+    console.log(event);
     this.router.navigate([`../user/${event.target.id}`]);
   }
-
 }

@@ -416,7 +416,7 @@ const RootQuery = new GraphQLObjectType({
       resolve: async (parent, args, { req, res }) => {
         try {
           const authResult = await authController.checkAuth(req, res);
-          authResult.token = "No";
+          authResult.token = null;
           authResult.id = authResult._id;
           return authResult;
         } catch (e) {
@@ -503,7 +503,7 @@ const Mutation = new GraphQLObjectType({
         try {
           const authResponse = await authController.checkAuth(req, res);
           const loggedInUser = await user.findOne({
-            Username: authResponse.Username,
+            _id: authResponse._id,
           });
 
           const newAnswer = new answer({
@@ -519,7 +519,6 @@ const Mutation = new GraphQLObjectType({
           if (
             loggedInUser._id.toString() == relatedQuestion.Receiver.toString()
           ) {
-            console.log("paska");
 
             if (args.Image != undefined) {
               const image = args.Image;
@@ -822,25 +821,27 @@ const Mutation = new GraphQLObjectType({
       type: profileInfoType,
       description: "follow a user",
       args: {
-        UserID: { type: new GraphQLNonNull(GraphQLID) },
         UserToFollow: { type: new GraphQLNonNull(GraphQLID) },
       },
-      //TODO: add user check, maybe with token?
-      resolve: async (parent, args) => {
+      resolve: async (parent, args, { req, res }) => {
         try {
+          const authResponse = await authController.checkAuth(req, res);
+          console.log(args.UserToFollow)
+          console.log(authResponse._id)
+
           let modifiedProfile = await profileInfo.findOne(
-            { UserID: args.UserID },
+            { UserID: args.UserToFollow },
             async (error, profile) => {
               // Check if UserToFollow is already in Following list
-              const isInArray = profile.Following.some((userId) => {
-                return userId.equals(args.UserToFollow);
+              const isInArray = profile.Followers.some((userId) => {
+                return userId.equals(authResponse._id);
               });
 
               // If not in Following, push new ID to Following
               if (!isInArray) {
                 // Save user id to following list
                 await profileInfo.findOneAndUpdate(
-                  { UserID: args.UserID },
+                  { UserID: authResponse._id },
                   { $push: { Following: args.UserToFollow } },
                   { new: true }
                 );
@@ -848,13 +849,15 @@ const Mutation = new GraphQLObjectType({
                 // Save user id to followers list of the respective user
                 await profileInfo.findOneAndUpdate(
                   { UserID: args.UserToFollow },
-                  { $push: { Followers: args.UserID } },
+                  { $push: { Followers: authResponse._id } },
                   { new: true }
                 );
               }
             }
           );
-          return await modifiedProfile;
+
+          console.log(modifiedProfile)
+          return modifiedProfile;
         } catch (e) {
           throw new Error(e.message);
         }
@@ -865,22 +868,22 @@ const Mutation = new GraphQLObjectType({
       type: profileInfoType,
       description: "unfollow a user",
       args: {
-        UserID: { type: new GraphQLNonNull(GraphQLID) },
         UserToUnfollow: { type: new GraphQLNonNull(GraphQLID) },
       },
-      //TODO: add user check, maybe with token?
-      resolve: async (parent, args) => {
+      resolve: async (parent, args, { req, res }) => {
         try {
+          const authResponse = await authController.checkAuth(req, res);
+          
           // Remove user id from followers list of the respective user
           await profileInfo.findOneAndUpdate(
             { UserID: args.UserToUnfollow },
-            { $pull: { Followers: args.UserID } },
+            { $pull: { Followers: authResponse._id } },
             { new: true }
           );
 
           // Remove user id from following list
           return await profileInfo.findOneAndUpdate(
-            { UserID: args.UserID },
+            { UserID: authResponse._id },
             { $pull: { Following: args.UserToUnfollow } },
             { new: true }
           );
@@ -894,24 +897,25 @@ const Mutation = new GraphQLObjectType({
       type: questionType,
       description: "Favourite an answer",
       args: {
-        UserID: { type: new GraphQLNonNull(GraphQLID) }, // TODO: CHANGE THIS TO GET USERID FROM TOKEN?
         QuestionID: { type: new GraphQLNonNull(GraphQLID) },
       },
-      resolve: async (parent, args) => {
+      resolve: async (parent, args, { req, res }) => {
         try {
+          const authResponse = await authController.checkAuth(req, res);
+
           let _question = await question.findOne(
             { _id: args.QuestionID },
             async (error, q) => {
               console.log(q);
               // Check if user has already favourited the answer
               const isInFavourites = q.Favourites.some((userID) => {
-                return userID.equals(args.UserID);
+                return userID.equals(authResponse._id);
               });
 
               if (!isInFavourites) {
                 // Save question id to the users favourites list
                 await profileInfo.findOneAndUpdate(
-                  { UserID: args.UserID },
+                  { UserID: authResponse._id },
                   { $push: { Favourites: args.QuestionID } },
                   { new: true }
                 );
@@ -919,7 +923,7 @@ const Mutation = new GraphQLObjectType({
                 // Save user id to favourites list of the respective question
                 await question.findOneAndUpdate(
                   { _id: args.QuestionID },
-                  { $push: { Favourites: args.UserID } },
+                  { $push: { Favourites: authResponse._id } },
                   { new: true }
                 );
               }
@@ -937,14 +941,15 @@ const Mutation = new GraphQLObjectType({
       type: questionType,
       description: "Remove favourite from an answer",
       args: {
-        UserID: { type: new GraphQLNonNull(GraphQLID) }, // TODO: CHANGE THIS TO GET USERID FROM PASSPORT-LOCAL
         QuestionID: { type: new GraphQLNonNull(GraphQLID) },
       },
-      resolve: async (parent, args) => {
+      resolve: async (parent, args, { req, res }) => {
         try {
+          const authResponse = await authController.checkAuth(req, res);
+
           // Remove question from the favourites of the user
           await profileInfo.findOneAndUpdate(
-            { UserID: args.UserID },
+            { UserID: authResponse._id },
             { $pull: { Favourites: args.QuestionID } },
             { new: true }
           );
@@ -952,7 +957,7 @@ const Mutation = new GraphQLObjectType({
           // Remove user from question favourites
           return await question.findOneAndUpdate(
             { _id: args.QuestionID },
-            { $pull: { Favourites: args.UserID } },
+            { $pull: { Favourites: authResponse._id } },
             { new: true }
           );
         } catch (e) {

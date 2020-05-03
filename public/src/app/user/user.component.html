@@ -86,7 +86,7 @@
                                 </div>
                                 
                                 <div>
-                                    <button mat-button (click)="deleteAnswer(i)">
+                                    <button mat-button (click)="deleteAnswer(i)" *ngIf="this.userData.id == this.loggedInUser.id">
                                         <mat-icon>delete</mat-icon>
                                     </button>
                                 </div>
