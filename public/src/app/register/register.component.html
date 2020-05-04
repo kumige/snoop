@@ -19,7 +19,7 @@
         <!-- prettier-ignore -->
         <mat-form-field id="textInput">
           <mat-label for="displayName">Display name</mat-label>
-          <input matInput type="text" formControlName="displayName" class="form-control" />
+          <input matInput type="text" formControlName="displayName" class="form-control" (focus)="hideDisplaynameError()"/>
           <mat-error *ngIf="(f_register.displayName.touched && f_register.displayName.invalid) || (submitted == true && f_register.displayName.invalid)">
             <mat-error *ngIf="f_register.displayName.errors.required">Display name is required.</mat-error>
             <mat-error *ngIf="f_register.displayName.errors.minlength">Display name has to be atleast 3 characters long.</mat-error>
@@ -69,12 +69,14 @@
         </button>
 
         <!-- prettier-ignore -->
-        <mat-error *ngIf="unexpectedError == true && submitted == true" class="register_errorMsg">
-          Unexpected register error, try again later
-        </mat-error>
-        <!-- prettier-ignore -->
         <mat-error class="register_errorMsg" *ngIf="f_register.password.touched && f_register.rePassword.touched && !f_register.password.invalid && !f_register.rePassword.invalid && f_register.password.value !== f_register.rePassword.value">
           Passwords do not match
+        </mat-error>
+        <!-- prettier-ignore -->
+        <mat-error class="register_errorMsg" *ngIf="f_register.displayName.touched && !f_register.displayName.invalid && takenDisplayname">Display name is taken</mat-error>
+        <!-- prettier-ignore -->
+        <mat-error class="register_errorMsg" *ngIf="unexpectedError == true && submitted == true">
+          Unexpected register error, try again later
         </mat-error>
       </div>
     </form>

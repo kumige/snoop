@@ -46,9 +46,13 @@ export class RegisterComponent implements OnInit {
       Validators.maxLength(20),
     ]),
   });
+  // Form submitted boolean
   submitted = false;
+  //Register result
   registerResult;
+  // Error booleans
   unexpectedError = false;
+  takenDisplayname = false;
 
   constructor(private api: FetchGqlService) {}
 
@@ -59,20 +63,28 @@ export class RegisterComponent implements OnInit {
   }
 
   // prettier-ignore
-  onSubmit() {
+  // Submits register form
+  async onSubmit() {
     console.log(this.registerForm.errors)
     this.submitted = true;
     console.log('Submitting registering ' + this.registerForm.valid);
     console.log(this.registerForm.controls);
+    await this.displaynameCheck()
     if (this.registerForm.controls.password.value === this.registerForm.controls.rePassword.value) {
       if (this.registerForm.valid) {
+        if(this.takenDisplayname == false){
+        console.log("really submitting")
         this.register();
+        } else {
+          console.log("display name taken")
+        }
       }
     } else {
       console.log('Different passwords');
     }
   }
 
+  // Handles registering
   private async register() {
     const query = {
       query: `mutation {
@@ -95,6 +107,30 @@ export class RegisterComponent implements OnInit {
       }
     } catch (e) {
       console.log('Error', e.message);
+    }
+  }
+
+  private async displaynameCheck() {
+    const query = {
+      query: `{
+        displaynameCheck(Displayname: "${this.registerForm.controls.displayName.value}") {
+          Displayname
+        }
+      }
+      `,
+    };
+    const user = await this.api.fetchGraphql(query);
+    console.log(user);
+    if (user.displaynameCheck != null) {
+      this.takenDisplayname = true;
+    } else {
+      this.takenDisplayname = false;
+    }
+  }
+
+  hideDisplaynameError() {
+    if (this.takenDisplayname == true) {
+      this.takenDisplayname = false;
     }
   }
 }
