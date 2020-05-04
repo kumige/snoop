@@ -30,8 +30,16 @@ export class SettingsComponent implements OnInit {
   });
 
   passwordForm = new FormGroup({
-    password: new FormControl('', []),
-    confirmPassword: new FormControl('', []),
+    password: new FormControl('', [
+      Validators.required,
+      Validators.minLength(6),
+      Validators.maxLength(20),
+    ]),
+    confirmPassword: new FormControl('', [
+      Validators.required,
+      Validators.minLength(6),
+      Validators.maxLength(20),
+    ]),
   });
 
   // Current user
@@ -40,10 +48,13 @@ export class SettingsComponent implements OnInit {
   changeDisplayNToggle = false;
   changeBioToggle = false;
   changePasswordToggle = false;
+  changePfpToggle = false;
   //Results
   displayNameResult;
   bioResult;
   passwordResult;
+  //True if display name is taken
+  takenDisplayname = false;
 
   get userData() {
     return this.user;
@@ -79,6 +90,8 @@ export class SettingsComponent implements OnInit {
     console.log(this.user);
   }
 
+  //------------------------PROFILE PICTURE------------------------
+
   //------------------------DISPLAY NAME------------------------
 
   // Submits display name
@@ -89,9 +102,15 @@ export class SettingsComponent implements OnInit {
       if (this.displayNameForm.controls.displayName.value === this.user.Displayname) {
         this.changeDisplayNToggle = false;
       } else {
-        await this.changeDisplayName();
-        this.getUser();
-        this.changeDisplayNToggle = false;
+
+        await this.displaynameCheck();
+
+        if(this.takenDisplayname == false){
+          console.log('is dp name taken: ' + this.takenDisplayname);
+          await this.changeDisplayName();
+          this.getUser();
+          this.changeDisplayNToggle = false;
+        }
       }
     }
   }
@@ -112,6 +131,12 @@ export class SettingsComponent implements OnInit {
       console.log(this.displayNameResult);
     } catch (e) {
       console.log('error', e.message);
+    }
+  }
+
+  hideDisplaynameError() {
+    if (this.takenDisplayname == true) {
+      this.takenDisplayname = false;
     }
   }
 
@@ -149,8 +174,14 @@ export class SettingsComponent implements OnInit {
 
   // Submits password
   onSubmitPassword() {
-    this.changePassword();
-    this.changePasswordToggle = false;
+    if (this.passwordForm.valid) {
+      // prettier-ignore
+      if (this.passwordForm.controls.password.value === this.passwordForm.controls.confirmPassword.value) {
+        this.changePassword();
+        this.changePasswordToggle = false;
+        this.passwordForm.reset()
+      }
+    }
   }
 
   // Handles password changing
@@ -181,5 +212,29 @@ export class SettingsComponent implements OnInit {
   }
   togglePassword() {
     this.changePasswordToggle = !this.changePasswordToggle;
+    this.passwordForm.reset();
+  }
+  togglePfp() {
+    this.changePfpToggle = !this.changePfpToggle;
+  }
+
+  // ------------------------HELP FUNCTIONS------------------------
+
+  private async displaynameCheck() {
+    const query = {
+      query: `{
+        displaynameCheck(Displayname: "${this.displayNameForm.controls.displayName.value}") {
+          Displayname
+        }
+      }
+      `,
+    };
+    const user = await this.api.fetchGraphql(query);
+    console.log(user);
+    if (user.displaynameCheck != null) {
+      this.takenDisplayname = true;
+    } else {
+      this.takenDisplayname = false;
+    }
   }
 }

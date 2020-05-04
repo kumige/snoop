@@ -423,6 +423,56 @@ const RootQuery = new GraphQLObjectType({
         }
       },
     },
+
+    usernameCheck: {
+      type: userType,
+      description: "Gets user by its username and returns only username",
+      args: {
+        Username: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve: async (parent, args) => {
+        try {
+          const temp = await user.findOne({ Username: args.Username });
+          // Setting every other variable for null for security purposes
+          temp.Displayname = null;
+          temp.Email = null;
+          temp.Password = null;
+          temp.UserType = null;
+          temp.ProfileInfo = null;
+          temp._id = null;
+          temp.__v = null;
+          return temp;
+        } catch (e) {
+          throw new Error(e.message);
+        }
+      },
+    },
+
+    displaynameCheck: {
+      type: userType,
+      description:
+        "Gets user by its display name and returns only display name",
+      args: {
+        Displayname: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve: async (parent, args) => {
+        try {
+          const temp = await user.findOne({ Displayname: args.Displayname });
+          // Setting every other variable for null for security purposes
+          temp.Username = null;
+          temp.Email = null;
+          temp.Password = null;
+          temp.UserType = null;
+          temp.ProfileInfo = null;
+          temp._id = null;
+          temp.__v = null;
+          console.log(temp);
+          return temp;
+        } catch (e) {
+          throw new Error(e.message);
+        }
+      },
+    },
   },
 });
 
@@ -703,6 +753,34 @@ const Mutation = new GraphQLObjectType({
       },
     },
 
+    modifyProfilePic: {
+      type: profileInfoType,
+      description: "modify profile picture",
+      args: {
+        ProfilePicture: {
+          description: "Image file.",
+          type: uploadScalar,
+        },
+      },
+      resolve: async (parent, args, { req, res }) => {
+        try {
+          const image = "";
+          if (args.ProfilePicture != undefined) {
+            image = await fileHelper.saveImage(ProfilePicture);
+          }
+          return await profileInfo.findOneAndUpdate(
+            { UserID: authResult._id },
+            { ProfilePicture: image },
+            {
+              new: true,
+            }
+          );
+        } catch (e) {
+          throw new Error(e.message);
+        }
+      },
+    },
+
     modifyDisplayName: {
       type: userType,
       description: "modify display name",
@@ -718,9 +796,19 @@ const Mutation = new GraphQLObjectType({
           );
 
           if (validDisplayName.valid) {
-            return await user.findByIdAndUpdate(authResult._id, args, {
-              new: true,
+            // Checks if the display name is taken
+            const sameUsernameCheck = await user.findOne({
+              Displayname: args.Displayname,
             });
+            if (sameUsernameCheck != null) {
+              console.log("Username taken");
+            } else {
+              console.log("Username not taken");
+
+              return await user.findByIdAndUpdate(authResult._id, args, {
+                new: true,
+              });
+            }
           } else {
             console.log("Unsuccessfull register: " + validDisplayName.message);
             throw new Error(validDisplayName.message);
@@ -779,7 +867,6 @@ const Mutation = new GraphQLObjectType({
           const validBio = validations.bioValidation(args.Bio);
 
           if (validBio.valid) {
-            console.log(authResult._id);
             return await profileInfo.findOneAndUpdate(
               { UserID: authResult._id },
               args,
