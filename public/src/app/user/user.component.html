@@ -37,7 +37,7 @@
         </div>
 
         <div id="countsContainer">
-          <span>Favourites: {{ profileInfo.favouriteCount }}</span>
+          <span id="{{ user.Username }}" (click)="redirectToFavourites($event)" class="qDisplayname">Favourites: {{ profileInfo.favouriteCount }}</span>
           <span>Followers: {{ profileInfo.followerCount }}</span>
           <span>Following: {{ profileInfo.followingCount }}</span>
         </div>

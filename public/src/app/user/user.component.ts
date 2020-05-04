@@ -83,6 +83,10 @@ export class UserComponent implements OnInit {
     this.router.navigate([`./user/${event.target.id}`]);
   }
 
+  redirectToFavourites(event) {
+    this.router.navigate([`./favourites/${event.target.id}`]);
+  }
+
   async getUserData() {
     const query = {
       query: `

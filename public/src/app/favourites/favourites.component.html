@@ -1,0 +1,73 @@
+<div class="page mat-app-background">
+    <div class="placeholder"></div>
+    <mat-card>
+        <mat-card-content id="feed">  
+            <h2 id="answerTitle">
+                {{ this.username }}'s Favourites
+            </h2>
+            <mat-divider></mat-divider>
+            
+            <div *ngIf="this.questions.length <= 0" style="text-align: center; margin-top: 16px;">
+                <span class="qText">You have no favourited answers</span> 
+            </div>
+
+            <ul>  
+                <li *ngFor="let q of questions; let i = index;" class="qWithA">
+                    <div class="question">
+                        <div class="horizontal">
+                            <img class="profilePicture" src="{{ uploadsUrl }}{{ q.Sender.ProfileInfo.ProfilePicture }}" alt="Profile image">
+                            <div class="vertical">
+                                <div>
+                                    <span id="{{ q.Sender.Username }}" class="qDisplayname" (click)="redirectToUser($event)">{{ q.Sender.Displayname }}</span> 
+                                    <span> asked:</span> 
+                                </div>
+                                <span>{{ q.DateTime.date }}</span> 
+                            </div>
+                        </div>
+                        <div class="textCenter">
+                            <span class="qText">{{ q.Text }}</span> 
+                        </div>
+                         
+                    </div>
+                    <div class="answer">
+                        <div class="horizontal">
+                            <img class="profilePicture" src="{{ uploadsUrl }}{{ q.Receiver.ProfileInfo.ProfilePicture }}" alt="Profile image">
+                            <div class="spaceBetween">
+                                <div class="vertical">
+                                    <div>
+                                        <span id="{{ q.Receiver.Username }}" class="qDisplayname" (click)="redirectToUser($event)">{{ q.Receiver.Displayname }}'s</span> 
+                                        <span> answer:</span> 
+                                    </div>
+                                    <span>{{ q.DateTime.date }}</span> 
+                                </div>
+                                <div *ngIf="this.loggedInUser != null">
+                                    <button mat-icon-button (click)="removeFavourite(q, i)" *ngIf="q.Favourites.includes(this.loggedInUser.id)">
+                                        <mat-icon>star</mat-icon>
+                                    </button>
+                                    <button mat-icon-button (click)="addFavourite(q, i)" *ngIf="!q.Favourites.includes(this.loggedInUser.id)">
+                                        <mat-icon>star_border</mat-icon>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        <div class="textCenter">
+                            <span class="aText">{{ q.Answer.Text }}</span>  
+                        </div>
+
+                        <div class="imgContainer">
+                            <img *ngIf="q.Answer.Image != null" class="answerImage" src="{{ uploadsUrl }}tn{{  q.Answer.Image  }}" alt="Answer image" (click)="openDialog(q.Answer.Image)">
+                        </div>
+                    </div>
+                    <mat-divider></mat-divider>
+
+                </li>  
+
+            </ul>  
+
+    
+        </mat-card-content> 
+
+    </mat-card>
+    <div class="placeholder"></div>
+</div>

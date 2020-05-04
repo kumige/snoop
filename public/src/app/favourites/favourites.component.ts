@@ -7,22 +7,23 @@ import {
   AfterViewInit,
 } from '@angular/core';
 import { FetchGqlService } from '../services/fetch-gql.service';
-import { Router } from '@angular/router';
-import { DynamicLoaderService } from '../services/dynamic-loader.service';
+import { Router, ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ImageDialogComponent } from '../image-dialog/image-dialog.component';
 import { GetAuthUserService } from '../services/get-auth-user.service';
-
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.sass'],
+  selector: 'app-favourites',
+  templateUrl: './favourites.component.html',
+  styleUrls: ['./favourites.component.sass']
 })
-export class HomeComponent implements OnInit, AfterViewInit {
+export class FavouritesComponent implements OnInit {
+
   questions;
   loaderService;
   loggedInUser;
+  username;
 
   get uploadsUrl() {
     return 'http://localhost:3000/uploads/';
@@ -33,94 +34,34 @@ export class HomeComponent implements OnInit, AfterViewInit {
   })
   viewContainerRef: ViewContainerRef;
 
-  private query = {
-    query: `
-    query {
-      qWithA(limit: 10, start: 0) {
-        id
-        Question {
-          id
-          Sender {
-            id
-            token
-            Email
-            Username
-            Displayname
-            ProfileInfo {
-              id
-              UserID
-              Bio
-              ProfilePicture
-              Following
-              Followers
-              Favourites
-              AnsweredQuestionCount
-            }
-            LastLogin
-          }
-          Receiver {
-            id
-            token
-            Email
-            Username
-            Displayname
-            ProfileInfo {
-              id
-              UserID
-              Bio
-              ProfilePicture
-              Following
-              Followers
-              Favourites
-              AnsweredQuestionCount
-            }
-            LastLogin
-          }
-          Text
-          Favourites
-          DateTime {
-            date
-            time
-          }
-        }
-        Text
-        Image
-        Giphy
-        DateTime {
-          date
-          time
-        }
-      }
-    }
-    `,
-  };
-
   constructor(
     private api: FetchGqlService,
     private router: Router,
-    @Inject(DynamicLoaderService) service,
+    private route: ActivatedRoute,
     public dialog: MatDialog,
-    private auth: GetAuthUserService
+    private auth: GetAuthUserService,
+    private snackBar: MatSnackBar,
   ) {
-    this.loaderService = service;
   }
 
   ngOnInit(): void {
+    this.route.params.subscribe((params) => {
+      this.username = params.username;
+      
+    });
+
     this.auth.getLoggedInUser().then(user => {
       this.loggedInUser = user
       if (this.loggedInUser != null) {
-        // Alternative query
         this.getQs();
       } else {
-        this.getQs();
+        this.snackBar.open('You must be logged in to access that page.', 'Close', {
+          duration: 5000,
+        });
+        this.router.navigate([`./home`]);
+
       }
     })
-  }
-
-  // Load side profile card
-  ngAfterViewInit(): void {
-    this.loaderService.setRootViewContainerRef(this.viewContainerRef);
-    this.loaderService.addDynamicComponent();
   }
 
   redirectToUser(event) {
@@ -135,11 +76,66 @@ export class HomeComponent implements OnInit, AfterViewInit {
   }
 
   private async getQs() {
-    this.questions = await this.api.fetchGraphql(this.query);
-    this.questions = this.questions.qWithA;
+    const query = {
+      query: `
+      query{
+        favouriteAnswers(Username: "${this.username}"){
+          id
+          Sender {
+            id
+            Username
+            Displayname
+            ProfileInfo {
+              id
+              UserID
+              Bio
+              ProfilePicture
+              Following
+              Followers
+              Favourites
+              AnsweredQuestionCount
+            }
+          } 
+          Receiver {
+            id
+            Username
+            Displayname
+            ProfileInfo {
+              id
+              UserID
+              Bio
+              ProfilePicture
+              Following
+              Followers
+              Favourites
+              AnsweredQuestionCount
+            }
+          } 
+          Text
+          Favourites
+          DateTime {
+            date
+            time
+          }
+          Answer {
+            id
+            Text
+            Image
+            Giphy
+            DateTime {
+              date
+              time
+            }
+          } 
+        }
+      }
+      `,
+    };
+
+    this.questions = await this.api.fetchGraphql(query);
     console.log(this.questions)
 
-    
+    this.questions = this.questions.favouriteAnswers;
   }
 
   async addFavourite(q, index) {
@@ -187,7 +183,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
 
   toggleStar(index) {
     
-    const favArray = this.questions[index].Question.Favourites
+    const favArray = this.questions[index].Favourites
     console.log(favArray)
     if(favArray.includes(this.loggedInUser.id)) {
       const i = favArray.indexOf(this.loggedInUser.id)
@@ -196,4 +192,5 @@ export class HomeComponent implements OnInit, AfterViewInit {
       favArray.push(this.loggedInUser.id)
     }
   }
+
 }

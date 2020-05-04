@@ -344,12 +344,13 @@ const RootQuery = new GraphQLObjectType({
       type: new GraphQLList(questionType),
       description: "Get a list of a users favourited answers",
       args: {
-        id: { type: GraphQLID },
+        Username: { type: GraphQLString },
       },
       resolve: async (parent, args) => {
         // Get profile info where the favourites is located
-        const userProfile = await profileInfo.findOne({ UserID: args.id });
-
+        const _user = await user.findOne({ Username: args.Username });
+        const userProfile = await profileInfo.findOne({ UserID: _user._id })
+        
         // Create a list of questions from the question IDs
         const favouriteArray = Promise.all(
           userProfile.Favourites.map(async (qID) => {

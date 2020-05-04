@@ -31,6 +31,7 @@ import { ImageDialogComponent } from './image-dialog/image-dialog.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RegisterComponent } from './register/register.component';
 import { SettingsComponent } from './settings/settings.component';
+import { FavouritesComponent } from './favourites/favourites.component';
 
 @NgModule({
   declarations: [
@@ -43,6 +44,7 @@ import { SettingsComponent } from './settings/settings.component';
     ProfileCardComponent,
     ImageDialogComponent,
     SettingsComponent,
+    FavouritesComponent,
   ],
   imports: [
     BrowserModule,
