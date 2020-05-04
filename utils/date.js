@@ -10,4 +10,27 @@ const now = () => {
   };
 };
 
-module.exports = { now };
+const sortList = (qList) => {
+  qList.sort((a, b) => {
+    const dateA = a.DateTime.date;
+    const timeA = a.DateTime.time;
+    const dateB = b.DateTime.date;
+    const timeB = b.DateTime.time;
+    switch (true) {
+      case dateA < dateB:
+        return -1;
+      case dateA > dateB:
+        return 1;
+      case timeA < timeB:
+        return -1;
+      case timeA > timeB:
+        return 1;
+      default:
+        return 0;
+    }
+  });
+
+  return qList
+}
+
+module.exports = { now, sortList };

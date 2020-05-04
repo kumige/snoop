@@ -13,6 +13,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ImageDialogComponent } from '../image-dialog/image-dialog.component';
 import { GetAuthUserService } from '../services/get-auth-user.service';
 import { environment } from 'src/environments/environment';
+import { element } from 'protractor';
 
 @Component({
   selector: 'app-home',
@@ -20,7 +21,7 @@ import { environment } from 'src/environments/environment';
   styleUrls: ['./home.component.sass'],
 })
 export class HomeComponent implements OnInit, AfterViewInit {
-  questions;
+  questions = [];
   loaderService;
   loggedInUser;
 
@@ -38,7 +39,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
     private router: Router,
     @Inject(DynamicLoaderService) service,
     public dialog: MatDialog,
-    private auth: GetAuthUserService
+    private auth: GetAuthUserService,
   ) {
     this.loaderService = service;
   }
@@ -52,13 +53,13 @@ export class HomeComponent implements OnInit, AfterViewInit {
         console.log(this.loggedInUser)
         // If user has followed people, change the home page feed to followed people posts
         if(this.loggedInUser.ProfileInfo.Following.length > 0){
-          this.getFollowingQs();
+          this.getFollowingQs(0);
         } else {
-          this.getQs();
+          this.getQs(0);
         }
 
       } else {
-        this.getQs();
+        this.getQs(0);
       }
     })
   }
@@ -80,11 +81,11 @@ export class HomeComponent implements OnInit, AfterViewInit {
     });
   }
 
-  private async getQs() {
+  private async getQs(start) {
     const query = {
       query: `
       query{
-        qWithA(limit: 10, start: 0){
+        qWithA(limit: 10, start: ${start}){
           id
           Sender {
             id
@@ -136,15 +137,18 @@ export class HomeComponent implements OnInit, AfterViewInit {
       }
       `,
     };
-    this.questions = await this.api.fetchGraphql(query);
-    this.questions = this.questions.qWithA;    
+    const res = await this.api.fetchGraphql(query);
+    res.qWithA.forEach(element => {
+      this.questions.push(element)
+    });
+    console.log(this.questions)
   }
 
-  private async getFollowingQs() {
+  private async getFollowingQs(start) {
     const query = {
       query: `
       query{
-        qWithAFollowing(UserID: "${this.loggedInUser.id}"){
+        qWithAFollowing(UserID: "${this.loggedInUser.id}", limit: 10, start: ${start}){
           id
           Sender {
             id
@@ -197,8 +201,27 @@ export class HomeComponent implements OnInit, AfterViewInit {
       `,
     };
 
-    this.questions = await this.api.fetchGraphql(query);
-    this.questions = this.questions.qWithAFollowing;
+    const res = await this.api.fetchGraphql(query);
+    res.qWithAFollowing.forEach(element => {
+      this.questions.push(element)
+    });
+
+    console.log(this.questions)
+
+  }
+
+  loadMore() {
+    const answerCount = document.getElementsByClassName("qWithA").length
+    if(this.loggedInUser) {
+      if(this.loggedInUser.ProfileInfo.Following.length > 0){
+        this.getFollowingQs(answerCount);
+      } else {
+        this.getQs(answerCount);
+      }
+    } else {
+      this.getQs(answerCount);
+    }
+    
   }
 
   async addFavourite(q, index) {

@@ -238,7 +238,7 @@ const RootQuery = new GraphQLObjectType({
             qList.push(q);
           }
         });
-        console.log(qList)
+        console.log(qList);
 
         return qList;
       },
@@ -283,10 +283,7 @@ const RootQuery = new GraphQLObjectType({
         let qList = [];
 
         for (let userID of profile.Following) {
-          const questions = await question
-            .find({ Receiver: userID })
-            .skip(args.start)
-            .limit(args.limit);
+          const questions = await question.find({ Receiver: userID });
 
           questions.forEach((singleQ) => {
             if (singleQ.Answer != undefined) {
@@ -295,7 +292,12 @@ const RootQuery = new GraphQLObjectType({
           });
         }
 
-        return qList;
+        let newQList = date.sortList(qList)
+
+        const limit = args.start + args.limit;
+        newQList = newQList.slice(args.start, limit);
+
+        return newQList;
       },
     },
 
