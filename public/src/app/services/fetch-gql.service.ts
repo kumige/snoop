@@ -1,10 +1,12 @@
 import { Injectable } from '@angular/core';
+import { environment } from 'src/environments/environment';
+
 
 @Injectable({
   providedIn: 'root',
 })
 export class FetchGqlService {
-  private apiURL = 'http://localhost:3000/graphql'
+  private apiURL = environment.gqlUrl
 
   constructor() {}
 

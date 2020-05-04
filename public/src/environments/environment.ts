@@ -3,7 +3,9 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  uploadUrl: "http://localhost:3000/uploads/",
+  gqlUrl: "http://localhost:3000/graphql",
 };
 
 /*

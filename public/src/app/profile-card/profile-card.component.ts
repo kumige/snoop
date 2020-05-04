@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FetchGqlService } from '../services/fetch-gql.service';
 import { Router } from '@angular/router';
 import { GetAuthUserService } from '../services/get-auth-user.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-profile-card',
@@ -17,7 +18,7 @@ export class ProfileCardComponent implements OnInit {
   }
 
   get uploadsUrl() {
-    return 'http://localhost:3000/uploads/';
+    return environment.uploadUrl;
   }
 
   constructor(

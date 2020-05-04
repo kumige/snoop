@@ -12,6 +12,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ImageDialogComponent } from '../image-dialog/image-dialog.component';
 import { GetAuthUserService } from '../services/get-auth-user.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-favourites',
@@ -26,7 +27,7 @@ export class FavouritesComponent implements OnInit {
   username;
 
   get uploadsUrl() {
-    return 'http://localhost:3000/uploads/';
+    return environment.uploadUrl;
   }
 
   @ViewChild('dynamic', {

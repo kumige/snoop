@@ -17,6 +17,7 @@ import { ErrorStateMatcher } from '@angular/material/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpClient } from '@angular/common/http';
 import { GetAuthUserService } from '../services/get-auth-user.service';
+import { environment } from 'src/environments/environment';
 
 /** Error when invalid control is dirty, touched, or submitted. */
 export class MyErrorStateMatcher implements ErrorStateMatcher {
@@ -43,9 +44,10 @@ export class ReceivedQuestionsComponent implements OnInit {
   };
   loggedInUser;
 
-  gqlUrl = 'http://localhost:3000/graphql';
+  gqlUrl = environment.gqlUrl;
+  
   get uploadsUrl() {
-    return 'http://localhost:3000/uploads/';
+    return environment.uploadUrl;
   }
 
   get currentFile() {

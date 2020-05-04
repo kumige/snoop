@@ -185,11 +185,7 @@ const RootQuery = new GraphQLObjectType({
         const questions = await question
           .find()
           .skip(args.start)
-          .limit(args.limit)
-          .populate("Sender")
-          .populate("Receiver")
-          .populate("Answer")
-          .exec();
+          .limit(args.limit);
 
         return questions;
       },
@@ -227,19 +223,24 @@ const RootQuery = new GraphQLObjectType({
     },
 
     qWithA: {
-      type: new GraphQLList(answerType),
+      type: new GraphQLList(questionType),
       description: "Get questions with an answer.",
       args: {
         limit: { type: GraphQLInt, defaultValue: 10 },
         start: { type: GraphQLInt, defaultValue: 0 },
       },
       resolve: async (parent, args) => {
-        const questions = await answer
-          .find()
-          .skip(args.start)
-          .limit(args.limit);
+        const allQs = await question.find().skip(args.start).limit(args.limit);
+        const qList = [];
 
-        return questions;
+        allQs.forEach((q) => {
+          if (q.Answer != undefined) {
+            qList.push(q);
+          }
+        });
+        console.log(qList)
+
+        return qList;
       },
     },
 
@@ -264,6 +265,35 @@ const RootQuery = new GraphQLObjectType({
             qList.push(singleQ);
           }
         });
+
+        return qList;
+      },
+    },
+
+    qWithAFollowing: {
+      type: new GraphQLList(questionType),
+      description: "Get questions with answers of followed people.",
+      args: {
+        limit: { type: GraphQLInt, defaultValue: 10 },
+        start: { type: GraphQLInt, defaultValue: 0 },
+        UserID: { type: GraphQLID },
+      },
+      resolve: async (parent, args) => {
+        const profile = await profileInfo.findOne({ UserID: args.UserID });
+        let qList = [];
+
+        for (let userID of profile.Following) {
+          const questions = await question
+            .find({ Receiver: userID })
+            .skip(args.start)
+            .limit(args.limit);
+
+          questions.forEach((singleQ) => {
+            if (singleQ.Answer != undefined) {
+              qList.push(singleQ);
+            }
+          });
+        }
 
         return qList;
       },
@@ -349,8 +379,8 @@ const RootQuery = new GraphQLObjectType({
       resolve: async (parent, args) => {
         // Get profile info where the favourites is located
         const _user = await user.findOne({ Username: args.Username });
-        const userProfile = await profileInfo.findOne({ UserID: _user._id })
-        
+        const userProfile = await profileInfo.findOne({ UserID: _user._id });
+
         // Create a list of questions from the question IDs
         const favouriteArray = Promise.all(
           userProfile.Favourites.map(async (qID) => {
@@ -453,9 +483,9 @@ const Mutation = new GraphQLObjectType({
             DateTime: date.now(),
           });
 
-          if(args.Text.toString().length <= 256){
+          if (args.Text.toString().length <= 256) {
             return await newQuestion.save();
-          } else return null
+          } else return null;
         } catch (error) {
           console.log(error.message);
         }
@@ -523,7 +553,6 @@ const Mutation = new GraphQLObjectType({
           if (
             loggedInUser._id.toString() == relatedQuestion.Receiver.toString()
           ) {
-
             if (args.Image != undefined) {
               const image = args.Image;
               newAnswer.Image = await fileHelper.saveImage(image);
@@ -552,10 +581,9 @@ const Mutation = new GraphQLObjectType({
             nProfile[0].AnsweredQuestionCount = answerCount;
             nProfile[0].save();
 
-            if(args.Text.toString().length <= 256) {
+            if (args.Text.toString().length <= 256) {
               return aToReturn;
-            } else return null
-            
+            } else return null;
           } else return null;
         } catch (error) {
           console.log(error.message);
@@ -833,8 +861,8 @@ const Mutation = new GraphQLObjectType({
       resolve: async (parent, args, { req, res }) => {
         try {
           const authResponse = await authController.checkAuth(req, res);
-          console.log(args.UserToFollow)
-          console.log(authResponse._id)
+          console.log(args.UserToFollow);
+          console.log(authResponse._id);
 
           let modifiedProfile = await profileInfo.findOne(
             { UserID: args.UserToFollow },
@@ -863,7 +891,7 @@ const Mutation = new GraphQLObjectType({
             }
           );
 
-          console.log(modifiedProfile)
+          console.log(modifiedProfile);
           return modifiedProfile;
         } catch (e) {
           throw new Error(e.message);
@@ -880,7 +908,7 @@ const Mutation = new GraphQLObjectType({
       resolve: async (parent, args, { req, res }) => {
         try {
           const authResponse = await authController.checkAuth(req, res);
-          
+
           // Remove user id from followers list of the respective user
           await profileInfo.findOneAndUpdate(
             { UserID: args.UserToUnfollow },

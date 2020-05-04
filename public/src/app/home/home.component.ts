@@ -12,7 +12,7 @@ import { DynamicLoaderService } from '../services/dynamic-loader.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ImageDialogComponent } from '../image-dialog/image-dialog.component';
 import { GetAuthUserService } from '../services/get-auth-user.service';
-
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-home',
@@ -25,75 +25,13 @@ export class HomeComponent implements OnInit, AfterViewInit {
   loggedInUser;
 
   get uploadsUrl() {
-    return 'http://localhost:3000/uploads/';
+    return environment.uploadUrl;
   }
 
   @ViewChild('dynamic', {
     read: ViewContainerRef,
   })
   viewContainerRef: ViewContainerRef;
-
-  private query = {
-    query: `
-    query {
-      qWithA(limit: 10, start: 0) {
-        id
-        Question {
-          id
-          Sender {
-            id
-            token
-            Email
-            Username
-            Displayname
-            ProfileInfo {
-              id
-              UserID
-              Bio
-              ProfilePicture
-              Following
-              Followers
-              Favourites
-              AnsweredQuestionCount
-            }
-            LastLogin
-          }
-          Receiver {
-            id
-            token
-            Email
-            Username
-            Displayname
-            ProfileInfo {
-              id
-              UserID
-              Bio
-              ProfilePicture
-              Following
-              Followers
-              Favourites
-              AnsweredQuestionCount
-            }
-            LastLogin
-          }
-          Text
-          Favourites
-          DateTime {
-            date
-            time
-          }
-        }
-        Text
-        Image
-        Giphy
-        DateTime {
-          date
-          time
-        }
-      }
-    }
-    `,
-  };
 
   constructor(
     private api: FetchGqlService,
@@ -108,9 +46,17 @@ export class HomeComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.auth.getLoggedInUser().then(user => {
       this.loggedInUser = user
+
+      // Check if the user is logged in
       if (this.loggedInUser != null) {
-        // Alternative query
-        this.getQs();
+        console.log(this.loggedInUser)
+        // If user has followed people, change the home page feed to followed people posts
+        if(this.loggedInUser.ProfileInfo.Following.length > 0){
+          this.getFollowingQs();
+        } else {
+          this.getQs();
+        }
+
       } else {
         this.getQs();
       }
@@ -135,11 +81,124 @@ export class HomeComponent implements OnInit, AfterViewInit {
   }
 
   private async getQs() {
-    this.questions = await this.api.fetchGraphql(this.query);
-    this.questions = this.questions.qWithA;
-    console.log(this.questions)
+    const query = {
+      query: `
+      query{
+        qWithA(limit: 10, start: 0){
+          id
+          Sender {
+            id
+            Username
+            Displayname
+            ProfileInfo {
+              id
+              UserID
+              Bio
+              ProfilePicture
+              Following
+              Followers
+              Favourites
+              AnsweredQuestionCount
+            }
+          } 
+          Receiver {
+            id
+            Username
+            Displayname
+            ProfileInfo {
+              id
+              UserID
+              Bio
+              ProfilePicture
+              Following
+              Followers
+              Favourites
+              AnsweredQuestionCount
+            }
+          } 
+          Text
+          Favourites
+          DateTime {
+            date
+            time
+          } 
+          Answer {
+            id
+            Text
+            Image
+            Giphy
+            DateTime {
+              date
+              time
+            }
+          }
+        }
+      }
+      `,
+    };
+    this.questions = await this.api.fetchGraphql(query);
+    this.questions = this.questions.qWithA;    
+  }
 
-    
+  private async getFollowingQs() {
+    const query = {
+      query: `
+      query{
+        qWithAFollowing(UserID: "${this.loggedInUser.id}"){
+          id
+          Sender {
+            id
+            Username
+            Displayname
+            ProfileInfo {
+              id
+              UserID
+              Bio
+              ProfilePicture
+              Following
+              Followers
+              Favourites
+              AnsweredQuestionCount
+            }
+          } 
+          Receiver {
+            id
+            Username
+            Displayname
+            ProfileInfo {
+              id
+              UserID
+              Bio
+              ProfilePicture
+              Following
+              Followers
+              Favourites
+              AnsweredQuestionCount
+            }
+          } 
+          Text
+          Favourites
+          DateTime {
+            date
+            time
+          } 
+          Answer {
+            id
+            Text
+            Image
+            Giphy
+            DateTime {
+              date
+              time
+            }
+          }
+        }
+      }
+      `,
+    };
+
+    this.questions = await this.api.fetchGraphql(query);
+    this.questions = this.questions.qWithAFollowing;
   }
 
   async addFavourite(q, index) {
@@ -186,9 +245,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   }
 
   toggleStar(index) {
-    
-    const favArray = this.questions[index].Question.Favourites
-    console.log(favArray)
+    const favArray = this.questions[index].Favourites
     if(favArray.includes(this.loggedInUser.id)) {
       const i = favArray.indexOf(this.loggedInUser.id)
       favArray.splice(i, 1)

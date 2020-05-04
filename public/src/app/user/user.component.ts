@@ -13,6 +13,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ImageDialogComponent } from '../image-dialog/image-dialog.component';
 import { Observable } from 'rxjs';
 import { GetAuthUserService } from '../services/get-auth-user.service';
+import { environment } from 'src/environments/environment';
 
 /** Error when invalid control is dirty, touched, or submitted. */
 export class MyErrorStateMatcher implements ErrorStateMatcher {
@@ -37,7 +38,7 @@ export class UserComponent implements OnInit {
   loggedInUser;
 
   get uploadsUrl() {
-    return 'http://localhost:3000/uploads/';
+    return environment.uploadUrl;
   }
 
   get user() {
