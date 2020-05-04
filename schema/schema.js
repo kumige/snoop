@@ -686,28 +686,51 @@ const Mutation = new GraphQLObjectType({
           // If all the user inputs are valid, registers new user
           // If all of the user inputs are not valid, throws an error saying what is wrong
           if (valid.valid) {
-            const hashedPass = await bcrypt.hash(args.Password, saltRound);
+            const sameDisplaynameCheck = await user.findOne({
+              Displayname: args.Displayname,
+            });
 
-            let newProfile = new profileInfo(args.ProfileInfo);
-            newProfile.ProfilePicture = "default.png";
+            const sameUsernameCheck = await user.findOne({
+              Username: args.Username,
+            });
 
-            const userWithHashAndProfile = {
-              ...args,
-              Password: hashedPass,
-              ProfileInfo: newProfile,
-              UserType: 0,
-            };
+            // Checks if the username and display name have already been taken
+            // If they are, returns error
+            // If they are not, registers user
+            if (sameUsernameCheck == null) {
+              if (sameDisplaynameCheck == null) {
+                console.log("Displayname not taken");
 
-            //console.log(userWithHashAndProfile.Password);
-            const newUser = new user(userWithHashAndProfile);
+                const hashedPass = await bcrypt.hash(args.Password, saltRound);
 
-            // Filling the profile info
-            newProfile.UserID = newUser.id;
-            newProfile.Bio = "";
-            newProfile.AnsweredQuestionCount = 0;
+                let newProfile = new profileInfo(args.ProfileInfo);
+                newProfile.ProfilePicture = "default.png";
 
-            await newProfile.save();
-            return await newUser.save();
+                const userWithHashAndProfile = {
+                  ...args,
+                  Password: hashedPass,
+                  ProfileInfo: newProfile,
+                  UserType: 0,
+                };
+
+                //console.log(userWithHashAndProfile.Password);
+                const newUser = new user(userWithHashAndProfile);
+
+                // Filling the profile info
+                newProfile.UserID = newUser.id;
+                newProfile.Bio = "";
+                newProfile.AnsweredQuestionCount = 0;
+
+                await newProfile.save();
+                return await newUser.save();
+              } else {
+                console.log("Displayname taken");
+                throw new Error("Displayname taken");
+              }
+            } else {
+              console.log("Username taken");
+              throw new Error("Username taken");
+            }
           } else {
             console.log("Unsuccessfull register: " + valid.message);
             throw new Error(valid.message);
@@ -791,23 +814,24 @@ const Mutation = new GraphQLObjectType({
         try {
           const authResult = await authController.checkAuth(req, res);
 
+          // Checks if the display name is valid
           const validDisplayName = validations.displayNameValidation(
             args.Displayname
           );
 
           if (validDisplayName.valid) {
             // Checks if the display name is taken
-            const sameUsernameCheck = await user.findOne({
+            const sameDisplaynameCheck = await user.findOne({
               Displayname: args.Displayname,
             });
-            if (sameUsernameCheck != null) {
-              console.log("Username taken");
-            } else {
-              console.log("Username not taken");
-
+            if (sameDisplaynameCheck == null) {
+              console.log("Displayname not taken");
               return await user.findByIdAndUpdate(authResult._id, args, {
                 new: true,
               });
+            } else {
+              console.log("Displayname taken");
+              throw new Error("Displayname taken");
             }
           } else {
             console.log("Unsuccessfull register: " + validDisplayName.message);

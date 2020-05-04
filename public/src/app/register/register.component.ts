@@ -53,6 +53,7 @@ export class RegisterComponent implements OnInit {
   // Error booleans
   unexpectedError = false;
   takenDisplayname = false;
+  takenUsername = false;
 
   constructor(private api: FetchGqlService) {}
 
@@ -70,13 +71,14 @@ export class RegisterComponent implements OnInit {
     console.log('Submitting registering ' + this.registerForm.valid);
     console.log(this.registerForm.controls);
     await this.displaynameCheck()
+    await this.usernameCheck()
     if (this.registerForm.controls.password.value === this.registerForm.controls.rePassword.value) {
       if (this.registerForm.valid) {
-        if(this.takenDisplayname == false){
+        if(this.takenDisplayname == false || this.takenUsername == false){
         console.log("really submitting")
         this.register();
         } else {
-          console.log("display name taken")
+          console.log("display name or username taken")
         }
       }
     } else {
@@ -131,6 +133,30 @@ export class RegisterComponent implements OnInit {
   hideDisplaynameError() {
     if (this.takenDisplayname == true) {
       this.takenDisplayname = false;
+    }
+  }
+
+  private async usernameCheck() {
+    const query = {
+      query: `{
+        usernameCheck(Username: "${this.registerForm.controls.username.value}") {
+          Username
+        }
+      }
+      `,
+    };
+    const user = await this.api.fetchGraphql(query);
+    console.log(user);
+    if (user.usernameCheck != null) {
+      this.takenUsername = true;
+    } else {
+      this.takenUsername = false;
+    }
+  }
+
+  hideUsernameError() {
+    if (this.takenUsername == true) {
+      this.takenUsername = false;
     }
   }
 }

@@ -206,6 +206,7 @@ export class SettingsComponent implements OnInit {
   // ------------------------TOGGLES------------------------
   toggleDisplayName() {
     this.changeDisplayNToggle = !this.changeDisplayNToggle;
+    this.takenDisplayname = false;
   }
   toggleBio() {
     this.changeBioToggle = !this.changeBioToggle;

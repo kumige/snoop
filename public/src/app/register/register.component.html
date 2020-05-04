@@ -6,7 +6,7 @@
         <!-- prettier-ignore -->
         <mat-form-field id="textInput">
           <mat-label for="username">Username</mat-label>
-          <input matInput type="text" formControlName="username" class="form-control" />
+          <input matInput type="text" formControlName="username" class="form-control" (focus)="hideUsernameError()"/>
           <mat-error *ngIf="(f_register.username.touched && f_register.username.invalid) || (submitted == true && f_register.username.invalid)">
             <mat-error *ngIf="f_register.username.errors.required">Username is required.</mat-error>
             <mat-error *ngIf="f_register.username.errors.minlength">Username has to be atleast 5 characters long.</mat-error>
@@ -70,13 +70,15 @@
 
         <!-- prettier-ignore -->
         <mat-error class="register_errorMsg" *ngIf="f_register.password.touched && f_register.rePassword.touched && !f_register.password.invalid && !f_register.rePassword.invalid && f_register.password.value !== f_register.rePassword.value">
-          Passwords do not match
+          Passwords do not match.
         </mat-error>
         <!-- prettier-ignore -->
-        <mat-error class="register_errorMsg" *ngIf="f_register.displayName.touched && !f_register.displayName.invalid && takenDisplayname">Display name is taken</mat-error>
+        <mat-error class="register_errorMsg" *ngIf="f_register.displayName.touched && !f_register.displayName.invalid && takenDisplayname">Display name is taken.</mat-error>
+        <!-- prettier-ignore -->
+        <mat-error class="register_errorMsg" *ngIf="f_register.username.touched && !f_register.username.invalid && takenUsername">Username is taken.</mat-error>
         <!-- prettier-ignore -->
         <mat-error class="register_errorMsg" *ngIf="unexpectedError == true && submitted == true">
-          Unexpected register error, try again later
+          Unexpected register error, try again later.
         </mat-error>
       </div>
     </form>
