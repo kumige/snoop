@@ -699,8 +699,6 @@ const Mutation = new GraphQLObjectType({
             // If they are not, registers user
             if (sameUsernameCheck == null) {
               if (sameDisplaynameCheck == null) {
-                console.log("Displayname not taken");
-
                 const hashedPass = await bcrypt.hash(args.Password, saltRound);
 
                 let newProfile = new profileInfo(args.ProfileInfo);
