@@ -7,6 +7,7 @@ import {
 } from '@angular/forms';
 import { FetchGqlService } from '../services/fetch-gql.service';
 import { customValidator } from './customValidators';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-register',
@@ -54,10 +55,14 @@ export class RegisterComponent implements OnInit {
   unexpectedError = false;
   takenDisplayname = false;
   takenUsername = false;
+  // Current user
+  user;
 
-  constructor(private api: FetchGqlService) {}
+  constructor(private api: FetchGqlService, private router: Router) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.getUser();
+  }
 
   get f_register() {
     return this.registerForm.controls;
@@ -74,7 +79,7 @@ export class RegisterComponent implements OnInit {
     await this.usernameCheck()
     if (this.registerForm.controls.password.value === this.registerForm.controls.rePassword.value) {
       if (this.registerForm.valid) {
-        if(this.takenDisplayname == false || this.takenUsername == false){
+        if(this.takenDisplayname == false && this.takenUsername == false){
         console.log("really submitting")
         this.register();
         } else {
@@ -105,7 +110,7 @@ export class RegisterComponent implements OnInit {
         console.log('Unexpected error');
       } else {
         this.unexpectedError = false;
-        //TODO redirect
+        this.router.navigate(['./login']);
       }
     } catch (e) {
       console.log('Error', e.message);
@@ -157,6 +162,25 @@ export class RegisterComponent implements OnInit {
   hideUsernameError() {
     if (this.takenUsername == true) {
       this.takenUsername = false;
+    }
+  }
+
+  // Gets current users data if user is logged in
+  private async getUser() {
+    const query = {
+      query: `{
+        userCheck {
+          Username,Displayname,Email,ProfileInfo{Bio}
+        }
+      }`,
+    };
+
+    this.user = await this.api.fetchGraphql(query);
+    this.user = this.user.userCheck;
+    console.log(this.user);
+    if (this.user == null) {
+    } else {
+      this.router.navigate(['./home']);
     }
   }
 }

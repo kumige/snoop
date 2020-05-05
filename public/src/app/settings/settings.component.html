@@ -1,4 +1,4 @@
-<div class="page mat-app-background">
+<div class="page mat-app-background" *ngIf="loggedIn; else notfound">
   <h2>Profile settings</h2>
 
   <!-- PROFILE PICTURE CHANGE -->
@@ -174,3 +174,11 @@
     </form>
   </mat-card>
 </div>
+
+<ng-template #notfound>
+  <div class="page mat-app-background">
+    <mat-card class="card">
+      <mat-error class="titles">Error: Not logged in.</mat-error>
+    </mat-card>
+  </div>
+</ng-template>

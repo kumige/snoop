@@ -44,6 +44,8 @@ export class SettingsComponent implements OnInit {
 
   // Current user
   user;
+  // Boolean to check if the user is logged in
+  loggedIn = false;
   //Toggles
   changeDisplayNToggle = false;
   changeBioToggle = false;
@@ -88,6 +90,11 @@ export class SettingsComponent implements OnInit {
     this.user = await this.api.fetchGraphql(query);
     this.user = this.user.userCheck;
     console.log(this.user);
+    if (this.user == null) {
+      this.loggedIn = false;
+    } else {
+      this.loggedIn = true;
+    }
   }
 
   //------------------------PROFILE PICTURE------------------------
@@ -96,7 +103,7 @@ export class SettingsComponent implements OnInit {
 
   // Submits display name
   async onSubmitDN() {
-    if (this.displayNameForm.valid) {
+    if (this.displayNameForm.valid && this.loggedIn) {
       // prettier-ignore
       // Checks if display name has been changed, if not, closes edit window
       if (this.displayNameForm.controls.displayName.value === this.user.Displayname) {
@@ -144,7 +151,7 @@ export class SettingsComponent implements OnInit {
 
   // Submits bio
   async onSubmitBio() {
-    if (this.bioForm.valid) {
+    if (this.bioForm.valid && this.loggedIn) {
       await this.changeBio();
       this.getUser();
       this.changeBioToggle = false;
@@ -174,7 +181,7 @@ export class SettingsComponent implements OnInit {
 
   // Submits password
   onSubmitPassword() {
-    if (this.passwordForm.valid) {
+    if (this.passwordForm.valid && this.loggedIn) {
       // prettier-ignore
       if (this.passwordForm.controls.password.value === this.passwordForm.controls.confirmPassword.value) {
         this.changePassword();
