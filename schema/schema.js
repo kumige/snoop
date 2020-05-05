@@ -1219,6 +1219,63 @@ const Mutation = new GraphQLObjectType({
         }
       },
     },
+
+    blockUser: {
+      type: userType,
+      description: "Block a user",
+      args: {
+        BlockedUsers: { type: new GraphQLNonNull(GraphQLID) },
+      },
+      resolve: async (parent, args) => {
+        try {
+          // Gets the user who is blocking another user
+          const authResponse = await authController.checkAuth(req, res);
+
+          // Checks if the user to be blocked exists
+          await user.findById(args.BlockedUsers);
+
+          if (!authResponse.BlockedUsers.includes(args.BlockedUsers)) {
+            console.log("doesnt include");
+            return await user.findByIdAndUpdate(
+              authResponse._id,
+              { $push: { BlockedUsers: args.BlockedUsers } },
+              { new: true }
+            );
+          } else {
+            throw new Error("User already blocked");
+          }
+        } catch (e) {
+          throw new Error(e.message);
+        }
+      },
+    },
+
+    removeBlock: {
+      type: userType,
+      description: "Block a user",
+      args: {
+        BlockedUsers: { type: new GraphQLNonNull(GraphQLID) },
+      },
+      resolve: async (parent, args) => {
+        try {
+          // Gets the user who is blocking another user
+          const authResponse = await authController.checkAuth(req, res);
+
+          if (authResponse.BlockedUsers.includes(args.BlockedUsers)) {
+            console.log("does include");
+            return await user.findByIdAndUpdate(
+              authResponse._id,
+              { $pull: { BlockedUsers: args.BlockedUsers } },
+              { new: true }
+            );
+          } else {
+            throw new Error("User not blocked");
+          }
+        } catch (e) {
+          throw new Error(e.message);
+        }
+      },
+    },
   }),
 });
 
