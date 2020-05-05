@@ -36,7 +36,7 @@
           <mat-error *ngIf="(f_register.email.touched && f_register.email.invalid) || (submitted == true && f_register.email.invalid)">
             <mat-error *ngIf="f_register.email.errors.required">Email is required.</mat-error>
             <mat-error *ngIf="f_register.email.errors.email">Please, enter valid email address.</mat-error>
-            <mat-error *ngIf="f_register.email.errors.maxlength && !f_register.email.errors.email">Email can not be longer than 30 characters.</mat-error>
+            <mat-error *ngIf="f_register.email.errors.maxlength && !f_register.email.errors.email">Email can not be longer than 80 characters.</mat-error>
             <mat-error *ngIf="f_register.email.errors.hasSpaces && !f_register.email.errors.minlength && !f_register.email.errors.maxlength && !f_register.email.errors.email">Email can not contain spaces.</mat-error>
           </mat-error>
         </mat-form-field>

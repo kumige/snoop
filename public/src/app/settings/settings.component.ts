@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FetchGqlService } from '../services/fetch-gql.service';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { customValidator } from '../register/customValidators';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-settings',
@@ -64,6 +65,11 @@ export class SettingsComponent implements OnInit {
   //True if display name is taken
   takenDisplayname = false;
 
+  gqlUrl = 'http://localhost:3000/graphql';
+  options = {
+    headers: { Authorization: 'Bearer ' + localStorage.getItem('token') },
+  };
+
   get userData() {
     return this.user;
   }
@@ -80,7 +86,7 @@ export class SettingsComponent implements OnInit {
     return this.pfpForm.controls;
   }
 
-  constructor(private api: FetchGqlService) {}
+  constructor(private api: FetchGqlService, private http: HttpClient) {}
 
   ngOnInit(): void {
     this.getUser();
@@ -124,21 +130,32 @@ export class SettingsComponent implements OnInit {
   // Handles display name changing
   private async changePfp() {
     console.log(this.pfpForm.controls.fileSource.value);
-    const query = {
-      query: `mutation {
-        modifyProfilePic(ProfilePicture:"${this.pfpForm.controls.fileSource.value}") {
+    const operations = {
+      query: `mutation($file: upload) {
+        modifyProfilePic(ProfilePicture:$file) {
           ProfilePicture
         }
       }
       `,
+      variables: {
+        file: null,
+      },
     };
 
-    try {
-      this.pfpResult = await this.api.fetchGraphql(query);
-      console.log(this.pfpResult);
-    } catch (e) {
-      console.log('error', e.message);
-    }
+    const _map = {
+      file: ['variables.file'],
+    };
+
+    const fd = new FormData();
+    fd.append('operations', JSON.stringify(operations));
+    fd.append('map', JSON.stringify(_map));
+    fd.append(
+      'file',
+      this.pfpForm.controls.fileSource.value,
+      this.pfpForm.controls.fileSource.value.name
+    );
+    this.pfpResult = this.http.post(this.gqlUrl, fd, this.options).subscribe();
+    console.log(this.pfpResult);
   }
 
   //------------------------DISPLAY NAME------------------------
@@ -194,9 +211,13 @@ export class SettingsComponent implements OnInit {
   // Submits bio
   async onSubmitBio() {
     if (this.bioForm.valid && this.loggedIn) {
-      await this.changeBio();
-      this.getUser();
-      this.changeBioToggle = false;
+      if (this.bioForm.controls.bio.value !== this.user.ProfileInfo.Bio) {
+        await this.changeBio();
+        this.getUser();
+        this.changeBioToggle = false;
+      } else {
+        this.changeBioToggle = false;
+      }
     }
   }
 

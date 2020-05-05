@@ -785,19 +785,26 @@ const Mutation = new GraphQLObjectType({
       },
       resolve: async (parent, args, { req, res }) => {
         try {
-          const image = "";
-          console.log(args.ProfilePicture);
+          const authResult = await authController.checkAuth(req, res);
+
+          let image = "";
           if (args.ProfilePicture != undefined) {
-            image = await fileHelper.saveImage(ProfilePicture);
-            console.log("testing");
+            image = await fileHelper.saveImage(args.ProfilePicture);
           }
-          return await profileInfo.findOneAndUpdate(
+
+          const oldImg = await profileInfo.findOne({ UserID: authResult._id });
+
+          const result = await profileInfo.findOneAndUpdate(
             { UserID: authResult._id },
             { ProfilePicture: image },
             {
               new: true,
             }
           );
+
+          await fileHelper.deleteFile(oldImg.ProfilePicture);
+
+          return result;
         } catch (e) {
           throw new Error(e.message);
         }

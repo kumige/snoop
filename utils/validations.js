@@ -44,10 +44,10 @@ const registerValidation = (Username, Displayname, Email, Password) => {
       valid: false,
       message: "Invalid email",
     };
-  } else if (Email.length > 30) {
+  } else if (Email.length > 80) {
     return {
       valid: false,
-      message: "Email can not be longer than 30 characters",
+      message: "Email can not be longer than 80 characters",
     };
   } else if (hasSpace(Email)) {
     return {

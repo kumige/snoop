@@ -33,7 +33,7 @@ export class RegisterComponent implements OnInit {
     email: new FormControl('', [
       Validators.required,
       Validators.email,
-      Validators.maxLength(30),
+      Validators.maxLength(80),
       customValidator.checkForSpaces,
     ]),
     password: new FormControl('', [
