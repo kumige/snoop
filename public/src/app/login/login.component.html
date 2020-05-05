@@ -25,6 +25,10 @@
         <button mat-raised-button color="primary" class="btn_login" type="submit" >
           Login
         </button>
+        <!-- prettier-ignore -->
+        <button mat-button color="primary" class="btn_register" type="button" (click)="redirectRegister()">
+          Press here to register!
+        </button>
         <mat-error class="login_errorMsg" *ngIf="loginError == true">
           <label>Incorrect username or password</label>
         </mat-error>

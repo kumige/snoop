@@ -67,6 +67,15 @@
         <button mat-raised-button color="primary" class="btn_register" type="submit">
         Register
         </button>
+        <button
+          mat-button
+          color="primary"
+          class="btn_login"
+          type="button"
+          (click)="redirectLogin()"
+        >
+          Already have an account?
+        </button>
 
         <!-- prettier-ignore -->
         <mat-error class="register_errorMsg" *ngIf="f_register.password.touched && f_register.rePassword.touched && !f_register.password.invalid && !f_register.rePassword.invalid && f_register.password.value !== f_register.rePassword.value">

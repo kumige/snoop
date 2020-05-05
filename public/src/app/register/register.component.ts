@@ -117,6 +117,7 @@ export class RegisterComponent implements OnInit {
     }
   }
 
+  // Checks if display name is already taken
   private async displaynameCheck() {
     const query = {
       query: `{
@@ -135,12 +136,14 @@ export class RegisterComponent implements OnInit {
     }
   }
 
+  // Hides display name taken error
   hideDisplaynameError() {
     if (this.takenDisplayname == true) {
       this.takenDisplayname = false;
     }
   }
 
+  // Checks if the username is already taken
   private async usernameCheck() {
     const query = {
       query: `{
@@ -159,6 +162,7 @@ export class RegisterComponent implements OnInit {
     }
   }
 
+  // Hides the username taken error
   hideUsernameError() {
     if (this.takenUsername == true) {
       this.takenUsername = false;
@@ -182,5 +186,10 @@ export class RegisterComponent implements OnInit {
     } else {
       this.router.navigate(['./home']);
     }
+  }
+
+  // Redirects to login
+  redirectLogin() {
+    this.router.navigate(['./login']);
   }
 }

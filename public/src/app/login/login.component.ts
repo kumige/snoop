@@ -92,4 +92,9 @@ export class LoginComponent implements OnInit {
       this.router.navigate(['./home']);
     }
   }
+
+  // Redirects to register
+  redirectRegister() {
+    this.router.navigate(['./register']);
+  }
 }
