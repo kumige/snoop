@@ -61,7 +61,7 @@ export class SettingsComponent implements OnInit {
   displayNameResult;
   bioResult;
   passwordResult;
-  pfpResult;
+  pfpResult = null;
   //True if display name is taken
   takenDisplayname = false;
 
@@ -114,10 +114,14 @@ export class SettingsComponent implements OnInit {
 
   //------------------------PROFILE PICTURE------------------------
 
-  onSubmitPfp() {
-    this.changePfp();
+  // Submits pfp
+  async onSubmitPfp() {
+    if (this.pfpForm.controls.fileSource.value) {
+      await this.changePfp();
+    }
   }
 
+  // As file changes, sets the file on fileSource
   onFileChange(event) {
     if (event.target.files.length > 0) {
       const file = event.target.files[0];
@@ -127,9 +131,8 @@ export class SettingsComponent implements OnInit {
     }
   }
 
-  // Handles display name changing
+  // Handles pfp changing
   private async changePfp() {
-    console.log(this.pfpForm.controls.fileSource.value);
     const operations = {
       query: `mutation($file: upload) {
         modifyProfilePic(ProfilePicture:$file) {
@@ -154,8 +157,18 @@ export class SettingsComponent implements OnInit {
       this.pfpForm.controls.fileSource.value,
       this.pfpForm.controls.fileSource.value.name
     );
-    this.pfpResult = this.http.post(this.gqlUrl, fd, this.options).subscribe();
-    console.log(this.pfpResult);
+    // Posts the pfp change request, sets data into pfpResult and calls for closePfpChange() function
+    this.http.post(this.gqlUrl, fd, this.options).subscribe((data) => {
+      this.pfpResult = data;
+      this.closePfpChange();
+    });
+  }
+
+  // Function that runs when pfp has changed. Gets updated user info, closes pfp change window and resets pfp change form
+  async closePfpChange() {
+    await this.getUser();
+    this.changePfpToggle = false;
+    this.pfpForm.reset();
   }
 
   //------------------------DISPLAY NAME------------------------
@@ -172,7 +185,7 @@ export class SettingsComponent implements OnInit {
         await this.displaynameCheck();
 
         if(this.takenDisplayname == false){
-          console.log('is dp name taken: ' + this.takenDisplayname);
+          console.log('is display name taken: ' + this.takenDisplayname);
           await this.changeDisplayName();
           this.getUser();
           this.changeDisplayNToggle = false;
