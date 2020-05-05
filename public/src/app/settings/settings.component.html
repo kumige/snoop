@@ -7,7 +7,8 @@
     <h2 class="titles">Profile picture</h2>
 
     <div *ngIf="!changePfpToggle" class="userDataDiv">
-      <span>PFP</span>
+      <!-- prettier-ignore -->
+      <img src="http://localhost:3000/uploads/{{userData?.ProfileInfo.ProfilePicture}}"/>
     </div>
 
     <!-- prettier-ignore -->
