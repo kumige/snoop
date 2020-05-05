@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { FetchGqlService } from '../services/fetch-gql.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -12,13 +13,19 @@ export class LoginComponent implements OnInit {
     username: new FormControl('', [Validators.required]),
     password: new FormControl('', [Validators.required]),
   });
+  // Login result
   loginResult;
+  // Boolean for submitting and error for login
   submitted = false;
   loginError = false;
+  // Current user
+  user;
 
-  constructor(private api: FetchGqlService) {}
+  constructor(private api: FetchGqlService, private router: Router) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.getUser();
+  }
 
   // Gets login form's controls
   get f_login() {
@@ -60,10 +67,34 @@ export class LoginComponent implements OnInit {
         this.loginError = true;
       } else {
         localStorage.setItem('token', this.loginResult.login.token);
-        // TODO: REDIRECT
+        this.router.navigate(['./home']);
       }
     } catch (e) {
       console.log('error', e.message);
     }
+  }
+
+  // Gets current users data if user is logged in
+  private async getUser() {
+    const query = {
+      query: `{
+        userCheck {
+          Username,Displayname,Email,ProfileInfo{Bio}
+        }
+      }`,
+    };
+
+    this.user = await this.api.fetchGraphql(query);
+    this.user = this.user.userCheck;
+    console.log(this.user);
+    if (this.user == null) {
+    } else {
+      this.router.navigate(['./home']);
+    }
+  }
+
+  // Redirects to register
+  redirectRegister() {
+    this.router.navigate(['./register']);
   }
 }

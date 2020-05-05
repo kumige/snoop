@@ -22,4 +22,14 @@ export class customValidator {
     }
     return null;
   }
+
+  static illegalCharactersBio(
+    control: AbstractControl
+  ): ValidationErrors | null {
+    var specialCharacters = /[<>]/;
+    if (specialCharacters.test(control.value)) {
+      return { illegalCharacters: true };
+    }
+    return null;
+  }
 }

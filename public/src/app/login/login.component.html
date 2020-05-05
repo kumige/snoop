@@ -6,7 +6,7 @@
         <!-- prettier-ignore -->
         <mat-form-field id="textInput">
           <mat-label class="label_username" for="username">Username</mat-label>
-          <input matInput type="text" formControlName="username" class="username_input"/>
+          <input matInput type="text" formControlName="username"/>
           <mat-error *ngIf="(f_login.username.touched && f_login.username.invalid) || (submitted == true && f_login.username.invalid)">
             <mat-error *ngIf="f_login.username.errors.required">Username is required.</mat-error>
           </mat-error>
@@ -15,7 +15,7 @@
         <!-- prettier-ignore -->
         <mat-form-field id="textInput">
           <mat-label class="label_password" for="password">Password</mat-label>
-          <input matInput type="password" formControlName="password" class="form-control"/>
+          <input matInput type="password" formControlName="password"/>
           <mat-error *ngIf="(f_login.password.touched && f_login.password.invalid) || (submitted == true && f_login.password.invalid)">
             <mat-error *ngIf="f_login.password.errors.required">Password is required.</mat-error>
           </mat-error>
@@ -24,6 +24,10 @@
         <!-- prettier-ignore -->
         <button mat-raised-button color="primary" class="btn_login" type="submit" >
           Login
+        </button>
+        <!-- prettier-ignore -->
+        <button mat-button color="primary" class="btn_register" type="button" (click)="redirectRegister()">
+          Press here to register!
         </button>
         <mat-error class="login_errorMsg" *ngIf="loginError == true">
           <label>Incorrect username or password</label>
