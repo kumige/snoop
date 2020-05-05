@@ -4,7 +4,6 @@ import {
   ViewChild,
   ViewContainerRef,
   OnInit,
-  AfterViewInit,
 } from '@angular/core';
 import { FetchGqlService } from '../services/fetch-gql.service';
 import { Router } from '@angular/router';
@@ -13,14 +12,13 @@ import { MatDialog } from '@angular/material/dialog';
 import { ImageDialogComponent } from '../image-dialog/image-dialog.component';
 import { GetAuthUserService } from '../services/get-auth-user.service';
 import { environment } from 'src/environments/environment';
-import { element } from 'protractor';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.sass'],
 })
-export class HomeComponent implements OnInit, AfterViewInit {
+export class HomeComponent implements OnInit {
   questions = [];
   loaderService;
   loggedInUser;
@@ -50,7 +48,11 @@ export class HomeComponent implements OnInit, AfterViewInit {
 
       // Check if the user is logged in
       if (this.loggedInUser != null) {
-        console.log(this.loggedInUser)
+        
+        // Load side profile card
+        this.loaderService.setRootViewContainerRef(this.viewContainerRef);
+        this.loaderService.addDynamicComponent();
+
         // If user has followed people, change the home page feed to followed people posts
         if(this.loggedInUser.ProfileInfo.Following.length > 0){
           this.getFollowingQs(0);
@@ -62,12 +64,6 @@ export class HomeComponent implements OnInit, AfterViewInit {
         this.getQs(0);
       }
     })
-  }
-
-  // Load side profile card
-  ngAfterViewInit(): void {
-    this.loaderService.setRootViewContainerRef(this.viewContainerRef);
-    this.loaderService.addDynamicComponent();
   }
 
   redirectToUser(event) {
@@ -205,8 +201,6 @@ export class HomeComponent implements OnInit, AfterViewInit {
     res.qWithAFollowing.forEach(element => {
       this.questions.push(element)
     });
-
-    console.log(this.questions)
 
   }
 

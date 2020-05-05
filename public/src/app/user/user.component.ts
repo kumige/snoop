@@ -35,7 +35,7 @@ export class UserComponent implements OnInit {
   username;
   userData;
   ProfileInfo;
-  answers;
+  answers = [];
   loggedInUser;
 
   get uploadsUrl() {
@@ -123,14 +123,14 @@ export class UserComponent implements OnInit {
       
     });
 
-    this.loadAnswers();
+    this.loadAnswers(0);
   }
 
-  async loadAnswers() {
+  async loadAnswers(start) {
     const query = {
       query: `
       query {
-        qWithAOfUser(UserID: "${this.userData.id}") {
+        qWithAOfUser(UserID: "${this.userData.id}", limit: 10, start: ${start}) {
           id
           Sender {
             id
@@ -182,8 +182,17 @@ export class UserComponent implements OnInit {
       }
     `,
     };
-    this.answers = await this.api.fetchGraphql(query);
-    this.answers = this.answers.qWithAOfUser;
+    const res = await this.api.fetchGraphql(query);
+    res.qWithAOfUser.forEach(element => {
+      this.answers.push(element)
+    });
+    console.log(this.answers)
+
+  }
+
+  async loadMore() {
+    const answerCount = document.getElementsByClassName("qWithA").length
+    this.loadAnswers(answerCount);
   }
 
   async sendQuestion(event) {
@@ -319,5 +328,58 @@ export class UserComponent implements OnInit {
       };
       f();
     });
+  }
+
+  async addFavourite(q, index) {
+    const query = {
+      query: 
+      `
+      mutation{
+        addFavourite(QuestionID: "${q.id}"){
+          id
+          Text
+          Favourites
+        }
+      }
+      `
+    }
+    const res = await this.api.fetchGraphql(query)
+    console.log(res)
+
+    if(res.addFavourite != null) {
+      this.toggleStar(index)
+    }
+    
+  }
+
+  async removeFavourite(q, index) {
+    const query = {
+      query: 
+      `
+      mutation{
+        removeFavourite(QuestionID: "${q.id}"){
+          id
+          Text
+          Favourites
+        }
+      }
+      `
+    }
+    const res = await this.api.fetchGraphql(query)
+    console.log(res)
+
+    if(res.removeFavourite != null) {
+      this.toggleStar(index)
+    }
+  }
+
+  toggleStar(index) {
+    const favArray = this.answers[index].Favourites
+    if(favArray.includes(this.loggedInUser.id)) {
+      const i = favArray.indexOf(this.loggedInUser.id)
+      favArray.splice(i, 1)
+    } else {
+      favArray.push(this.loggedInUser.id)
+    }
   }
 }

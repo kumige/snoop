@@ -3,6 +3,7 @@ import { FetchGqlService } from '../services/fetch-gql.service';
 import { Router } from '@angular/router';
 import { GetAuthUserService } from '../services/get-auth-user.service';
 import { environment } from 'src/environments/environment';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-profile-card',
@@ -68,4 +69,5 @@ export class ProfileCardComponent implements OnInit {
   redirectToUser(event) {
     this.router.navigate([`../user/${event.target.id}`]);
   }
+
 }

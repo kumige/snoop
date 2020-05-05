@@ -230,17 +230,20 @@ const RootQuery = new GraphQLObjectType({
         start: { type: GraphQLInt, defaultValue: 0 },
       },
       resolve: async (parent, args) => {
-        const allQs = await question.find().skip(args.start).limit(args.limit);
-        const qList = [];
+        const allQs = await question.find();
+        let qList = [];
 
         allQs.forEach((q) => {
           if (q.Answer != undefined) {
             qList.push(q);
           }
         });
-        console.log(qList);
 
-        return qList;
+        qList = qList.reverse()
+        const limit = args.start + args.limit;
+        let newQList = qList.slice(args.start, limit);
+
+        return newQList;
       },
     },
 
@@ -253,10 +256,10 @@ const RootQuery = new GraphQLObjectType({
         UserID: { type: GraphQLID },
       },
       resolve: async (parent, args) => {
+        console.log(args)
+
         const questions = await question
           .find({ Receiver: args.UserID })
-          .skip(args.start)
-          .limit(args.limit);
 
         let qList = [];
 
@@ -266,7 +269,12 @@ const RootQuery = new GraphQLObjectType({
           }
         });
 
-        return qList;
+
+        qList = qList.reverse()
+        const limit = args.start + args.limit;
+        let newQList = qList.slice(args.start, limit);
+
+        return newQList;
       },
     },
 
@@ -293,6 +301,7 @@ const RootQuery = new GraphQLObjectType({
         }
 
         let newQList = date.sortList(qList)
+        newQList = newQList.reverse()
 
         const limit = args.start + args.limit;
         newQList = newQList.slice(args.start, limit);
@@ -611,11 +620,22 @@ const Mutation = new GraphQLObjectType({
           if (
             questionToDelete.Receiver.toString() == authResponse._id.toString()
           ) {
+
+            // Delete favourites from profiles
+            for(let user of questionToDelete.Favourites) {
+              const p = await profileInfo.findOneAndUpdate(
+                { UserID: user },
+                { $pull: { Favourites: questionToDelete.id } },
+                { new: true }
+              );
+            }
+
             // Delete related question
             const relatedQuestion = await question.findByIdAndDelete(
               answerToDelete.Question
             );
 
+            // Delete answer
             const res = await answer.findByIdAndDelete(args.id);
 
             // Update answered questions count
@@ -641,7 +661,7 @@ const Mutation = new GraphQLObjectType({
             // Delete image
             if (res.Image != null) {
               fileHelper.deleteFile(res.Image);
-            }
+            }            
 
             return res;
           } else return null;

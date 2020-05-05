@@ -69,11 +69,9 @@ export class FollowDialogComponent implements OnInit {
     } else if(data.queryName == "followers") {
       this.users = res.followers;
     }
-    console.log(this.users);
 
     if (this.loggedInUser != null) {
       this.users.forEach((user) => {
-        console.log(user.ProfileInfo.Followers.includes(this.loggedInUser.id));
 
         if (user.ProfileInfo.Followers.includes(this.loggedInUser.id)) {
           this.loadInitialFollows(user.ProfileInfo.UserID);
@@ -113,7 +111,6 @@ export class FollowDialogComponent implements OnInit {
     this.tFollowButton(user.ProfileInfo.UserID);
 
     const res = await this.api.fetchGraphql(query);
-    console.log(res);
   }
 
   redirectToUser(username) {
@@ -128,11 +125,9 @@ export class FollowDialogComponent implements OnInit {
 
       if (followButton != null) {
         if (followButton.style.display == 'flex') {
-          console.log('setting following visible');
           followButton.style.display = 'flex';
           followingButton.style.display = 'none';
         } else {
-          console.log('setting follow visible');
           followButton.style.display = 'none';
           followingButton.style.display = 'flex';
         }
@@ -145,18 +140,14 @@ export class FollowDialogComponent implements OnInit {
       const followingButton = document.getElementById(`following${followID}`);
       const followButton = document.getElementById(`follow${followID}`);
 
-      console.log('followButton.style.display', followButton.style.display);
-
       if (followButton != null) {
         if (followButton.style.display == 'flex') {
-          console.log('setting following visible');
           followButton.style.display = 'none';
           followingButton.style.display = 'flex';
         } else if (followButton.style.display == '') {
           followButton.style.display = 'none';
           followingButton.style.display = 'flex';
         } else {
-          console.log('setting follow visible');
           followButton.style.display = 'flex';
           followingButton.style.display = 'none';
         }
