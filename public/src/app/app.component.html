@@ -5,11 +5,12 @@
   <div class="items">
     <div>
       <button class="navButton" mat-button routerLink="/">Home</button>
-      <button class="navButton" mat-button routerLink="/login">Login</button>
-      <button class="navButton" mat-button routerLink="/questions">Questions</button>
+      <button class="navButton" mat-button routerLink="/questions">
+        Questions
+      </button>
     </div>
 
-    <div>
+    <div class="navSearch">
       <mat-form-field>
         <mat-label></mat-label>
         <input
@@ -33,6 +34,22 @@
         }}</mat-option>
       </mat-autocomplete>
     </div>
+
+    <!-- prettier-ignore -->
+    <button class="navButton" mat-button routerLink="/login" *ngIf="!isLoggedIn">
+      Login
+    </button>
+
+    <!-- prettier-ignore -->
+    <button *ngIf="isLoggedIn" mat-button class="navButton" [matMenuTriggerFor]="beforeMenu">
+      <mat-icon>person</mat-icon>
+    </button>
+    <!-- prettier-ignore -->
+    <mat-menu #beforeMenu="matMenu" xPosition="before">
+      <button mat-menu-item routerLink="/user/{{ loggedInUser?.Username }}">Profile</button>
+      <button mat-menu-item routerLink="/settings">Settings</button>
+      <button mat-menu-item (click)="logout()">Logout</button>
+    </mat-menu>
   </div>
 </mat-toolbar>
 

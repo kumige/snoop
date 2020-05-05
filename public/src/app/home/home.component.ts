@@ -37,33 +37,31 @@ export class HomeComponent implements OnInit {
     private router: Router,
     @Inject(DynamicLoaderService) service,
     public dialog: MatDialog,
-    private auth: GetAuthUserService,
+    private auth: GetAuthUserService
   ) {
     this.loaderService = service;
   }
 
   ngOnInit(): void {
-    this.auth.getLoggedInUser().then(user => {
-      this.loggedInUser = user
+    this.auth.getLoggedInUser().then((user) => {
+      this.loggedInUser = user;
 
       // Check if the user is logged in
       if (this.loggedInUser != null) {
-        
         // Load side profile card
         this.loaderService.setRootViewContainerRef(this.viewContainerRef);
         this.loaderService.addDynamicComponent();
 
         // If user has followed people, change the home page feed to followed people posts
-        if(this.loggedInUser.ProfileInfo.Following.length > 0){
+        if (this.loggedInUser.ProfileInfo.Following.length > 0) {
           this.getFollowingQs(0);
         } else {
           this.getQs(0);
         }
-
       } else {
         this.getQs(0);
       }
-    })
+    });
   }
 
   redirectToUser(event) {
@@ -73,7 +71,7 @@ export class HomeComponent implements OnInit {
 
   openDialog(img) {
     this.dialog.open(ImageDialogComponent, {
-      data: img
+      data: img,
     });
   }
 
@@ -97,7 +95,7 @@ export class HomeComponent implements OnInit {
               Favourites
               AnsweredQuestionCount
             }
-          } 
+          }
           Receiver {
             id
             Username
@@ -112,13 +110,13 @@ export class HomeComponent implements OnInit {
               Favourites
               AnsweredQuestionCount
             }
-          } 
+          }
           Text
           Favourites
           DateTime {
             date
             time
-          } 
+          }
           Answer {
             id
             Text
@@ -134,10 +132,10 @@ export class HomeComponent implements OnInit {
       `,
     };
     const res = await this.api.fetchGraphql(query);
-    res.qWithA.forEach(element => {
-      this.questions.push(element)
+    res.qWithA.forEach((element) => {
+      this.questions.push(element);
     });
-    console.log(this.questions)
+    console.log(this.questions);
   }
 
   private async getFollowingQs(start) {
@@ -160,7 +158,7 @@ export class HomeComponent implements OnInit {
               Favourites
               AnsweredQuestionCount
             }
-          } 
+          }
           Receiver {
             id
             Username
@@ -175,13 +173,13 @@ export class HomeComponent implements OnInit {
               Favourites
               AnsweredQuestionCount
             }
-          } 
+          }
           Text
           Favourites
           DateTime {
             date
             time
-          } 
+          }
           Answer {
             id
             Text
@@ -198,16 +196,15 @@ export class HomeComponent implements OnInit {
     };
 
     const res = await this.api.fetchGraphql(query);
-    res.qWithAFollowing.forEach(element => {
-      this.questions.push(element)
+    res.qWithAFollowing.forEach((element) => {
+      this.questions.push(element);
     });
-
   }
 
   loadMore() {
-    const answerCount = document.getElementsByClassName("qWithA").length
-    if(this.loggedInUser) {
-      if(this.loggedInUser.ProfileInfo.Following.length > 0){
+    const answerCount = document.getElementsByClassName('qWithA').length;
+    if (this.loggedInUser) {
+      if (this.loggedInUser.ProfileInfo.Following.length > 0) {
         this.getFollowingQs(answerCount);
       } else {
         this.getQs(answerCount);
@@ -215,13 +212,11 @@ export class HomeComponent implements OnInit {
     } else {
       this.getQs(answerCount);
     }
-    
   }
 
   async addFavourite(q, index) {
     const query = {
-      query: 
-      `
+      query: `
       mutation{
         addFavourite(QuestionID: "${q.id}"){
           id
@@ -229,21 +224,19 @@ export class HomeComponent implements OnInit {
           Favourites
         }
       }
-      `
-    }
-    const res = await this.api.fetchGraphql(query)
-    console.log(res)
+      `,
+    };
+    const res = await this.api.fetchGraphql(query);
+    console.log(res);
 
-    if(res.addFavourite != null) {
-      this.toggleStar(index)
+    if (res.addFavourite != null) {
+      this.toggleStar(index);
     }
-    
   }
 
   async removeFavourite(q, index) {
     const query = {
-      query: 
-      `
+      query: `
       mutation{
         removeFavourite(QuestionID: "${q.id}"){
           id
@@ -251,23 +244,23 @@ export class HomeComponent implements OnInit {
           Favourites
         }
       }
-      `
-    }
-    const res = await this.api.fetchGraphql(query)
-    console.log(res)
+      `,
+    };
+    const res = await this.api.fetchGraphql(query);
+    console.log(res);
 
-    if(res.removeFavourite != null) {
-      this.toggleStar(index)
+    if (res.removeFavourite != null) {
+      this.toggleStar(index);
     }
   }
 
   toggleStar(index) {
-    const favArray = this.questions[index].Favourites
-    if(favArray.includes(this.loggedInUser.id)) {
-      const i = favArray.indexOf(this.loggedInUser.id)
-      favArray.splice(i, 1)
+    const favArray = this.questions[index].Favourites;
+    if (favArray.includes(this.loggedInUser.id)) {
+      const i = favArray.indexOf(this.loggedInUser.id);
+      favArray.splice(i, 1);
     } else {
-      favArray.push(this.loggedInUser.id)
+      favArray.push(this.loggedInUser.id);
     }
   }
 }

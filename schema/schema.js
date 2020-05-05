@@ -43,6 +43,12 @@ const userType = new GraphQLObjectType({
         return profileInfo.findById(parent.ProfileInfo);
       },
     },
+    BlockedUsers: {
+      type: userType,
+      resolve(parent, args) {
+        return user.findById(parent.BlockedUsers);
+      },
+    },
     LastLogin: { type: GraphQLString },
   }),
 });

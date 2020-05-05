@@ -3,7 +3,8 @@ import { FormControl } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { FetchGqlService } from './services/fetch-gql.service';
-import { Router } from '@angular/router';
+import { Router, NavigationStart } from '@angular/router';
+import { GetAuthUserService } from './services/get-auth-user.service';
 
 @Component({
   selector: 'app-root',
@@ -17,14 +18,42 @@ export class AppComponent implements OnInit {
   filteredOptions = new Observable();
   searchTerm;
   matMenu;
+  loggedInUser;
+  // Boolean to check if user is logged in
+  isLoggedIn = false;
 
-  constructor(private api: FetchGqlService, private router: Router) {}
+  constructor(
+    private api: FetchGqlService,
+    private router: Router,
+    private auth: GetAuthUserService
+  ) {}
 
   ngOnInit() {
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationStart) {
+        this.isUserLoggedIn();
+      }
+    });
+
     this.filteredOptions = this.searchControl.valueChanges.pipe(
       startWith(''),
       map((value) => this._filter(value))
     );
+  }
+
+  isUserLoggedIn() {
+    this.auth.getLoggedInUser().then((user) => {
+      this.loggedInUser = user;
+
+      // Check if the user is logged in
+      if (this.loggedInUser != null) {
+        console.log('logged in');
+        console.log(user);
+        this.isLoggedIn = true;
+      } else {
+        this.isLoggedIn = false;
+      }
+    });
   }
 
   private _filter(value: string): string[] {
@@ -49,14 +78,20 @@ export class AppComponent implements OnInit {
       };
       const results = await this.api.fetchGraphql(query);
       this.options = results.searchUser;
-    } 
+    }
   }
 
   redirectToUser(user) {
     this.router.navigate([`./user/${user.Username}`]);
-    const bar = document.getElementById('searchBar') as HTMLInputElement
-    bar.value = ""
-    bar.blur()
-    this.options =[]
+    const bar = document.getElementById('searchBar') as HTMLInputElement;
+    bar.value = '';
+    bar.blur();
+    this.options = [];
+  }
+
+  logout() {
+    localStorage.removeItem('token');
+    this.isUserLoggedIn();
+    this.router.navigate([`./home`]);
   }
 }
