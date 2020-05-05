@@ -786,8 +786,10 @@ const Mutation = new GraphQLObjectType({
       resolve: async (parent, args, { req, res }) => {
         try {
           const image = "";
+          console.log(args.ProfilePicture);
           if (args.ProfilePicture != undefined) {
             image = await fileHelper.saveImage(ProfilePicture);
+            console.log("testing");
           }
           return await profileInfo.findOneAndUpdate(
             { UserID: authResult._id },

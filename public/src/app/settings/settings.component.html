@@ -16,6 +16,24 @@
         <mat-icon>edit</mat-icon>
       </button>
     </div>
+
+    <!-- prettier-ignore -->
+    <form *ngIf="changePfpToggle" [formGroup]="pfpForm" (ngSubmit)="onSubmitPfp()">
+      <div class="forms">
+
+        <input type="file" formControlName="file" (change)="onFileChange($event)" >
+
+        <div class="buttons">
+          <button mat-raised-button color="primary" type="submit" class="updateBtn">
+            Update
+          </button>
+
+          <button mat-raised-button color="primary" (click)="togglePfp()" class="cancelBtn" type="button">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </form>
   </mat-card>
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->

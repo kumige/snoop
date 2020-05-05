@@ -42,6 +42,11 @@ export class SettingsComponent implements OnInit {
     ]),
   });
 
+  pfpForm = new FormGroup({
+    file: new FormControl('', [Validators.required]),
+    fileSource: new FormControl('', [Validators.required]),
+  });
+
   // Current user
   user;
   // Boolean to check if the user is logged in
@@ -55,6 +60,7 @@ export class SettingsComponent implements OnInit {
   displayNameResult;
   bioResult;
   passwordResult;
+  pfpResult;
   //True if display name is taken
   takenDisplayname = false;
 
@@ -70,6 +76,9 @@ export class SettingsComponent implements OnInit {
   get f_password() {
     return this.passwordForm.controls;
   }
+  get f_pfp() {
+    return this.pfpForm.controls;
+  }
 
   constructor(private api: FetchGqlService) {}
 
@@ -82,7 +91,7 @@ export class SettingsComponent implements OnInit {
     const query = {
       query: `{
         userCheck {
-          Username,Displayname,Email,ProfileInfo{Bio}
+          Username,Displayname,Email,ProfileInfo{Bio, ProfilePicture}
         }
       }`,
     };
@@ -98,6 +107,39 @@ export class SettingsComponent implements OnInit {
   }
 
   //------------------------PROFILE PICTURE------------------------
+
+  onSubmitPfp() {
+    this.changePfp();
+  }
+
+  onFileChange(event) {
+    if (event.target.files.length > 0) {
+      const file = event.target.files[0];
+      this.pfpForm.patchValue({
+        fileSource: file,
+      });
+    }
+  }
+
+  // Handles display name changing
+  private async changePfp() {
+    console.log(this.pfpForm.controls.fileSource.value);
+    const query = {
+      query: `mutation {
+        modifyProfilePic(ProfilePicture:"${this.pfpForm.controls.fileSource.value}") {
+          ProfilePicture
+        }
+      }
+      `,
+    };
+
+    try {
+      this.pfpResult = await this.api.fetchGraphql(query);
+      console.log(this.pfpResult);
+    } catch (e) {
+      console.log('error', e.message);
+    }
+  }
 
   //------------------------DISPLAY NAME------------------------
 
