@@ -61,7 +61,7 @@ export class SettingsComponent implements OnInit {
   displayNameResult;
   bioResult;
   passwordResult;
-  pfpResult = null;
+  pfpResult;
   //True if display name is taken
   takenDisplayname = false;
 
@@ -300,6 +300,7 @@ export class SettingsComponent implements OnInit {
   }
   togglePfp() {
     this.changePfpToggle = !this.changePfpToggle;
+    this.pfpForm.reset();
   }
 
   // ------------------------HELP FUNCTIONS------------------------
