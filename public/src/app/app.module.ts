@@ -32,6 +32,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RegisterComponent } from './register/register.component';
 import { SettingsComponent } from './settings/settings.component';
 import { FavouritesComponent } from './favourites/favourites.component';
+import { FollowDialogComponent } from './follow-dialog/follow-dialog.component';
 
 @NgModule({
   declarations: [
@@ -45,6 +46,7 @@ import { FavouritesComponent } from './favourites/favourites.component';
     ImageDialogComponent,
     SettingsComponent,
     FavouritesComponent,
+    FollowDialogComponent,
   ],
   imports: [
     BrowserModule,

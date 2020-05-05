@@ -14,6 +14,7 @@ import { ImageDialogComponent } from '../image-dialog/image-dialog.component';
 import { Observable } from 'rxjs';
 import { GetAuthUserService } from '../services/get-auth-user.service';
 import { environment } from 'src/environments/environment';
+import { FollowDialogComponent } from '../follow-dialog/follow-dialog.component';
 
 /** Error when invalid control is dirty, touched, or submitted. */
 export class MyErrorStateMatcher implements ErrorStateMatcher {
@@ -74,7 +75,6 @@ export class UserComponent implements OnInit {
       
     });
     this.auth.getLoggedInUser().then(user => {
-      console.log(user)
       this.loggedInUser = user
       this.getUserData();
     })
@@ -225,6 +225,17 @@ export class UserComponent implements OnInit {
     this.dialog.open(ImageDialogComponent, {
       data: img,
     });
+  }
+
+  getFollows(queryName) {
+      this.dialog.open(FollowDialogComponent, {
+        data: { 
+          queryName: queryName,
+          user: this.userData,
+          loggedInUser: this.loggedInUser
+        }
+      });
+
   }
 
   async deleteAnswer(i) {

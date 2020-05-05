@@ -38,8 +38,8 @@
 
         <div id="countsContainer">
           <span id="{{ user.Username }}" (click)="redirectToFavourites($event)" class="qDisplayname">Favourites: {{ profileInfo.favouriteCount }}</span>
-          <span>Followers: {{ profileInfo.followerCount }}</span>
-          <span>Following: {{ profileInfo.followingCount }}</span>
+          <span (click)="getFollows('followers')" class="qDisplayname">Followers: {{ profileInfo.followerCount }}</span>
+          <span (click)="getFollows('following')" class="qDisplayname">Following: {{ profileInfo.followingCount }}</span>
         </div>
       </div>
 
