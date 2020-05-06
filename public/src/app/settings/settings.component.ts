@@ -3,6 +3,7 @@ import { FetchGqlService } from '../services/fetch-gql.service';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { customValidator } from '../register/customValidators';
 import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-settings',
@@ -87,6 +88,9 @@ export class SettingsComponent implements OnInit {
   }
   get f_pfp() {
     return this.pfpForm.controls;
+  }
+  get uploadsUrl() {
+    return environment.uploadUrl;
   }
 
   constructor(private api: FetchGqlService, private http: HttpClient) {}
