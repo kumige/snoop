@@ -560,21 +560,37 @@ const Mutation = new GraphQLObjectType({
       resolve: async (parent, args, { req, res }) => {
         try {
           const authResponse = await authController.checkAuth(req, res);
-          const sender = await user.findOne({
-            Username: authResponse.Username,
-          });
+          const thisReceiver = await user.findById(args.Receiver);
 
-          const newQuestion = new question({
-            Sender: sender._id,
-            Receiver: args.Receiver,
-            Text: args.Text,
-            Favourites: [],
-            DateTime: date.now(),
-          });
+          let i;
+          let isBlocked = false;
 
-          if (args.Text.toString().length <= 256) {
-            return await newQuestion.save();
-          } else return null;
+          for (i = 0; i < thisReceiver.BlockedUsers.length; i++) {
+            // prettier-ignore
+            if (thisReceiver.BlockedUsers[i].toString() == authResponse._id.toString()) {
+              isBlocked = true;
+            }
+          }
+
+          if (!isBlocked) {
+            const sender = await user.findOne({
+              Username: authResponse.Username,
+            });
+
+            const newQuestion = new question({
+              Sender: sender._id,
+              Receiver: args.Receiver,
+              Text: args.Text,
+              Favourites: [],
+              DateTime: date.now(),
+            });
+
+            if (args.Text.toString().length <= 256) {
+              return await newQuestion.save();
+            } else return null;
+          } else {
+            throw new Error("Can't post question when blocked by user");
+          }
         } catch (error) {
           console.log(error.message);
         }
