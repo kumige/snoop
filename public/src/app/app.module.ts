@@ -19,6 +19,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatBadgeModule } from '@angular/material/badge';
 
 import { LoginComponent } from './login/login.component';
 import { HomeComponent } from './home/home.component';
@@ -70,6 +71,7 @@ import { FollowDialogComponent } from './follow-dialog/follow-dialog.component';
     MatAutocompleteModule,
     MatMenuModule,
     MatDialogModule,
+    MatBadgeModule
   ],
   providers: [DynamicLoaderService],
   bootstrap: [AppComponent],

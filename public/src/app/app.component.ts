@@ -21,6 +21,8 @@ export class AppComponent implements OnInit {
   loggedInUser;
   // Boolean to check if user is logged in
   isLoggedIn = false;
+  visible = false
+  badgeContent;
 
   constructor(
     private api: FetchGqlService,
@@ -48,10 +50,30 @@ export class AppComponent implements OnInit {
       // Check if the user is logged in
       if (this.loggedInUser != null) {
         this.isLoggedIn = true;
+        this.getQuestionCount();
       } else {
         this.isLoggedIn = false;
       }
     });
+  }
+
+  private async getQuestionCount() {
+    const query = {
+      query: 
+      `
+      query{
+        questionsForUser(id: "${this.loggedInUser.id}"){
+          id
+          Text
+        }
+      }
+      `
+    }
+    const res = await this.api.fetchGraphql(query)
+    console.log(res.questionsForUser.length)
+    const button = document.getElementById("questionButton")
+    this.badgeContent = res.questionsForUser.length
+    this.visible = true
   }
 
   private _filter(value: string): string[] {
