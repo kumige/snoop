@@ -43,12 +43,7 @@ const userType = new GraphQLObjectType({
         return profileInfo.findById(parent.ProfileInfo);
       },
     },
-    BlockedUsers: {
-      type: userType,
-      resolve(parent, args) {
-        return user.findById(parent.BlockedUsers);
-      },
-    },
+    BlockedUsers: { type: new GraphQLList(GraphQLID) },
     LastLogin: { type: GraphQLString },
   }),
 });
@@ -458,10 +453,11 @@ const RootQuery = new GraphQLObjectType({
 
     userCheck: {
       type: userType,
-      description: "Gets current user, authentication required",
+      description: "Get current user, authentication required",
       resolve: async (parent, args, { req, res }) => {
         try {
           const authResult = await authController.checkAuth(req, res);
+
           authResult.token = null;
           authResult.id = authResult._id;
           return authResult;
@@ -473,7 +469,7 @@ const RootQuery = new GraphQLObjectType({
 
     usernameCheck: {
       type: userType,
-      description: "Gets user by its username and returns only username",
+      description: "Get user by its username and returns only username",
       args: {
         Username: { type: new GraphQLNonNull(GraphQLString) },
       },
@@ -497,8 +493,7 @@ const RootQuery = new GraphQLObjectType({
 
     displaynameCheck: {
       type: userType,
-      description:
-        "Gets user by its display name and returns only display name",
+      description: "Get user by its display name and returns only display name",
       args: {
         Displayname: { type: new GraphQLNonNull(GraphQLString) },
       },
@@ -518,6 +513,35 @@ const RootQuery = new GraphQLObjectType({
         } catch (e) {
           throw new Error(e.message);
         }
+      },
+    },
+
+    getBlockedUsers: {
+      type: new GraphQLList(userType),
+      description: "Get blocked users",
+      args: {},
+      resolve: async (parent, args, { req, res }) => {
+        const authResult = await authController.checkAuth(req, res);
+
+        // Get user info where the following data is located
+        const userProfile = await user.findById(authResult._id);
+
+        // Create a list of users from the user IDs
+        const blockedList = Promise.all(
+          userProfile.BlockedUsers.map(async (id) => {
+            let temp = await user.findById(id);
+            temp.Password = null;
+            temp.UserType = null;
+            temp.__v = null;
+            temp.Email = null;
+            return temp;
+          })
+        );
+
+        return blockedList.then((data) => {
+          data.Password = null;
+          return data;
+        });
       },
     },
   },
@@ -1224,24 +1248,36 @@ const Mutation = new GraphQLObjectType({
       type: userType,
       description: "Block a user",
       args: {
+        blockker: { type: new GraphQLNonNull(GraphQLID) },
         BlockedUsers: { type: new GraphQLNonNull(GraphQLID) },
       },
       resolve: async (parent, args) => {
         try {
           // Gets the user who is blocking another user
-          const authResponse = await authController.checkAuth(req, res);
+          //const authResponse = await authController.checkAuth(req, res);
 
           // Checks if the user to be blocked exists
           await user.findById(args.BlockedUsers);
 
-          if (!authResponse.BlockedUsers.includes(args.BlockedUsers)) {
-            console.log("doesnt include");
+          let i;
+          let isBlocked = false;
+
+          const user2 = await user.findById(args.blockker);
+
+          for (i = 0; i < user2.BlockedUsers.length; i++) {
+            if (user2.BlockedUsers[i] == args.BlockedUsers) {
+              isBlocked = true;
+            }
+          }
+
+          if (!isBlocked) {
             return await user.findByIdAndUpdate(
-              authResponse._id,
+              args.blockker,
               { $push: { BlockedUsers: args.BlockedUsers } },
               { new: true }
             );
           } else {
+            console.log("User already blocked");
             throw new Error("User already blocked");
           }
         } catch (e) {
@@ -1252,23 +1288,32 @@ const Mutation = new GraphQLObjectType({
 
     removeBlock: {
       type: userType,
-      description: "Block a user",
+      description: "Remove a block",
       args: {
         BlockedUsers: { type: new GraphQLNonNull(GraphQLID) },
       },
-      resolve: async (parent, args) => {
+      resolve: async (parent, args, { req, res }) => {
         try {
           // Gets the user who is blocking another user
           const authResponse = await authController.checkAuth(req, res);
 
-          if (authResponse.BlockedUsers.includes(args.BlockedUsers)) {
-            console.log("does include");
+          let i;
+          let isBlocked = false;
+
+          for (i = 0; i < authResponse.BlockedUsers.length; i++) {
+            if (authResponse.BlockedUsers[i] == args.BlockedUsers) {
+              isBlocked = true;
+            }
+          }
+
+          if (isBlocked) {
             return await user.findByIdAndUpdate(
               authResponse._id,
               { $pull: { BlockedUsers: args.BlockedUsers } },
               { new: true }
             );
           } else {
+            console.log("User not blocked");
             throw new Error("User not blocked");
           }
         } catch (e) {

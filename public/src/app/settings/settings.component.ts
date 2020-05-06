@@ -57,6 +57,7 @@ export class SettingsComponent implements OnInit {
   changeBioToggle = false;
   changePasswordToggle = false;
   changePfpToggle = false;
+  showBlockedToggle = false;
   //Results
   displayNameResult;
   bioResult;
@@ -64,6 +65,8 @@ export class SettingsComponent implements OnInit {
   pfpResult;
   //True if display name is taken
   takenDisplayname = false;
+  // Blocked users
+  blockedUsers;
 
   gqlUrl = 'http://localhost:3000/graphql';
   options = {
@@ -90,6 +93,7 @@ export class SettingsComponent implements OnInit {
 
   ngOnInit(): void {
     this.getUser();
+    this.getBlockedUsers();
   }
 
   // Gets current users data if user is logged in
@@ -97,14 +101,13 @@ export class SettingsComponent implements OnInit {
     const query = {
       query: `{
         userCheck {
-          Username,Displayname,Email,ProfileInfo{Bio, ProfilePicture}
+          Username,Displayname,Email,ProfileInfo{Bio, ProfilePicture},BlockedUsers
         }
       }`,
     };
 
     this.user = await this.api.fetchGraphql(query);
     this.user = this.user.userCheck;
-    console.log(this.user);
     if (this.user == null) {
       this.loggedIn = false;
     } else {
@@ -272,7 +275,7 @@ export class SettingsComponent implements OnInit {
     const query = {
       query: `mutation {
         modifyPassword(Password:"${this.passwordForm.controls.password.value}") {
-          id
+          Username
         }
       }
       `,
@@ -281,6 +284,47 @@ export class SettingsComponent implements OnInit {
     try {
       this.passwordResult = await this.api.fetchGraphql(query);
       console.log(this.passwordResult);
+    } catch (e) {
+      console.log('error', e.message);
+    }
+  }
+
+  // ------------------------BLOCKED USERS------------------------
+
+  private async getBlockedUsers() {
+    const query = {
+      query: `{getBlockedUsers{id,Displayname,ProfileInfo{ProfilePicture}}}
+      `,
+    };
+
+    try {
+      this.blockedUsers = await this.api.fetchGraphql(query);
+      this.blockedUsers = this.blockedUsers.getBlockedUsers;
+      console.log(this.blockedUsers);
+    } catch (e) {
+      console.log('error', e.message);
+    }
+  }
+
+  async removeBlock(index) {
+    console.log(this.blockedUsers[index].id);
+    await this.deleteBlock(this.blockedUsers[index].id);
+    this.getBlockedUsers();
+  }
+
+  private async deleteBlock(toRemove) {
+    const query = {
+      query: `mutation {
+        removeBlock(BlockedUsers:"${toRemove}"){
+          Displayname
+        }
+      }
+      `,
+    };
+
+    try {
+      const result = await this.api.fetchGraphql(query);
+      console.log(result);
     } catch (e) {
       console.log('error', e.message);
     }
@@ -301,6 +345,10 @@ export class SettingsComponent implements OnInit {
   togglePfp() {
     this.changePfpToggle = !this.changePfpToggle;
     this.pfpForm.reset();
+  }
+
+  toggleBlocked() {
+    this.showBlockedToggle = !this.showBlockedToggle;
   }
 
   // ------------------------HELP FUNCTIONS------------------------

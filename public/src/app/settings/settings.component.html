@@ -192,6 +192,38 @@
       </div>
     </form>
   </mat-card>
+
+  <mat-card class="card">
+    <h2 class="titles">Blocked users</h2>
+
+    <!-- prettier-ignore -->
+    <ul *ngIf="showBlockedToggle">
+      <li *ngFor="let bUsers of blockedUsers; let i = index">
+        <div class="bUserContainer">
+          <div class="bUsersDiv">
+            <img class="bUsersImg" src="http://localhost:3000/uploads/{{ bUsers?.ProfileInfo.ProfilePicture }}" />
+            <div class="bUsersDn">
+              {{ bUsers.Displayname }}
+            </div>
+          </div>
+          <button mat-button color="accent" type="button" (click)="removeBlock(i)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+        <mat-divider></mat-divider>
+      </li>
+    </ul>
+
+    <!-- prettier-ignore -->
+    <div class="bUsersBtn">
+      <button *ngIf="!showBlockedToggle" mat-raised-button color="primary" type="button" class="bUsersBtn" (click)="toggleBlocked()">
+        <mat-icon>expand_more</mat-icon>
+      </button>
+      <button *ngIf="showBlockedToggle" mat-raised-button color="primary" type="button" class="bUsersBtn" (click)="toggleBlocked()">
+        <mat-icon>expand_less</mat-icon>
+      </button>
+    </div>
+  </mat-card>
 </div>
 
 <ng-template #notfound>

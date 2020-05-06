@@ -47,8 +47,6 @@ export class AppComponent implements OnInit {
 
       // Check if the user is logged in
       if (this.loggedInUser != null) {
-        console.log('logged in');
-        console.log(user);
         this.isLoggedIn = true;
       } else {
         this.isLoggedIn = false;
