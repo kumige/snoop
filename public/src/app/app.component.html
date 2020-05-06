@@ -6,7 +6,7 @@
     <div>
       <button class="navButton" mat-button routerLink="/">Home</button>
       <button class="navButton" mat-button routerLink="/questions">
-        Questions
+        <span [matBadge]="badgeContent" matBadgeColor="accent" matBadgeOverlap="false" [matBadgeHidden]="!visible" id="questionButton">Questions</span>
       </button>
     </div>
 
