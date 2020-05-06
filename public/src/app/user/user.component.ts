@@ -138,10 +138,9 @@ export class UserComponent implements OnInit {
     }
 
     if (this.userData.BlockedUsers.includes(this.loggedInUser.id)) {
-      console.log('this user has blocked you');
       this.blockedByUser = true;
     } else {
-      console.log('this user has not blocked you');
+      this.blockedByUser = false;
     }
   }
 
