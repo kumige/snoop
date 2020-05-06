@@ -11,13 +11,12 @@ const db = require("./db/db");
 const server = express();
 
 server.use(cors());
-server.use(express.json()); // for parsing application/json
-server.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+server.use(express.json()); 
+server.use(express.urlencoded({ extended: true })); 
 
 server.use(express.static("public"));
 server.use('/uploads', express.static('uploads'))
 server.use("/modules", express.static("node_modules"));
-
 server.use(
   "/graphql",
   graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 }),
