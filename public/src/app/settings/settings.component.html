@@ -8,7 +8,7 @@
 
     <div *ngIf="!changePfpToggle" class="userDataDiv">
       <!-- prettier-ignore -->
-      <img src="http://localhost:3000/uploads/{{userData?.ProfileInfo.ProfilePicture}}"/>
+      <img src="{{ uploadsUrl }}{{userData?.ProfileInfo.ProfilePicture}}"/>
     </div>
 
     <!-- prettier-ignore -->
@@ -201,7 +201,7 @@
       <li *ngFor="let bUsers of blockedUsers; let i = index">
         <div class="bUserContainer">
           <div class="bUsersDiv">
-            <img class="bUsersImg" src="http://localhost:3000/uploads/{{ bUsers?.ProfileInfo.ProfilePicture }}" />
+            <img class="bUsersImg" src="{{ uploadsUrl }}{{ bUsers?.ProfileInfo.ProfilePicture }}" />
             <div class="bUsersDn">
               {{ bUsers.Displayname }}
             </div>
