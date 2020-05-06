@@ -72,8 +72,16 @@ export class AppComponent implements OnInit {
     const res = await this.api.fetchGraphql(query)
     console.log(res.questionsForUser.length)
     const button = document.getElementById("questionButton")
-    this.badgeContent = res.questionsForUser.length
-    this.visible = true
+    if(res.questionsForUser.length > 99) {
+      this.badgeContent = 99
+    } else {
+      this.badgeContent = res.questionsForUser.length
+    }
+    
+    if (res.questionsForUser.length != 0) {
+      this.visible = true
+    }
+    
   }
 
   private _filter(value: string): string[] {
