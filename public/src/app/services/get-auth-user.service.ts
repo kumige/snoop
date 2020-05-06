@@ -1,12 +1,12 @@
-import { Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 import { FetchGqlService } from './fetch-gql.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class GetAuthUserService {
-  loggedInUser
-  constructor(private api: FetchGqlService) { }
+  loggedInUser;
+  constructor(private api: FetchGqlService) {}
 
   async getLoggedInUser() {
     const query = {
@@ -25,13 +25,14 @@ export class GetAuthUserService {
             Followers
             Favourites
             AnsweredQuestionCount
-          } 
+          }
+          BlockedUsers
         }
       }
     `,
     };
     this.loggedInUser = await this.api.fetchGraphql(query);
-    this.loggedInUser = this.loggedInUser.userCheck
-    return this.loggedInUser
+    this.loggedInUser = this.loggedInUser.userCheck;
+    return this.loggedInUser;
   }
 }

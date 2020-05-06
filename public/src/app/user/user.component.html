@@ -15,25 +15,38 @@
         </div>
         <div style="flex-grow: 1;"></div>
         <div *ngIf="this.loggedInUser != null">
-          <button
-            mat-raised-button
-            *ngIf="this.userData.id != this.loggedInUser.id"
-            color="primary"
-            id="followButton"
-            (click)="followUser()"
-            style="display: flex;"
-          >
-            Follow
-          </button>
-          <button
-            mat-stroked-button
-            *ngIf="this.userData.id != this.loggedInUser.id"
-            color="primary"
-            id="followingButton"
-            (click)="unfollowUser()"
-          >
-            Following
-          </button>
+          <div id="profileButtons">
+            <button
+              id="blockButton"
+              mat-raised-button
+              *ngIf="
+                this.userData.id != this.loggedInUser.id && showBlockButton
+              "
+              color="primary"
+              (click)="blockUser()"
+            >
+              Block
+            </button>
+            <button
+              mat-raised-button
+              *ngIf="this.userData.id != this.loggedInUser.id"
+              color="primary"
+              id="followButton"
+              (click)="followUser()"
+              style="display: flex;"
+            >
+              Follow
+            </button>
+            <button
+              mat-stroked-button
+              *ngIf="this.userData.id != this.loggedInUser.id"
+              color="primary"
+              id="followingButton"
+              (click)="unfollowUser()"
+            >
+              Following
+            </button>
+          </div>
         </div>
 
         <div id="countsContainer">

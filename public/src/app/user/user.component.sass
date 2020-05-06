@@ -1,139 +1,148 @@
 
-    
+
 .page
-    display: flex
-    justify-content: flex-start
-    align-items: center 
-    flex-flow: column
+  display: flex
+  justify-content: flex-start
+  align-items: center
+  flex-flow: column
 
 li, ul
-    padding: 0
-    list-style: none
+  padding: 0
+  list-style: none
 
 .profilePicture
-    width: 36px
-    height: 36px
-    margin-right: 0.5em
-    border-radius: 50%
+  width: 36px
+  height: 36px
+  margin-right: 0.5em
+  border-radius: 50%
 
 .spaceBetween
-    width: 100%
-    display: flex
-    flex-flow: row
-    justify-content: space-between
+  width: 100%
+  display: flex
+  flex-flow: row
+  justify-content: space-between
 
 .qDisplayname
-    cursor: pointer
-    &:hover
-        text-decoration: underline
+  cursor: pointer
+  &:hover
+    text-decoration: underline
 
 #profile
-    width: 30rem
-    display: flex
-    justify-content: space-between
-    flex-flow: column
+  width: 30rem
+  display: flex
+  justify-content: space-between
+  flex-flow: column
 
-    #profileVerticalContainer
-        display: flex
-        flex-flow: row
-        justify-content: space-between
-
-        #followButton
-            display: flex
-            justify-content: center
-            height: 36px
-            width: 92px
-            margin-right: 16px
-
-        #followingButton
-            display: none
-            justify-content: center
-            height: 36px
-            width: 92px
-            margin-right: 16px
-
-    #profPicAndName
-        display: flex
-        flex-flow: row
-
-        #namesContainer
-            display: flex
-            flex-flow: column
-
-    #countsContainer
-        display: flex
-        flex-flow: column
-
-    #bioContainer
-        text-align: center
-
-#askBox
-    width: 30rem
+  #profileVerticalContainer
     display: flex
     flex-flow: row
+    justify-content: space-between
 
-    #textInput
-        flex-grow: 2
+    #followButton
+      display: flex
+      justify-content: center
+      height: 36px
+      width: 92px
+      margin-right: 16px
+
+      #followingButton
+        display: none
+        justify-content: center
+        height: 36px
+        width: 92px
         margin-right: 16px
 
-    #sendButton
-        height: 52px
-        margin-top: 3.5px
+    #profPicAndName
+      display: flex
+      flex-flow: row
 
-#feed
-    width: 30rem
-
-    #answerTitle
-        text-decoration: underline
-.qWithA
-    margin-bottom: 16px
-
-    .answer
-        margin-top: 16px
-
-    .question, .answer
-        max-width: 30rem
+      #namesContainer
         display: flex
-        align-items: flex-start 
-        justify-content: center
         flex-flow: column
 
-        .qText, .aText
-            font-size: 18px
-            margin: 0.5em
+    #countsContainer
+      display: flex
+      flex-flow: column
+
+    #bioContainer
+      text-align: center
+
+    #profileButtons
+      display: flex
+      align-items: center
+      flex-flow: row
+      margin-right: 15px
+
+      #blockButton
+        margin-right: 10px
+
+#askBox
+  width: 30rem
+  display: flex
+  flex-flow: row
+
+  #textInput
+    flex-grow: 2
+    margin-right: 16px
+
+    #sendButton
+      height: 52px
+      margin-top: 3.5px
+
+#feed
+  width: 30rem
+
+  #answerTitle
+    text-decoration: underline
+.qWithA
+  margin-bottom: 16px
+
+  .answer
+    margin-top: 16px
+
+    .question, .answer
+      max-width: 30rem
+      display: flex
+      align-items: flex-start
+      justify-content: center
+      flex-flow: column
+
+      .qText, .aText
+        font-size: 18px
+        margin: 0.5em
 
         .qUsername
-            color: #B0B0B0
+          color: #B0B0B0
 
-        
-            
+
+
         .imgContainer
-            width: 100%
-            display: flex                                                                                                                            
-            align-items: center
-            justify-content: center
-            max-width: 480px
-            max-height: 480px
-            overflow: hidden
-            cursor: pointer
+          width: 100%
+          display: flex
+          align-items: center
+          justify-content: center
+          max-width: 480px
+          max-height: 480px
+          overflow: hidden
+          cursor: pointer
 
         .textCenter
-            width: 100%
-            display: flex
-            align-items: center
-            justify-content: center
-            overflow-wrap: anywhere
-        
+          width: 100%
+          display: flex
+          align-items: center
+          justify-content: center
+          overflow-wrap: anywhere
+
         .horizontal
-            width: 100%
-            display: flex
-            flex-flow: row
+          width: 100%
+          display: flex
+          flex-flow: row
 
         .vertical
-            display: flex
-            flex-flow: column
+          display: flex
+          flex-flow: column
 
 #notFound
-    width: 100%
-    display: flex
-    justify-content: center
+  width: 100%
+  display: flex
+  justify-content: center

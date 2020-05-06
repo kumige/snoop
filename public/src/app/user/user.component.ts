@@ -37,6 +37,7 @@ export class UserComponent implements OnInit {
   ProfileInfo;
   answers = [];
   loggedInUser;
+  showBlockButton = true;
 
   get uploadsUrl() {
     return environment.uploadUrl;
@@ -66,18 +67,17 @@ export class UserComponent implements OnInit {
     public dialog: MatDialog,
     private auth: GetAuthUserService
   ) {
-    this.router.routeReuseStrategy.shouldReuseRoute = () => false
+    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
   }
 
   ngOnInit(): void {
     this.route.params.subscribe((params) => {
       this.username = params.username;
-      
     });
-    this.auth.getLoggedInUser().then(user => {
-      this.loggedInUser = user
+    this.auth.getLoggedInUser().then((user) => {
+      this.loggedInUser = user;
       this.getUserData();
-    })
+    });
   }
 
   redirectToUser(event) {
@@ -115,15 +115,21 @@ export class UserComponent implements OnInit {
     this.userData = this.userData.userByUsername;
 
     this.userData.ProfileInfo.Followers.forEach((userID) => {
-      if(this.loggedInUser != null) {
+      if (this.loggedInUser != null) {
         if (userID == this.loggedInUser.id) {
           this.toggleFollowButton();
         }
       }
-      
     });
 
     this.loadAnswers(0);
+
+    console.log(this.user);
+    if (this.loggedInUser.BlockedUsers.includes(this.userData.id)) {
+      this.showBlockButton = false;
+    } else {
+      this.showBlockButton = true;
+    }
   }
 
   async loadAnswers(start) {
@@ -183,15 +189,14 @@ export class UserComponent implements OnInit {
     `,
     };
     const res = await this.api.fetchGraphql(query);
-    res.qWithAOfUser.forEach(element => {
-      this.answers.push(element)
+    res.qWithAOfUser.forEach((element) => {
+      this.answers.push(element);
     });
-    console.log(this.answers)
-
+    console.log(this.answers);
   }
 
   async loadMore() {
-    const answerCount = document.getElementsByClassName("qWithA").length
+    const answerCount = document.getElementsByClassName('qWithA').length;
     this.loadAnswers(answerCount);
   }
 
@@ -205,20 +210,20 @@ export class UserComponent implements OnInit {
     const query = {
       query: `
       mutation{
-        addQuestion(Receiver: "${this.userData.id}", Text: "${question}"){ 
+        addQuestion(Receiver: "${this.userData.id}", Text: "${question}"){
           id
           Text
           DateTime {
             date
             time
-          } 
+          }
         }
       }
       `,
     };
 
     const qInfo = await this.api.fetchGraphql(query);
-    console.log(qInfo)
+    console.log(qInfo);
     if (qInfo.addQuestion != null) {
       this.snackBar.open('Question Sent!', 'Close', {
         duration: 3000,
@@ -237,14 +242,13 @@ export class UserComponent implements OnInit {
   }
 
   getFollows(queryName) {
-      this.dialog.open(FollowDialogComponent, {
-        data: { 
-          queryName: queryName,
-          user: this.userData,
-          loggedInUser: this.loggedInUser
-        }
-      });
-
+    this.dialog.open(FollowDialogComponent, {
+      data: {
+        queryName: queryName,
+        user: this.userData,
+        loggedInUser: this.loggedInUser,
+      },
+    });
   }
 
   async deleteAnswer(i) {
@@ -265,7 +269,7 @@ export class UserComponent implements OnInit {
   }
 
   async followUser() {
-    console.log(this.userData.id)
+    console.log(this.userData.id);
     const query = {
       query: `
       mutation{
@@ -279,7 +283,7 @@ export class UserComponent implements OnInit {
     this.toggleFollowButton();
 
     const res = await this.api.fetchGraphql(query);
-    console.log(res)
+    console.log(res);
     if (res != undefined) {
     }
   }
@@ -332,8 +336,7 @@ export class UserComponent implements OnInit {
 
   async addFavourite(q, index) {
     const query = {
-      query: 
-      `
+      query: `
       mutation{
         addFavourite(QuestionID: "${q.id}"){
           id
@@ -341,21 +344,19 @@ export class UserComponent implements OnInit {
           Favourites
         }
       }
-      `
-    }
-    const res = await this.api.fetchGraphql(query)
-    console.log(res)
+      `,
+    };
+    const res = await this.api.fetchGraphql(query);
+    console.log(res);
 
-    if(res.addFavourite != null) {
-      this.toggleStar(index)
+    if (res.addFavourite != null) {
+      this.toggleStar(index);
     }
-    
   }
 
   async removeFavourite(q, index) {
     const query = {
-      query: 
-      `
+      query: `
       mutation{
         removeFavourite(QuestionID: "${q.id}"){
           id
@@ -363,23 +364,50 @@ export class UserComponent implements OnInit {
           Favourites
         }
       }
-      `
-    }
-    const res = await this.api.fetchGraphql(query)
-    console.log(res)
+      `,
+    };
+    const res = await this.api.fetchGraphql(query);
+    console.log(res);
 
-    if(res.removeFavourite != null) {
-      this.toggleStar(index)
+    if (res.removeFavourite != null) {
+      this.toggleStar(index);
     }
   }
 
   toggleStar(index) {
-    const favArray = this.answers[index].Favourites
-    if(favArray.includes(this.loggedInUser.id)) {
-      const i = favArray.indexOf(this.loggedInUser.id)
-      favArray.splice(i, 1)
+    const favArray = this.answers[index].Favourites;
+    if (favArray.includes(this.loggedInUser.id)) {
+      const i = favArray.indexOf(this.loggedInUser.id);
+      favArray.splice(i, 1);
     } else {
-      favArray.push(this.loggedInUser.id)
+      favArray.push(this.loggedInUser.id);
+    }
+  }
+
+  // -------------------------------USER BLOCK-------------------------------
+
+  blockUser() {
+    this.block(this.userData.id);
+  }
+
+  private async block(toBlock) {
+    const query = {
+      query: `mutation {
+        blockUser(BlockedUsers:"${toBlock}"){
+          Displayname
+        }
+      }
+      `,
+    };
+
+    try {
+      const result = await this.api.fetchGraphql(query);
+      console.log(result);
+      if (result.blockUser != null) {
+        this.showBlockButton = false;
+      }
+    } catch (e) {
+      console.log('error', e.message);
     }
   }
 }

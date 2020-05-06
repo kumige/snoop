@@ -1248,13 +1248,12 @@ const Mutation = new GraphQLObjectType({
       type: userType,
       description: "Block a user",
       args: {
-        blockker: { type: new GraphQLNonNull(GraphQLID) },
         BlockedUsers: { type: new GraphQLNonNull(GraphQLID) },
       },
-      resolve: async (parent, args) => {
+      resolve: async (parent, args, { req, res }) => {
         try {
           // Gets the user who is blocking another user
-          //const authResponse = await authController.checkAuth(req, res);
+          const authResponse = await authController.checkAuth(req, res);
 
           // Checks if the user to be blocked exists
           await user.findById(args.BlockedUsers);
@@ -1262,17 +1261,17 @@ const Mutation = new GraphQLObjectType({
           let i;
           let isBlocked = false;
 
-          const user2 = await user.findById(args.blockker);
+          //const user2 = await user.findById(args.blockker);
 
-          for (i = 0; i < user2.BlockedUsers.length; i++) {
-            if (user2.BlockedUsers[i] == args.BlockedUsers) {
+          for (i = 0; i < authResponse.BlockedUsers.length; i++) {
+            if (authResponse.BlockedUsers[i] == args.BlockedUsers) {
               isBlocked = true;
             }
           }
 
           if (!isBlocked) {
             return await user.findByIdAndUpdate(
-              args.blockker,
+              authResponse._id,
               { $push: { BlockedUsers: args.BlockedUsers } },
               { new: true }
             );
