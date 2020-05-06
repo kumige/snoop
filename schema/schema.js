@@ -33,7 +33,6 @@ const userType = new GraphQLObjectType({
   name: "user",
   fields: () => ({
     id: { type: GraphQLID },
-    token: { type: GraphQLString },
     Email: { type: GraphQLString },
     Username: { type: GraphQLString },
     Displayname: { type: GraphQLString },
