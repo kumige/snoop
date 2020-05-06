@@ -70,8 +70,6 @@ export class AppComponent implements OnInit {
       `
     }
     const res = await this.api.fetchGraphql(query)
-    console.log(res.questionsForUser.length)
-    const button = document.getElementById("questionButton")
     if(res.questionsForUser.length > 99) {
       this.badgeContent = 99
     } else {
@@ -80,6 +78,8 @@ export class AppComponent implements OnInit {
     
     if (res.questionsForUser.length != 0) {
       this.visible = true
+    } else {
+      this.visible = false
     }
     
   }

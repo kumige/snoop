@@ -69,7 +69,7 @@ export class SettingsComponent implements OnInit {
   // Blocked users
   blockedUsers;
 
-  gqlUrl = 'http://localhost:3000/graphql';
+  gqlUrl = environment.gqlUrl;
   options = {
     headers: { Authorization: 'Bearer ' + localStorage.getItem('token') },
   };
