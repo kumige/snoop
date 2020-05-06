@@ -300,7 +300,6 @@ export class SettingsComponent implements OnInit {
     try {
       this.blockedUsers = await this.api.fetchGraphql(query);
       this.blockedUsers = this.blockedUsers.getBlockedUsers;
-      console.log(this.blockedUsers);
     } catch (e) {
       console.log('error', e.message);
     }

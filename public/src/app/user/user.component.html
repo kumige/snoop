@@ -28,8 +28,19 @@
               Block
             </button>
             <button
+              id="blockButton"
+              mat-stroked-button
+              *ngIf="
+                this.userData.id != this.loggedInUser.id && !showBlockButton
+              "
+              color="primary"
+              (click)="unblockUser()"
+            >
+              Unblock
+            </button>
+            <button
               mat-raised-button
-              *ngIf="this.userData.id != this.loggedInUser.id"
+              *ngIf="this.userData.id != this.loggedInUser.id && !following"
               color="primary"
               id="followButton"
               (click)="followUser()"
@@ -39,7 +50,7 @@
             </button>
             <button
               mat-stroked-button
-              *ngIf="this.userData.id != this.loggedInUser.id"
+              *ngIf="this.userData.id != this.loggedInUser.id && following"
               color="primary"
               id="followingButton"
               (click)="unfollowUser()"
@@ -70,7 +81,7 @@
       </div>
     </mat-card-content>
   </mat-card>
-  <div *ngIf="this.loggedInUser != null">
+  <div *ngIf="this.loggedInUser != null && !blockedByUser">
     <mat-card *ngIf="this.userData.id != this.loggedInUser.id">
       <mat-card-content>
         <form (ngSubmit)="sendQuestion($event)" id="askBox">
@@ -96,6 +107,16 @@
             Send
           </button>
         </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div *ngIf="blockedByUser">
+    <mat-card id="userBlockedCard">
+      <mat-card-content>
+        <mat-error
+          >This user has blocked you. You can not post questions.</mat-error
+        >
       </mat-card-content>
     </mat-card>
   </div>

@@ -37,7 +37,12 @@ export class UserComponent implements OnInit {
   ProfileInfo;
   answers = [];
   loggedInUser;
+  // Boolean to show block button
   showBlockButton = true;
+  // Boolean to show following button
+  following = false;
+  // Boolean user is blocked
+  blockedByUser = false;
 
   get uploadsUrl() {
     return environment.uploadUrl;
@@ -96,6 +101,7 @@ export class UserComponent implements OnInit {
           id
           Username
           Displayname
+          BlockedUsers
           ProfileInfo {
             id
             UserID
@@ -129,6 +135,13 @@ export class UserComponent implements OnInit {
       this.showBlockButton = false;
     } else {
       this.showBlockButton = true;
+    }
+
+    if (this.userData.BlockedUsers.includes(this.loggedInUser.id)) {
+      console.log('this user has blocked you');
+      this.blockedByUser = true;
+    } else {
+      console.log('this user has not blocked you');
     }
   }
 
@@ -305,17 +318,7 @@ export class UserComponent implements OnInit {
   }
 
   toggleFollowButton() {
-    this.waitForElementToAppear('followButton').subscribe((followButton) => {
-      const followingButton = document.getElementById('followingButton');
-
-      if (followButton.style.display == 'flex') {
-        followButton.style.display = 'none';
-        followingButton.style.display = 'flex';
-      } else {
-        followButton.style.display = 'flex';
-        followingButton.style.display = 'none';
-      }
-    });
+    this.following = !this.following;
   }
 
   waitForElementToAppear(elementId) {
@@ -390,6 +393,10 @@ export class UserComponent implements OnInit {
     this.block(this.userData.id);
   }
 
+  unblockUser() {
+    this.deleteBlock(this.userData.id);
+  }
+
   private async block(toBlock) {
     const query = {
       query: `mutation {
@@ -405,6 +412,27 @@ export class UserComponent implements OnInit {
       console.log(result);
       if (result.blockUser != null) {
         this.showBlockButton = false;
+      }
+    } catch (e) {
+      console.log('error', e.message);
+    }
+  }
+
+  private async deleteBlock(toRemove) {
+    const query = {
+      query: `mutation {
+        removeBlock(BlockedUsers:"${toRemove}"){
+          Displayname
+        }
+      }
+      `,
+    };
+
+    try {
+      const result = await this.api.fetchGraphql(query);
+      console.log(result);
+      if (result.removeBlock != null) {
+        this.showBlockButton = true;
       }
     } catch (e) {
       console.log('error', e.message);
