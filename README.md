@@ -1,6 +1,7 @@
 # snoop
 web project for school
-<p>nodejs backend with GraphQL API, mongodb with authenticated mutations & Angular front-end</p>
+<p>Snoop is a website where you can ask questions from other users. You can answer questions with text and images. You can also follow other users, which will modify the home page feed to show answers from the people you followed.</p>
+<p> It has a nodejs backend with GraphQL API, mongodb with authenticated mutations & Angular front-end</p>
 <a href="https://mikkojro.jelastic.metropolia.fi/home">Link to website</a> </br>
 <a href="https://mikkojro.jelastic.metropolia.fi/graphql">Link to GraphQL API</a>
 <p>(these might not work in the future)</p>
