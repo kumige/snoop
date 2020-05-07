@@ -9,6 +9,7 @@ const passport = require("./utils/passport");
 const schema = require("./schema/schema");
 const db = require("./db/db");
 const server = express();
+const path = require("path");
 
 server.use(cors());
 server.use(express.json());
@@ -34,6 +35,14 @@ server.use(
   (req, res) => {
     graphQlHttp({ schema, graphiql: true, context: { req, res } })(req, res);
   }
+);
+
+// redirect missing routes to index.html
+server.use((req, res) =>{
+  if (process.env.NODE_ENV === "production") {
+    res.sendFile(path.join(__dirname, "public/index.html"))
+  }
+}
 );
 
 db.on("connected", () => {
