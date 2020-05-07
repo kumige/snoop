@@ -902,8 +902,6 @@ const Mutation = new GraphQLObjectType({
             }
           );
 
-          await fileHelper.deleteFile(oldImg.ProfilePicture);
-
           return result;
         } catch (e) {
           throw new Error(e.message);

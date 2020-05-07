@@ -17,6 +17,17 @@ server.use(express.urlencoded({ extended: true }));
 server.use(express.static("public"));
 server.use('/uploads', express.static('uploads'))
 server.use("/modules", express.static("node_modules"));
+
+server.use((req, res, next) => {
+  if (req.secure || process.env.NODE_ENV === "development") {
+    next();
+  } else if (process.env.NODE_ENV === "production") {
+    server.enable("trust proxy");
+    res.redirect("https://" + req.headers.host + req.url);
+    return;
+  }
+});
+
 server.use(
   "/graphql",
   graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 }),
