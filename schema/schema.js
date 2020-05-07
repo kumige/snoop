@@ -34,6 +34,7 @@ const userType = new GraphQLObjectType({
   fields: () => ({
     id: { type: GraphQLID },
     Email: { type: GraphQLString },
+    token: { type: GraphQLString },
     Username: { type: GraphQLString },
     Displayname: { type: GraphQLString },
     ProfileInfo: {
@@ -843,7 +844,6 @@ const Mutation = new GraphQLObjectType({
       description: "modify user",
       args: {
         id: { type: new GraphQLNonNull(GraphQLID) },
-        //token: { type: new GraphQLNonNull(GraphQLString) },
         Password: { type: GraphQLString },
         Displayname: { type: GraphQLString },
       },
@@ -1051,7 +1051,6 @@ const Mutation = new GraphQLObjectType({
       description: "modify profile info",
       args: {
         UserID: { type: new GraphQLNonNull(GraphQLID) },
-        //token: { type: new GraphQLNonNull(GraphQLString) },
         Bio: { type: GraphQLString },
         ProfilePicture: { type: GraphQLString },
       },
