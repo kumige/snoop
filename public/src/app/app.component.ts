@@ -21,7 +21,7 @@ export class AppComponent implements OnInit {
   loggedInUser;
   // Boolean to check if user is logged in
   isLoggedIn = false;
-  visible = false
+  visible = false;
   badgeContent;
 
   constructor(
@@ -59,29 +59,27 @@ export class AppComponent implements OnInit {
 
   private async getQuestionCount() {
     const query = {
-      query: 
-      `
+      query: `
       query{
         questionsForUser(id: "${this.loggedInUser.id}"){
           id
           Text
         }
       }
-      `
-    }
-    const res = await this.api.fetchGraphql(query)
-    if(res.questionsForUser.length > 99) {
-      this.badgeContent = 99
+      `,
+    };
+    const res = await this.api.fetchGraphql(query);
+    if (res.questionsForUser.length > 99) {
+      this.badgeContent = 99;
     } else {
-      this.badgeContent = res.questionsForUser.length
+      this.badgeContent = res.questionsForUser.length;
     }
-    
+
     if (res.questionsForUser.length != 0) {
-      this.visible = true
+      this.visible = true;
     } else {
-      this.visible = false
+      this.visible = false;
     }
-    
   }
 
   private _filter(value: string): string[] {
@@ -120,6 +118,6 @@ export class AppComponent implements OnInit {
   logout() {
     localStorage.removeItem('token');
     this.isUserLoggedIn();
-    this.router.navigate([`./home`]);
+    this.router.navigate([`./login`]);
   }
 }
