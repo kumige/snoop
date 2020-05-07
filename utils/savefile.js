@@ -28,16 +28,18 @@ const saveImage = async (image) => {
 const deleteFile = (img) => {
   console.log(img);
 
-  fs.unlink(`${uploadURI}${img}`, (err) => {
-    if (err) throw err;
-    // if no error, file has been deleted successfully
-    console.log("File deleted!");
-  });
-  fs.unlink(`${uploadURI}tn${img}`, (err) => {
-    if (err) throw err;
-    // if no error, file has been deleted successfully
-    console.log("File thumbnail deleted!");
-  });
+  if (img.toString() != "default.png") {
+    fs.unlink(`${uploadURI}${img}`, (err) => {
+      if (err) throw err;
+      // if no error, file has been deleted successfully
+      console.log("File deleted!");
+    });
+    fs.unlink(`${uploadURI}tn${img}`, (err) => {
+      if (err) throw err;
+      // if no error, file has been deleted successfully
+      console.log("File thumbnail deleted!");
+    });
+  }
 };
 
 module.exports = { saveImage, deleteFile };
