@@ -1,7 +1,6 @@
 # snoop
 web project for school
 <li>GraphQL backend with authenticated mutations & Angular front-end</li>
-<li></li>
 
 ### Environment stuff: 
 .env:
